@@ -152,5 +152,81 @@ export default {
         ] },
       ],
     },
+    {
+      id: 'setup-sideways',
+      title: 'When setup goes sideways (a true story)',
+      minutes: 14,
+      body: [
+        { t: 'why', text: [
+          'Every tutorial makes setup look smooth. Real life is not. While building this very course, almost everything in this lesson went wrong at least once: a key pasted into a chat, a database that was "connected" but was not, a domain that would not load, emails that only reached one inbox, and a name that was already taken.',
+          'None of it was a disaster, because each problem has a simple, boring fix. Learn the fixes now and you will lose minutes instead of days.',
+        ] },
+        { t: 'h', text: '1. "I pasted my API key into the chat"' },
+        { t: 'p', text: 'It happens to everyone, usually when you are tired and just want it to work. Once a key has been in a chat, an email or a screenshot, treat it as **public**. It is not about trusting the AI; chats get saved, synced and shared.' },
+        { t: 'steps', items: [
+          { do: 'Open the service (Resend, Stripe, and so on) and **delete** that key right away.', why: 'A deleted key is useless to anyone who finds it.' },
+          { do: 'Create a new key with the least power it needs (for Resend: "Sending access").' },
+          { do: 'Paste the new key **directly** into Vercel → Settings → Environment Variables, and switch on **Sensitive**.', why: 'Sensitive means even you cannot read it back later, so it can never leak from the dashboard.' },
+          { do: 'If Claude needs a key to do a setup job, ask it to open a terminal with a **hidden prompt** so you type the key there, not in chat.' },
+        ] },
+        { t: 'prompt', label: 'Handle a key safely', text: `I need to give you an API key for [SERVICE] so you can finish setup.
+Do not ask me to paste it into this chat.
+Open a terminal with a hidden prompt, save it to a private file only my user can read, and use it from there without ever printing it.` },
+        { t: 'h', text: '2. "I connected the database" (but the app cannot see it)' },
+        { t: 'p', text: 'Creating a database and connecting it to **your project** are two separate clicks. It is very easy to create one and leave it connected to nothing, or to a different project.' },
+        { t: 'steps', items: [
+          { do: 'In Vercel, open **your project → Settings → Environment Variables**.' },
+          { do: 'Look for **DATABASE_URL** in the list.', why: 'If it is not there, your app has no database, no matter what the Storage page says.' },
+          { do: 'If it is missing: **Storage → Connect Database**, pick it, and make sure **your project is ticked** before you confirm.' },
+          { do: 'Redeploy. Settings only reach your app on the next deployment.' },
+        ] },
+        { t: 'h', text: '3. "I added the DNS records" (but the site will not load)' },
+        { t: 'p', text: 'DNS is the internet\'s phone book, and it does exactly what you typed, typos included. When your domain does not work, it is almost always one of these:' },
+        { t: 'table', head: ['Symptom', 'Usual cause', 'Fix'], rows: [
+          ['Nothing loads at all', 'Records were never saved, or saved on a different domain', 'Open Cloudflare → the right domain → DNS, and check the records are really there'],
+          ['Certificate or "too many redirects" errors', 'The orange cloud (proxy) is on', 'Click it so it turns grey: **DNS only**'],
+          ['Old website shows up', 'An older A or CNAME record is still there', 'Delete the old record for the same name'],
+          ['Works for you, not for others', 'DNS is still spreading around the world', 'Wait 5 to 30 minutes, then check again'],
+        ] },
+        { t: 'prompt', label: 'Check my domain', text: `Check whether [MYDOMAIN.COM] and www.[MYDOMAIN.COM] point to Vercel.
+Look up the A and CNAME records, tell me exactly what is wrong in plain English, and what to change in Cloudflare.
+Also check whether Vercel shows the domain as valid.` },
+        { t: 'h', text: '4. "Emails only arrive in my own inbox"' },
+        { t: 'p', text: 'Until you verify your own domain, Resend sends from its test address, and that address can **only email you**. Your sign-up codes look like they work in testing, then fail for every real user.' },
+        { t: 'steps', items: [
+          { do: 'In Resend, add your domain and add its records in Cloudflare (Resend can even do this for you with a "Sign in to Cloudflare" button).' },
+          { do: 'Wait for **Verified**, then send from an address on your domain, like `codes@yourdomain.com`.' },
+          { do: 'Test by signing up with a **different** email address than your own.' },
+        ] },
+        { t: 'h', text: '5. "The name I wanted is taken"' },
+        { t: 'p', text: 'Check the domain **before** you fall in love with a name, make a logo, or tell anyone. Short .com names are almost all gone. Good options: add a word ("tinyappcode" instead of "tinyapp"), or use a newer ending like .app or .dev. Buy it the same day you decide.' },
+        { t: 'h', text: '6. "Mac says my app is damaged"' },
+        { t: 'p', text: 'Apps downloaded from the internet must be signed with a paid Apple Developer ID ($99 a year), or macOS blocks them. That is one big reason this course moved from a download to a website: a website just works on every device, with nothing to install and nothing to sign.' },
+        { t: 'h', text: 'The habit that fixes most of this: check, do not assume' },
+        { t: 'p', text: '"I did it" and "it worked" are different things. After every setup step, look at the place where the result should show up: the variable in Vercel, the record in Cloudflare, the "Verified" badge in Resend, an actual email in a second inbox. Claude can do these checks for you in seconds.' },
+        { t: 'prompt', label: 'Verify my whole setup', text: `Check my app's setup end to end. Do not print any secret values, only names and yes/no answers.
+1. Which environment variables exist in my Vercel project (names only)? Is DATABASE_URL there?
+2. Does my domain point to Vercel, and is it valid?
+3. Is my sending domain verified in Resend?
+4. Sign up a test account with a test email and tell me whether the code email arrives.
+Tell me what is missing and exactly where to click to fix it.` },
+        { t: 'deeper', title: 'Why "Sensitive" variables and hidden prompts matter', blocks: [
+          { t: 'p', text: 'Secrets leak through **copies**: chat histories, terminal scrollback, screenshots, shell history, logs and support tickets. Each copy is another place to steal it from. Sensitive environment variables are write-only after saving, hidden prompts (`read -s`) never echo to the screen or shell history, and a file with permission `600` can only be read by your user account.' },
+          { t: 'p', text: 'When a key may have leaked, **rotate** it (make a new one and delete the old one) instead of debating whether anyone saw it. Rotation takes two minutes; investigating takes hours.' },
+          { t: 'p', text: 'Scale check: for a free course with 10,000 users, hosting and the database usually stay free or near free. The first real bill is often email, because every sign-up and new-device code is an email. Watch your email limits first.' },
+        ] },
+        { t: 'check', q: 'You accidentally pasted a live API key into a chat. What should you do?', options: [
+          'Delete the message and hope nobody saw it',
+          'Delete the key in the service, make a new one, and put the new one straight into Vercel as Sensitive',
+          'Nothing, the chat is private',
+        ], answer: 1, explain: 'Once a secret has been copied somewhere, rotate it. It takes two minutes and ends the risk completely.' },
+        { t: 'recap', items: [
+          'A leaked key gets deleted and replaced, never "probably fine."',
+          'Connected means the variable shows up in your project, not just a database existing.',
+          'Grey cloud for Vercel records; verify your email domain; test with a second inbox.',
+          'Check the result of every setup step instead of assuming.',
+        ] },
+      ],
+    },
   ],
 };
