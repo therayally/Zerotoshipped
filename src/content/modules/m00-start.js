@@ -1,3 +1,4 @@
+import { MASTER_LABEL, MASTER_PROMPT } from '../master';
 export default {
   id: 'start',
   title: 'Start here',
@@ -45,6 +46,10 @@ export default {
           'Because every extra service is another password, bill and thing that can break',
           'Because AI cannot work with more than six tools',
         ], answer: 1, explain: 'Fewer moving parts means fewer things to secure, pay for and fix. That matters a lot when you are the whole team.' },
+        { t: 'h', text: 'Your Master Prompt' },
+        { t: 'p', text: 'This one prompt holds every rule in the course: how to plan, how to handle secret keys, security, design, mobile, git and deploying. Paste it into Claude Code at the start of **every** new project. Claude saves it as **CLAUDE.md** (its rulebook) and follows it from then on. You will find it again at the end of every lesson and pinned at the top of the Prompt Library.' },
+        { t: 'analogy', text: 'The Master Prompt is the employee handbook you give a new hire on day one. You explain the house rules once, in writing, instead of repeating them every morning.' },
+        { t: 'prompt', label: MASTER_LABEL, text: MASTER_PROMPT },
         { t: 'recap', items: [
           'You will build a real, live app, one small piece per lesson.',
           'The AI writes the code; your job is to steer, check and keep it safe.',
@@ -89,6 +94,11 @@ export default {
           'You cannot easily tell which change caused the break',
           'Ten features is too many for a free plan',
         ], answer: 1, explain: 'Small steps make problems easy to find. When one small change breaks something, you know exactly where to look.' },
+        { t: 'prompt', label: 'Vibe code my first tiny thing', text: `I am brand new to vibe coding. Build me a one-page "tip calculator" website in a new folder called tip-calculator.
+- Big friendly buttons that work on a phone.
+- Explain each file you create in one plain sentence.
+- When done, tell me exactly how to open it in my browser.
+Then ask me one change I want, and make it, so I see how talking to you changes the app.` },
         { t: 'recap', items: [
           'Vibe coding is building by describing what you want to an AI.',
           'The AI can produce code that looks fine but has hidden holes.',

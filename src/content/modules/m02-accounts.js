@@ -34,6 +34,9 @@ export default {
           { t: 'p', text: 'None of these choices lock you in forever. Because your code lives in GitHub and your data is standard Postgres, you can move any piece later.' },
         ] },
         { t: 'check', q: 'Which tool actually runs your app so people can visit it?', options: ['GitHub', 'Vercel', 'Neon'], answer: 1, explain: 'GitHub stores the code, Neon stores the data, and Vercel is the kitchen where the app actually runs.' },
+        { t: 'prompt', label: 'Explain my stack back to me', text: `I am building [MY APP IDEA]. Explain, in plain words with a real-world comparison for each, what these do for my app and how they connect: GitHub, Vercel, Neon (database), Resend (email), Stripe or Square (payments), Cloudflare (domain).
+Then draw a simple text diagram showing a visitor's request going through them.
+Tell me which ones I need for the very first version and which can wait.` },
         { t: 'recap', items: [
           'Each tool has one job: save code, run app, address, data, email, payments.',
           'We picked tools that are free to start and plug into each other.',
@@ -128,6 +131,12 @@ Never ask me to paste a password, token or key into this chat.` },
           'Selling counts as commercial use, so you need Vercel Pro',
           'You have to move to a different host',
         ], answer: 1, explain: 'Donations are fine on Hobby. Selling, payments and ads are commercial use, which needs Pro.' },
+        { t: 'prompt', label: 'Connect my project to Vercel', text: `I made a Vercel account. Connect this project to it:
+1. Check if the Vercel CLI is installed; if not, install it.
+2. Run the login so I can sign in in my browser (tell me what to click).
+3. Link this folder to a new Vercel project and deploy a preview.
+4. Give me the preview link and explain the difference between a preview and production.
+Never ask me to paste any token into this chat.` },
         { t: 'recap', items: [
           'Hosting puts your app online; Vercel does it automatically from GitHub.',
           'Sign up with GitHub and turn on two-factor login.',
@@ -167,6 +176,11 @@ Never ask me to paste a password, token or key into this chat.` },
           'In Vercel\'s settings and a private .env.local file',
           'In your app\'s public settings page',
         ], answer: 1, explain: 'The connection string contains your database password. It only belongs in places the public can never read.' },
+        { t: 'prompt', label: 'Connect my Neon database', text: `I added a Neon Postgres database through my Vercel account. Connect this project to it:
+1. Pull the environment variables from Vercel into .env.local (make sure .env.local is in .gitignore).
+2. Create one simple test table, insert one row, read it back, then delete the test table.
+3. Tell me in plain words what worked.
+Never print the database URL or password, and never ask me to paste it into this chat.` },
         { t: 'recap', items: [
           'A database is your app\'s memory, organized in tables.',
           'Neon runs Postgres and is created from inside Vercel.',

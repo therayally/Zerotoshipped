@@ -5,12 +5,13 @@ import SearchRounded from '@mui/icons-material/SearchRounded';
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { allLessons, TRACKS } from '../content/course';
 import { PromptBox } from './Blocks';
+import { MASTER_LABEL, MASTER_PROMPT } from '../content/master';
 
 // Every copy-and-paste prompt in the course, collected from the lessons (including "Go deeper" sections).
 function collect() {
   const out = [];
   const walk = (blocks, lesson) => (blocks || []).forEach((b) => {
-    if (b.t === 'prompt') out.push({ label: b.label || 'Prompt', text: b.text, lesson });
+    if (b.t === 'prompt' && b.text !== MASTER_PROMPT) out.push({ label: b.label || 'Prompt', text: b.text, lesson });
     if (b.t === 'deeper') walk(b.blocks, lesson);
   });
   allLessons.forEach((l) => walk(l.body, l));
@@ -47,6 +48,13 @@ export default function PromptLibrary({ go }) {
           <Typography sx={{ ml: 'auto', alignSelf: 'center', fontSize: 13, color: t.muted }}>{shown.length} shown</Typography>
         </Box>
       </Box>
+      {!words.length && (
+        <Box component="section" sx={{ mt: 3 }}>
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 700 }}>Start here: the Master Prompt</Typography>
+          <Typography sx={{ color: 'text.secondary', mt: 0.5 }}>Every rule from the course in one paste. Use it at the start of every new project; Claude saves it as CLAUDE.md so it never forgets.</Typography>
+          <PromptBox label={MASTER_LABEL} text={MASTER_PROMPT} />
+        </Box>
+      )}
       {groups.map((g) => (
         <Box key={g.module + g.items[0].lesson.id} component="section" sx={{ mt: 3 }}>
           <Typography variant="h5" component="h2" sx={{ fontWeight: 700 }}>{g.module}</Typography>

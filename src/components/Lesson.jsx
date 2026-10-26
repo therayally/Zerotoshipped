@@ -9,7 +9,7 @@ import ScheduleRounded from '@mui/icons-material/ScheduleRounded';
 import SkipNextRounded from '@mui/icons-material/SkipNextRounded';
 import { allLessons } from '../content/course';
 import { metaFor } from '../content/meta';
-import Blocks from './Blocks';
+import Blocks, { MasterRef } from './Blocks';
 import Figure from './Figures';
 import { HeroBanner, LogoTile } from './Art';
 
@@ -65,8 +65,8 @@ export default function Lesson({ lesson, index, onBack, onNext, onSkipModule, co
         <Blocks key={lesson.id} blocks={lesson.body.slice(0, 1)} />
         {lesson.figure && <Figure name={lesson.figure} />}
         <Blocks key={lesson.id + '-rest'} blocks={lesson.body.slice(1)} />
+        <MasterRef />
         <Box ref={endRef} aria-hidden="true" sx={{ height: '1px' }} />
-
 
         <Box sx={{ position: 'sticky', bottom: 0, zIndex: 5, mt: 5, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 1.5, py: 1.5, background: t.bg, borderTop: `1px solid ${t.border}` }}>
           <Box>

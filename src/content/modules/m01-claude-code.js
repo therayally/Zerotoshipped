@@ -85,6 +85,11 @@ Sort by how serious they are, and point to the file and line for each.` },
           'No: in the Claude app, Claude runs the commands and you approve them',
           'Only on Windows',
         ], answer: 1, explain: 'The Claude desktop app\'s Code tab does the typing. Your job is to describe what you want and read before you click Allow.' },
+        { t: 'prompt', label: 'Check Claude Code is ready', text: `Check that you are set up correctly on this computer:
+1. Tell me which folder you are working in and what files are in it.
+2. Check if git, Node.js and npm are installed, and their versions. If something is missing, tell me the easiest way to install it (step by step, no jargon).
+3. Make a folder called my-first-app and a README.md inside it that says what we will build.
+Explain everything you did in plain words.` },
         { t: 'recap', items: [
           'Download the Claude app from claude.com/download and sign in.',
           'Use the Code tab and give Claude one project folder.',

@@ -18,6 +18,7 @@ import FlagRounded from '@mui/icons-material/FlagRounded';
 import { FONT_MONO } from '../theme';
 import { Snapshot, Mock, TerminalShot } from './Art';
 import { logo } from '../content/logos';
+import { MASTER_LABEL, MASTER_PROMPT } from '../content/master';
 import Figure from './Figures';
 
 // ───────── motion: everything fades up as it scrolls into view; reduced-motion users see it still.
@@ -136,6 +137,34 @@ export function PromptBox({ label, text }) {
       <Box component="pre" tabIndex={0} aria-label={`${label || 'Prompt'} text`} sx={{ m: 0, mx: 1.25, mb: 1.25, p: 2, borderRadius: '3px', fontFamily: FONT_MONO, fontSize: 13.5, lineHeight: 1.65, whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: t.text2, background: t.surface2, maxHeight: 340, overflow: 'auto' }}>
         {text}
       </Box>
+    </Box>
+  );
+}
+
+// The Master Prompt reminder at the end of every lesson: one paste that carries all the course rules.
+export function MasterRef() {
+  const { t } = useTheme();
+  const [open, setOpen] = useState(false);
+  return (
+    <Box component="aside" aria-label="Master Prompt" sx={{ my: 4, borderRadius: '3px', border: `1px solid ${t.border}`, background: t.surface, overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+        <Box sx={{ width: 36, height: 36, borderRadius: '2px', background: t.grad, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <FlagRounded sx={{ fontSize: 19, color: '#fff' }} />
+        </Box>
+        <Box sx={{ flex: { xs: '1 1 calc(100% - 52px)', sm: 1 }, minWidth: 0 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>Using the Master Prompt?</Typography>
+          <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>Paste it once at the start of any project. Claude saves every rule from this course as CLAUDE.md and follows them in this lesson too.</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, ml: { xs: 'auto', sm: 0 } }}>
+          <Button size="small" onClick={() => setOpen(!open)} aria-expanded={open} sx={{ color: t.accentText, whiteSpace: 'nowrap' }}>{open ? 'Hide' : 'Show it'}</Button>
+          <CopyButton text={MASTER_PROMPT} />
+        </Box>
+      </Box>
+      {open && (
+        <Box component="pre" tabIndex={0} aria-label={`${MASTER_LABEL} text`} sx={{ m: 0, mx: 1.25, mb: 1.25, p: 2, borderRadius: '3px', fontFamily: FONT_MONO, fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: t.text2, background: t.surface2, maxHeight: 340, overflow: 'auto' }}>
+          {MASTER_PROMPT}
+        </Box>
+      )}
     </Box>
   );
 }

@@ -138,7 +138,7 @@ const PERKS = [
 // There is deliberately no "I already donated" button: only a recorded donation closes it for good.
 // Everything under the header: perks, the give button, card logos, PayPal and crypto, and "Not now".
 // Shared by the pop-up and the /donate page so they always match.
-export function DonateBody({ active = true, onClose, account, onAccount }) {
+export function DonateBody({ active = true, onClose, account, onAccount, holdLeft = 0 }) {
   const { t } = useTheme();
   const [config, setConfig] = useState({});
   const [waiting, setWaiting] = useState(false);
@@ -247,30 +247,52 @@ export function DonateBody({ active = true, onClose, account, onAccount }) {
         )}
       </Box>
 
-      {onClose && <Button onClick={onClose} sx={{ color: 'text.secondary', alignSelf: 'center' }}>Not now</Button>}
+      {onClose && (
+        <Button onClick={onClose} disabled={holdLeft > 0} sx={{ color: 'text.secondary', alignSelf: 'center', fontVariantNumeric: 'tabular-nums' }}>
+          {holdLeft > 0 ? `Not now (${holdLeft})` : 'Not now'}
+        </Button>
+      )}
     </Box>
   );
 }
 
-export function DonateDialog({ open, onClose, account, onAccount }) {
+// After a module is finished, `finished` ({ number, title }) turns it into a thank-you, and "Not now"
+// waits a few seconds so the message is actually seen. It never blocks the course for long.
+const HOLD_SECONDS = 6;
+
+export function DonateDialog({ open, onClose, account, onAccount, finished }) {
   const { t } = useTheme();
   const first = account?.name?.split(' ')[0];
+  const [holdLeft, setHoldLeft] = useState(0);
+  useEffect(() => {
+    if (!open || !finished) { setHoldLeft(0); return undefined; }
+    setHoldLeft(HOLD_SECONDS);
+    const id = setInterval(() => setHoldLeft((n) => { if (n <= 1) { clearInterval(id); return 0; } return n - 1; }), 1000);
+    return () => clearInterval(id);
+  }, [open, finished]);
+  const close = () => { if (holdLeft <= 0) onClose(); };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth aria-labelledby="drink-title"
+    <Dialog open={open} onClose={close} maxWidth="xs" fullWidth aria-labelledby="drink-title"
       slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } }, paper: { sx: { overflowX: 'hidden', overflowY: 'auto', m: { xs: 1.5, sm: 4 }, maxHeight: { xs: 'calc(100% - 24px)', sm: 'calc(100% - 64px)' }, width: { xs: 'calc(100% - 24px)', sm: undefined } } } }}>
       <Box sx={{ background: t.grad, color: '#fff', px: { xs: 2.5, sm: 3 }, py: { xs: 2.5, sm: 3 }, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="overline" sx={{ opacity: 0.85, letterSpacing: '0.12em', lineHeight: 1.6 }}>
-            {first ? `Hey ${first}, enjoying it?` : 'Enjoying the course?'}
+            {finished ? 'Module complete' : first ? `Hey ${first}, enjoying it?` : 'Enjoying the course?'}
           </Typography>
-          <Typography id="drink-title" variant="h4" sx={{ fontWeight: 700, lineHeight: 1.1, mt: 0.5 }}>Buy me a drink</Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>The whole course is free. One person makes it.</Typography>
+          <Typography id="drink-title" variant="h4" sx={{ fontWeight: 700, lineHeight: 1.1, mt: 0.5 }}>
+            {finished ? `Thank you${first ? ', ' + first : ''}!` : 'Buy me a drink'}
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
+            {finished
+              ? `Thanks for completing ${finished.number ? `Module ${finished.number}: ` : ''}${finished.title}. If you like this content, please consider buying me a drink. The course is free and one person makes it.`
+              : 'The whole course is free. One person makes it.'}
+          </Typography>
         </Box>
         <DrinkArt />
       </Box>
 
-      <DonateBody active={open} onClose={onClose} account={account} onAccount={onAccount} />
+      <DonateBody active={open} onClose={close} account={account} onAccount={onAccount} holdLeft={holdLeft} />
     </Dialog>
   );
 }

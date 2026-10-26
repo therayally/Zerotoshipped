@@ -93,6 +93,12 @@ export default {
           'Because whoever controls the domain controls where your website and email go',
           'Because it stores customer cards',
         ], answer: 1, explain: 'Hijack the domain and you can redirect the website and read the email. Protect it like your bank account.' },
+        { t: 'prompt', label: 'Point my domain at my app', text: `I own [MYDOMAIN.COM] on Cloudflare and my app is on Vercel.
+Walk me through connecting them, one step at a time:
+1. Add the domain to my Vercel project.
+2. Tell me exactly which DNS records to add in Cloudflare (type, name, value, and whether the orange cloud should be on or off).
+3. After I add them, check the domain works with HTTPS and that www redirects to the main domain.
+If you can use the Cloudflare API, ask for the token through a hidden terminal prompt only, never in this chat.` },
         { t: 'recap', items: [
           'A domain is your address; DNS is the phone book that finds it.',
           'Cloudflare sells domains at cost with no upsells.',

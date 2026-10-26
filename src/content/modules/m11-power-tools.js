@@ -43,6 +43,11 @@ export default {
           'The AI rereads the whole conversation every time, which keeps growing',
           'It does not; every message costs the same',
         ], answer: 1, explain: 'Every turn includes everything before it. Fresh sessions with /clear keep costs and confusion down.' },
+        { t: 'prompt', label: 'Help me spend fewer tokens', text: `Help me use fewer tokens in this project:
+1. Look at CLAUDE.md and make it short and clear; move long background notes into separate files you read only when needed.
+2. Tell me when to use /clear, /compact and plan mode, in plain words.
+3. Suggest which model to use for small jobs versus big ones.
+4. Give me a 5-line checklist I can follow every day.` },
         { t: 'recap', items: [
           'Tokens are chunks of text; both directions count.',
           'Each message re-sends the whole conversation, so keep sessions focused.',
@@ -308,6 +313,9 @@ Only search when the question needs current information, show the sources in the
           'model.bin',
           'model.safetensors or model.gguf',
         ], answer: 2, explain: 'safetensors and GGUF hold only numbers, so they cannot hide code that runs on your machine.' },
+        { t: 'prompt', label: 'Find me a model on Hugging Face', text: `I want to [TASK, e.g. "run a small chat model on my laptop" or "turn speech into text"]. My computer is [MAC/PC, how much RAM, graphics card if any].
+Search Hugging Face for 3 good open models for this. For each, give me: what it is good at, its size, its license (can I use it in a paid app?), and whether it will run on my computer.
+Then show me the easiest way to try the best one (LM Studio or Ollama), step by step.` },
         { t: 'recap', items: [
           'Hugging Face is where free models live; LM Studio downloads from it.',
           'Check the uploader, downloads, license and model card.',

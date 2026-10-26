@@ -104,6 +104,11 @@ export const evals = [
         'Run the full eval set to make sure nothing else got worse',
         'Ask it the hours question once more',
       ], answer: 1, explain: 'Changes to AI prompts have side effects. The full eval set catches them.' },
+      { t: 'prompt', label: 'Write my first evals', text: `My app uses AI to [WHAT IT DOES, e.g. "write listing descriptions from notes"].
+1. Write 10 test cases in evals/cases.json: an input, and what a good answer must include or avoid. Include 3 tricky ones (empty input, rude input, a trick question).
+2. Write a small script, evals/run, that runs every case through my app's AI function and scores pass or fail.
+3. Run it and show me a table of results in plain words.
+Add a line to CLAUDE.md: "Run the evals before changing any AI prompt." ` },
       { t: 'recap', items: [
         'Evals are tests for AI: test cases, expected behavior, a grader.',
         'Test common questions, must-nevers, tricks and tone.',

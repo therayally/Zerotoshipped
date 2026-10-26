@@ -61,6 +61,11 @@ Make it fast and great on phones, add proper page titles and a social share imag
         'The value of those 5 hours to them',
         'Whatever the cheapest competitor charges',
       ], answer: 1, explain: 'Value-based pricing: charge a fair share of what you save or earn them.' },
+      { t: 'prompt', label: 'Price my app', text: `Help me price [MY APP] for [WHO].
+1. Ask me 5 questions about my customers, my costs (hosting, AI, payment fees) and what it saves them in time or money.
+2. Work out my cost per customer per month.
+3. Suggest a free tier and 2 paid plans in a table, with what each includes and why.
+4. Tell me honestly if my price is too low to be worth it.` },
       { t: 'recap', items: [
         'Pick one model: free + paid, trial, one-time or subscription.',
         '2–3 plans, one highlighted; yearly with a discount.',

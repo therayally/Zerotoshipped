@@ -129,6 +129,7 @@ export default function App() {
   const demo = import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo');
   const [termsOk, setTermsOk] = useState(() => demo || store.get('terms', null) === TERMS_VERSION);
   const [drinkOpen, setDrinkOpen] = useState(false);
+  const [finishedMod, setFinishedMod] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [splash, setSplash] = useState(() => !session.get('splashSeen'));
@@ -220,7 +221,14 @@ export default function App() {
     const track = TRACKS.find((tr) => lessonsInTrack(tr.id).includes(id));
     if (track && !certs[track.id] && lessonsInTrack(track.id).every((x) => n.has(x))) { setClaimTrack(track); return; }
     const mod = modules.find((m) => m.lessons.some((l) => l.id === id));
-    if (mod && mod.lessons.every((l) => n.has(l.id))) setToast(`Module complete: ${mod.title}. Nice work!`);
+    if (!mod || !mod.lessons.every((l) => n.has(l.id))) return;
+    // Finishing a module says thank you with the donation window (once per module), unless they already donated.
+    const thanked = store.get('thanked', []);
+    if (!account?.donated && !demo && !thanked.includes(mod.id)) {
+      store.set('thanked', [...thanked, mod.id]);
+      setFinishedMod({ number: modules.indexOf(mod), title: mod.title });
+      setDrinkOpen(true);
+    } else setToast(`Module complete: ${mod.title}. Nice work!`);
   };
   const markDone = (id) => setLessonDone(id, true);
 
@@ -234,7 +242,7 @@ export default function App() {
   const onSkipModule = nextModule ? () => go(nextModule.id) : undefined;
 
   const goHome = () => { setView('home'); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); };
-  const openDrink = () => setDrinkOpen(true);
+  const openDrink = () => { setFinishedMod(null); setDrinkOpen(true); };
   const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
   const openPrompts = () => { setView('prompts'); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); };
   const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} openPrompts={openPrompts} />;
@@ -295,7 +303,7 @@ export default function App() {
       )}
       <TermsGate open={!termsOk && !splash} onAccept={() => { store.set('terms', TERMS_VERSION); setTermsOk(true); }} />
       <AccountGate open={termsOk && !splash && !demo && !account && !offline} onAccount={(a) => { setAccount(a); setToast(`Welcome${a.name ? ', ' + a.name.split(' ')[0] : ''}!`); }} onOffline={() => setOffline(true)} />
-      <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => setDrinkOpen(false)} account={account}
+      <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => { setDrinkOpen(false); setTimeout(() => setFinishedMod(null), 300); }} account={account} finished={finishedMod}
         onAccount={(a) => { setAccount(a); if (a?.donated) { setDrinkOpen(false); setToast('Cheers! Your drink arrived. Thank you.'); } }} />
       {a11yLayer(gated)}
       <ClaimCertificate open={!!claimTrack} track={claimTrack} account={account} onClose={() => setClaimTrack(null)} />

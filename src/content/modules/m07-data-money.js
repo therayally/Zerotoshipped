@@ -90,6 +90,9 @@ Every query must only return rows that belong to the signed-in user.` + SAFE },
           'A webhook from Stripe or Square with a valid signature',
           'They clicked the Buy button',
         ], answer: 1, explain: 'Anyone can visit a page. Only the signed message from the payment company is real proof.' },
+        { t: 'prompt', label: 'Help me pick Stripe or Square', text: `I am building [MY APP] and I sell [WHAT, e.g. "monthly memberships" or "one-off orders"] to [WHO]. I [do / do not] also sell in person.
+Compare Stripe and Square for my case in a short table: fees, payouts, in-person selling, subscriptions, and how easy each is to set up with you.
+Recommend one, explain why in plain words, and list exactly what I need to sign up (business info, bank account) before we start.` },
         { t: 'recap', items: [
           'Stripe for online software and subscriptions; Square for real-world businesses.',
           'Customers pay on the payment company\'s page; your app never sees cards.',

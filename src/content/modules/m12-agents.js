@@ -33,6 +33,10 @@ export default {
           'Prompt injection',
           'A normal instruction it should follow',
         ], answer: 1, explain: 'Text an agent reads is data, not orders. Limited tools and approvals keep a tricked agent from doing harm.' },
+        { t: 'prompt', label: 'Turn a chore into an agent', text: `Here is a chore I do every week: [DESCRIBE IT, e.g. "check 3 websites for new grants and email myself a summary"].
+1. Explain how an AI agent could do it: what tools it would need, what it should never do without asking me, and how I would check its work.
+2. Rate how safe and reliable it would be today (low, medium, high) and why.
+3. Build the simplest version as a script I can run by hand first, before we automate anything.` },
         { t: 'recap', items: [
           'Chatbots talk; agents use tools in a loop to get jobs done.',
           'Every agent has a brain, hands, results and memory/schedule.',
