@@ -11,6 +11,7 @@ import { logo } from '../content/logos';
 import { Logo } from './Panels';
 import { LogoTile } from './Art';
 import { useInView } from './Blocks';
+import LegalNote from './LegalNote';
 
 // The public front page at tinyappcode.com for anyone not signed in: what this is, why it is fun, who made it, and the doors in.
 const float = keyframes`0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); }`;
@@ -79,7 +80,7 @@ export default function Landing({ onLogin, onSignup }) {
         <Box sx={{ maxWidth: 1120, mx: 'auto', px: 2, height: 64, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box component="a" href="/" aria-label="TinyAppCode home"><Logo size={20} /></Box>
           <Box component="nav" aria-label="Page" sx={{ display: { xs: 'none', md: 'flex' }, gap: 3, ml: 3 }}>
-            {[['#vibe', 'What is vibe coding?'], ['#inside', 'Inside the course'], ['#ray', 'Meet the developer'], ['#faq', 'FAQ']].map(([h, l]) => (
+            {[['#vibe', 'What is vibe coding?'], ['#inside', 'Inside the course'], ['#ray', 'Meet the developer'], ['#faq', 'FAQ'], ['/get-the-app', 'Get the app']].map(([h, l]) => (
               <Box key={h} component="a" href={h} sx={{ color: 'text.secondary', textDecoration: 'none', fontWeight: 600, fontSize: 14.5, '&:hover': { color: 'text.primary' } }}>{l}</Box>
             ))}
           </Box>
@@ -267,16 +268,16 @@ export default function Landing({ onLogin, onSignup }) {
         </Box>
       </main>
 
-      <Box component="footer" sx={{ borderTop: '1px solid #ECEEF3', background: '#fff', px: 2, py: 5 }}>
+      <Box component="footer" sx={{ borderTop: '1px solid #ECEEF3', background: '#fff', px: 2, pt: 5, pb: { xs: 12, md: 5 } }}>
         <Box sx={{ maxWidth: 1120, mx: 'auto', display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '2fr 1fr 1fr 1fr' }, gap: 3 }}>
           <Box sx={{ gridColumn: { xs: '1 / -1', md: 'auto' } }}>
             <Logo size={20} />
             <Typography sx={{ color: 'text.secondary', mt: 1.5, fontSize: 14, maxWidth: 320 }}>A free course for building real apps with AI, created by Ray Ally.</Typography>
           </Box>
           {[
-            ['Course', [['Start free', onSignup], ['Log in', onLogin], ['Buy me a drink', '/donate']]],
+            ['Course', [['Start free', onSignup], ['Log in', onLogin], ['Get the phone app', '/get-the-app'], ['Buy me a drink', '/donate']]],
             ['Follow', [['TikTok', 'https://www.tiktok.com/@therayally'], ['therayally.com', 'https://therayally.com']]],
-            ['Legal', [['Terms', '/terms'], ['Privacy', '/privacy'], ['Accessibility', '/accessibility']]],
+            ['Legal', [['Terms of Service', '/terms'], ['Privacy Policy', '/privacy'], ['Disclaimer', '/disclaimer'], ['Accessibility', '/accessibility']]],
           ].map(([h, links]) => (
             <Box key={h} sx={{ display: 'grid', gap: 1, alignContent: 'start' }}>
               <Typography sx={{ fontWeight: 700, fontSize: 14 }}>{h}</Typography>
@@ -286,6 +287,7 @@ export default function Landing({ onLogin, onSignup }) {
             </Box>
           ))}
         </Box>
+        <LegalNote newTab={false} sx={{ maxWidth: 1120, mx: 'auto', mt: 4, pt: 3, borderTop: '1px solid #ECEEF3' }} />
       </Box>
     </Box>
   );

@@ -6,6 +6,7 @@ import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { allLessons, TRACKS } from '../content/course';
 import { PromptBox } from './Blocks';
 import { MASTER_LABEL, MASTER_PROMPT } from '../content/master';
+import LegalNote from './LegalNote';
 
 // Every copy-and-paste prompt in the course, collected from the lessons (including "Go deeper" sections).
 function collect() {
@@ -69,6 +70,7 @@ export default function PromptLibrary({ go }) {
         </Box>
       ))}
       {!shown.length && <Typography sx={{ mt: 4, color: 'text.secondary' }}>No prompts match. Try a different word.</Typography>}
+      <LegalNote sx={{ mt: 6 }} />
     </Box>
   );
 }

@@ -101,7 +101,7 @@ export default function AccountGate({ open, onAccount, onOffline, startView = 'l
 
         {view === 'signup' && (
           <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', mt: -0.5 }}>
-            By creating an account you agree to the <Box component="a" href="/terms" target="_blank" sx={{ color: t.t.accentText }}>Terms</Box> and <Box component="a" href="/privacy" target="_blank" sx={{ color: t.t.accentText }}>Privacy Policy</Box>.
+            By creating an account you confirm you are 18 or older and agree to the <Box component="a" href="/terms" target="_blank" sx={{ color: t.t.accentText }}>Terms</Box>, <Box component="a" href="/privacy" target="_blank" sx={{ color: t.t.accentText }}>Privacy Policy</Box> and <Box component="a" href="/disclaimer" target="_blank" sx={{ color: t.t.accentText }}>Disclaimer</Box>.
           </Typography>
         )}
 

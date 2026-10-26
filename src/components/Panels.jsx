@@ -18,6 +18,8 @@ import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded
 import { A11yButton } from './Accessibility';
 import ContentPasteRounded from '@mui/icons-material/ContentPasteRounded';
 import { metaFor } from '../content/meta';
+import LegalNote from './LegalNote';
+import PhoneIphoneRounded from '@mui/icons-material/PhoneIphoneRounded';
 import { ModuleTile, ModuleCover, HeroBanner, LogoTile } from './Art';
 
 export const SIDEBAR = 260;
@@ -146,6 +148,10 @@ export function SideNav({ view, currentId, done, go, goHome, openPrompts }) {
         <Box component="button" onClick={openPrompts} sx={{ ...row(view === 'prompts'), mt: -1, mb: 1.5 }}>
           <ContentPasteRounded sx={{ fontSize: 20, color: view === 'prompts' ? t.accent : t.muted }} />
           <Typography sx={{ fontSize: 14.5, fontWeight: 600 }}>Prompt library</Typography>
+        </Box>
+        <Box component="a" href="/get-the-app" sx={{ ...row(false), mt: -1, mb: 1.5, color: 'inherit', textDecoration: 'none' }}>
+          <PhoneIphoneRounded sx={{ fontSize: 20, color: t.muted }} />
+          <Typography sx={{ fontSize: 14.5, fontWeight: 600 }}>Get the phone app</Typography>
         </Box>
         {modules.map((m, mi) => {
           const ids = m.lessons.map((l) => l.id);
@@ -340,6 +346,7 @@ export function Home({ currentId, done, go, openMenu, openDrink, onClaim, certs 
 
       <TrackHeader track={TRACKS[1]} done={done} onClaim={onClaim} certId={certs[2]} />
       <Box sx={grid}>{adv.map(([m, mi]) => <ModuleCard key={m.id} m={m} mi={mi} done={done} go={go} />)}</Box>
+      <LegalNote sx={{ mt: 6, pt: 3, borderTop: `1px solid ${t.border}` }} />
 
       <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 25, justifyContent: 'space-around', alignItems: 'center', height: 64, background: t.surface, borderTop: `1px solid ${t.border}` }}>
         {[[HomeRounded, 'Home', () => window.scrollTo({ top: 0, behavior: 'smooth' }), true], [GridViewRounded, 'Modules', openMenu], [PlayArrowRounded, 'Continue', () => go(current.id)], [ContentPasteRounded, 'Prompts', openPrompts], [LocalBarRounded, 'Drink', openDrink]].map(([Icon, text, fn, on]) => (

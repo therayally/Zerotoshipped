@@ -9,7 +9,7 @@ import { metaFor } from './content/meta';
 import Lesson from './components/Lesson';
 import { TermsGate, DonateDialog, DonateBody, TERMS_VERSION } from './components/Gates';
 import { Inline } from './components/Blocks';
-import { terms as termsDoc, privacy as privacyDoc, accessibility as accessibilityDoc, LEGAL_UPDATED } from './content/legal';
+import { terms as termsDoc, privacy as privacyDoc, accessibility as accessibilityDoc, disclaimer as disclaimerDoc, LEGAL_UPDATED } from './content/legal';
 import { getConfig, fetchProgress, pushProgress, myCertificates } from './account';
 import { CertificatePage, ClaimCertificate } from './components/Certificate';
 import { A11yButton, A11yDialog, A11yStyles, loadA11y } from './components/Accessibility';
@@ -17,6 +17,7 @@ import PromptLibrary from './components/PromptLibrary';
 import { TRACKS, lessonsInTrack } from './content/course';
 import AccountGate from './components/AccountGate';
 import Landing from './components/Landing';
+import GetTheApp from './components/GetTheApp';
 import { getAccount, refreshAccount, signOut } from './account';
 
 // Browser storage is a convenience only: every read and write is guarded.
@@ -97,12 +98,19 @@ function LegalPage({ doc, theme }) {
         ))}
         <Box component="section" sx={{ mt: 4 }}>
           <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 1 }}>{doc.sections.length + 1}. Contact</Typography>
-          <Typography>{contact ? <>Questions or requests: <Box component="a" href={`mailto:${contact}`} sx={{ color: t.accentText }}>{contact}</Box>. TheRayAlly, Frederick, Maryland, USA.</> : 'TheRayAlly, Frederick, Maryland, USA.'}</Typography>
+          <Typography>
+            Questions, privacy requests or copyright notices:{' '}
+            {contact
+              ? <Box component="a" href={`mailto:${contact}`} sx={{ color: t.accentText }}>{contact}</Box>
+              : <>use the Contact link at <Box component="a" href="https://therayally.com" target="_blank" rel="noopener noreferrer" sx={{ color: t.accentText }}>therayally.com</Box></>}
+            . TheRayAlly, Frederick, Maryland, USA.
+          </Typography>
         </Box>
         <Box sx={{ mt: 6, pt: 3, borderTop: `1px solid ${t.border}`, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           <Box component="a" href="/" sx={{ color: t.accentText }}>Back to TinyAppCode</Box>
           <Box component="a" href="/terms" sx={{ color: t.accentText }}>Terms of Service</Box>
           <Box component="a" href="/privacy" sx={{ color: t.accentText }}>Privacy Policy</Box>
+          <Box component="a" href="/disclaimer" sx={{ color: t.accentText }}>Disclaimer</Box>
           <Box component="a" href="/accessibility" sx={{ color: t.accentText }}>Accessibility</Box>
           <Box component="a" href="/donate" sx={{ color: t.accentText }}>Donate</Box>
         </Box>
@@ -116,7 +124,7 @@ export function LegalLinks({ color }) {
   const sx = { color: color || 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 };
   return (
     <Typography variant="body2" sx={{ color: color || 'text.secondary', textAlign: 'center' }}>
-      <Box component="a" href="/terms" target="_blank" sx={sx}>Terms</Box>{' · '}<Box component="a" href="/privacy" target="_blank" sx={sx}>Privacy</Box>{' · '}<Box component="a" href="/accessibility" target="_blank" sx={sx}>Accessibility</Box>
+      <Box component="a" href="/terms" target="_blank" sx={sx}>Terms</Box>{' · '}<Box component="a" href="/privacy" target="_blank" sx={sx}>Privacy</Box>{' · '}<Box component="a" href="/disclaimer" target="_blank" sx={sx}>Disclaimer</Box>{' · '}<Box component="a" href="/accessibility" target="_blank" sx={sx}>Accessibility</Box>
     </Typography>
   );
 }
@@ -197,8 +205,9 @@ export default function App() {
   useEffect(() => {
     store.set('last', currentId);
     store.set('view', view);
-    const ownPage = /^\/(donate|terms|privacy|accessibility|certificate)(\/|$)/.test(window.location.pathname);
+    const ownPage = /^\/(donate|terms|privacy|accessibility|disclaimer|get-the-app|certificate)(\/|$)/.test(window.location.pathname);
     if (!ownPage && (window.location.pathname !== '/' || window.location.hash)) history.replaceState(null, '', '/' + window.location.search);
+    if (ownPage) return; // standalone pages set their own titles
     if (!demo && !account && !offline && !entered) document.title = 'TinyAppCode: learn to vibe code, free';
     else document.title = view === 'home' ? 'TinyAppCode' : view === 'prompts' ? 'Prompt library · TinyAppCode' : `${lesson.title} · TinyAppCode`;
   }, [currentId, lesson.title, view, demo, account, offline, entered]);
@@ -266,6 +275,8 @@ export default function App() {
   if (page === '/terms') return standalone(<LegalPage doc={termsDoc} theme={theme} />);
   if (page === '/privacy') return standalone(<LegalPage doc={privacyDoc} theme={theme} />);
   if (page === '/accessibility') return standalone(<LegalPage doc={accessibilityDoc} theme={theme} />);
+  if (page === '/disclaimer') return standalone(<LegalPage doc={disclaimerDoc} theme={theme} />);
+  if (page === '/get-the-app') return <ThemeProvider theme={landingTheme}><CssBaseline /><GetTheApp />{a11yLayer(true)}</ThemeProvider>;
   if (page === '/donate') return standalone(<DonatePage account={account} onAccount={setAccount} theme={theme} />);
   // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
   const gated = !demo && (!termsOk || (!account && !offline));

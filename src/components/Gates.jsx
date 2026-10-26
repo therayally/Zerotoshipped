@@ -13,7 +13,7 @@ import { FONT_MONO } from '../theme';
 import { getConfig, refreshAccount, startDonation } from '../account';
 import { logo } from '../content/logos';
 
-export const TERMS_VERSION = '2026-10-26-tos';
+export const TERMS_VERSION = '2026-10-26b-tos';
 
 const terms = [
   ['Education and entertainment only', 'TinyAppCode is provided strictly for educational and entertainment purposes. Nothing here is professional, legal, financial, tax, security, compliance or medical advice.'],
@@ -21,8 +21,10 @@ const terms = [
   ['You are responsible', 'You alone are responsible for what you build, deploy, run, publish or charge for, and for your use of any third-party service (including their costs and terms). Always review AI-generated code before using it.'],
   ['No liability', 'To the fullest extent allowed by law, the creator of this course and anyone involved in it are not liable for any loss or damage of any kind, including lost data, lost money, security incidents, service charges, or business losses, arising from your use of this course.'],
   ['Security and compliance', 'Security lessons (including OWASP and SOC 2 material) are for awareness only. Completing them does not make any product secure or compliant. A SOC 2 report can only be issued by a licensed CPA firm.'],
+  ['AI can be wrong', 'AI tools can produce code or answers that are wrong or insecure. Lessons, time estimates and examples are not a promise of any result or income.'],
+  ['Not affiliated', 'TinyAppCode is independent and not endorsed by Anthropic, Claude or any company named in it. Trademarks belong to their owners. Some links are labeled partner links.'],
   ['Indemnity', 'You agree to hold harmless and indemnify the creator against claims arising from your use of this course or anything you build with it.'],
-  ['Your data', 'You need a free account to use the course. We store your name, email, a scrambled (hashed) password, your sign-ins and trusted devices, and any donation records, only to run your account and recognize your donations. Your lesson progress is saved in your browser. We never sell your data.'],
+  ['Your data', 'You need a free account to use the course. We store your name, email, a scrambled (hashed) password, your sign-ins and trusted devices, and any donation records, only to run your account and recognize your donations. Your lesson progress is saved to your account. We never sell your data.'],
 ];
 
 export function TermsGate({ open, onAccept }) {
@@ -51,7 +53,7 @@ export function TermsGate({ open, onAccept }) {
       <Box sx={{ p: { xs: 2.5, sm: 3.5 }, pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <FormControlLabel
           control={<Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} sx={{ '&.Mui-checked': { color: t.accent } }} />}
-          label={<Typography variant="body2">I am 18 or older, and I agree to the <Box component="a" href="/terms" target="_blank" sx={{ color: t.accentText }}>Terms of Service</Box> and <Box component="a" href="/privacy" target="_blank" sx={{ color: t.accentText }}>Privacy Policy</Box>.</Typography>}
+          label={<Typography variant="body2">I am 18 or older, and I agree to the <Box component="a" href="/terms" target="_blank" sx={{ color: t.accentText }}>Terms of Service</Box> , <Box component="a" href="/privacy" target="_blank" sx={{ color: t.accentText }}>Privacy Policy</Box> and <Box component="a" href="/disclaimer" target="_blank" sx={{ color: t.accentText }}>Disclaimer</Box>.</Typography>}
           sx={{ alignItems: 'flex-start', m: 0, '& .MuiCheckbox-root': { mt: '-7px', ml: '-9px' } }}
         />
         <Button variant="contained" size="large" fullWidth disabled={!agree} onClick={onAccept}>Agree and continue</Button>
@@ -243,6 +245,9 @@ export function DonateBody({ active = true, onClose, account, onAccount, holdLef
             </Box>
             {wallets.map(([l, a]) => <WalletRow key={l} label={l} addr={(l === 'ETH' ? config.donate_eth : config.donate_btc) || a} />)}
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>PayPal and crypto are confirmed by hand, so this window may keep showing for a day or two.</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
+              Donations are voluntary gifts to support a free course. They do not buy any product or access, are non-refundable and are not tax-deductible. <Box component="a" href="/terms" target="_blank" sx={{ color: 'inherit' }}>Terms</Box>
+            </Typography>
           </Box>
         )}
       </Box>

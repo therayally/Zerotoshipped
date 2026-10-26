@@ -12,6 +12,7 @@ import { metaFor } from '../content/meta';
 import Blocks, { MasterRef } from './Blocks';
 import Figure from './Figures';
 import { HeroBanner, LogoTile } from './Art';
+import LegalNote from './LegalNote';
 
 function Chip({ children, onClick, title }) {
   const { t } = useTheme();
@@ -66,6 +67,7 @@ export default function Lesson({ lesson, index, onBack, onNext, onSkipModule, co
         {lesson.figure && <Figure name={lesson.figure} />}
         <Blocks key={lesson.id + '-rest'} blocks={lesson.body.slice(1)} />
         <MasterRef />
+        <LegalNote sx={{ mt: 3 }} />
         <Box ref={endRef} aria-hidden="true" sx={{ height: '1px' }} />
 
         <Box sx={{ position: 'sticky', bottom: 0, zIndex: 5, mt: 5, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 1.5, py: 1.5, background: t.bg, borderTop: `1px solid ${t.border}` }}>

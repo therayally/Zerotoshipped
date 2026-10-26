@@ -77,6 +77,7 @@ export function CertificatePage({ id }) {
               <Box><Typography sx={{ fontWeight: 700, fontFamily: 'monospace' }}>{cert.id}</Typography><Typography sx={{ fontSize: 12.5, color: '#5A6072' }}>Certificate ID</Typography></Box>
             </Box>
             <Typography sx={{ fontSize: 12, color: '#8A90A0', mt: 1 }}>Verify at tinyappcode.com/certificate/{cert.id}</Typography>
+            <Typography sx={{ fontSize: 11, color: '#8A90A0', maxWidth: 520 }}>Certificate of completion for a free online course. Not a degree, license, accreditation or professional certification.</Typography>
           </Box>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.25, flexWrap: 'wrap', justifyContent: 'center', mt: 3, '@media print': { display: 'none' } }}>
