@@ -20,7 +20,7 @@ const TITLES = {
 // Shown at launch until the person has an account on this computer.
 export default function AccountGate({ open, onAccount, onOffline }) {
   const t = useTheme();
-  const [view, setView] = useState('signup');
+  const [view, setView] = useState('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

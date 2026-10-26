@@ -258,7 +258,7 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth aria-labelledby="drink-title"
-      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } }, paper: { sx: { overflow: 'hidden' } } }}>
+      slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } }, paper: { sx: { overflowX: 'hidden', overflowY: 'auto', m: { xs: 1.5, sm: 4 }, maxHeight: { xs: 'calc(100% - 24px)', sm: 'calc(100% - 64px)' }, width: { xs: 'calc(100% - 24px)', sm: undefined } } } }}>
       <Box sx={{ background: t.grad, color: '#fff', px: { xs: 2.5, sm: 3 }, py: { xs: 2.5, sm: 3 }, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="overline" sx={{ opacity: 0.85, letterSpacing: '0.12em', lineHeight: 1.6 }}>
