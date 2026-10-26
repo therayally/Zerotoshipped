@@ -9,7 +9,7 @@ import { signup, resendSignup, confirmSignup, login, verifyLogin, forgotPassword
 const field = { '& .MuiOutlinedInput-root': { borderRadius: '3px' } };
 
 const TITLES = {
-  signup: ['Create your free account', 'So we can save your spot and recognize your donations.'],
+  signup: ['Create your free account', 'The whole course is free. If it helps you, please consider buying me a drink to keep it going.'],
   confirm: ['Check your email', ''],
   login: ['Welcome back', 'Sign in to continue.'],
   verify: ['Confirm it is you', 'Two-step sign-in keeps your account yours. This device will be remembered for 30 days.'],
