@@ -145,6 +145,8 @@ export default function App() {
   const [certs, setCerts] = useState({});
   const [offline, setOffline] = useState(false);
   const theme = useMemo(() => makeTheme(colorMode, a11y), [colorMode, a11y]);
+  // The public landing page is always the clean, white product look.
+  const landingTheme = useMemo(() => makeTheme('light', a11y), [a11y]);
   const index = allLessons.findIndex((l) => l.id === currentId);
   const lesson = allLessons[index];
 
@@ -268,7 +270,7 @@ export default function App() {
   // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
   const gated = !demo && (!termsOk || (!account && !offline));
   if (!demo && !account && !offline && !entered) {
-    return standalone(<Landing onLogin={() => setEntered('login')} onSignup={() => setEntered('signup')} colorMode={colorMode} toggleColor={toggleColor} />);
+    return <ThemeProvider theme={landingTheme}><CssBaseline /><Landing onLogin={() => setEntered('login')} onSignup={() => setEntered('signup')} />{a11yLayer(true)}</ThemeProvider>;
   }
 
   return (

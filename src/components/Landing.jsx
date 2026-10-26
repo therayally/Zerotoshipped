@@ -6,8 +6,6 @@ import ChatBubbleRounded from '@mui/icons-material/ChatBubbleRounded';
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded';
 import RocketLaunchRounded from '@mui/icons-material/RocketLaunchRounded';
 import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
-import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
-import LightModeRounded from '@mui/icons-material/LightModeRounded';
 import { allLessons, TRACKS, lessonsInTrack } from '../content/course';
 import { logo } from '../content/logos';
 import { Logo } from './Panels';
@@ -37,7 +35,7 @@ function Reveal({ children, delay = 0 }) {
 function Section({ id, eyebrow, title, intro, children, tint }) {
   const { t } = useTheme();
   return (
-    <Box component="section" id={id} aria-labelledby={`${id}-title`} sx={{ py: { xs: 7, md: 11 }, px: 2, background: tint ? t.surface : 'transparent', scrollMarginTop: 64 }}>
+    <Box component="section" id={id} aria-labelledby={`${id}-title`} sx={{ py: { xs: 7, md: 11 }, px: 2, background: tint ? '#F8F9FC' : '#fff', scrollMarginTop: 64 }}>
       <Box sx={{ maxWidth: 1120, mx: 'auto' }}>
         <Reveal>
           <Typography sx={{ color: t.accentText, fontWeight: 700, fontSize: 13, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{eyebrow}</Typography>
@@ -53,9 +51,9 @@ function Section({ id, eyebrow, title, intro, children, tint }) {
 function Shot({ src, alt, phone }) {
   const { t } = useTheme();
   return (
-    <Box sx={{ borderRadius: phone ? '28px' : '10px', overflow: 'hidden', border: phone ? '8px solid #111' : `1px solid ${t.border}`, boxShadow: '0 24px 60px rgba(20,30,90,0.22)', background: '#fff', maxWidth: phone ? 300 : 'none', mx: phone ? 'auto' : 0 }}>
+    <Box sx={{ borderRadius: phone ? '28px' : '10px', overflow: 'hidden', border: phone ? '8px solid #111' : '1px solid #ECEEF3', boxShadow: '0 20px 50px rgba(20,30,90,0.12)', background: '#fff', maxWidth: phone ? 300 : 'none', mx: phone ? 'auto' : 0 }}>
       {!phone && (
-        <Box sx={{ display: 'flex', gap: 0.75, px: 1.5, py: 1, background: t.surface2, borderBottom: `1px solid ${t.border}` }} aria-hidden="true">
+        <Box sx={{ display: 'flex', gap: 0.75, px: 1.5, py: 1, background: '#F6F7FA', borderBottom: '1px solid #ECEEF3' }} aria-hidden="true">
           {['#FF5F57', '#FEBC2E', '#28C840'].map((c) => <Box key={c} sx={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
         </Box>
       )}
@@ -64,20 +62,20 @@ function Shot({ src, alt, phone }) {
   );
 }
 
-export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
+export default function Landing({ onLogin, onSignup }) {
   const { t } = useTheme();
   const tools = ['claude', 'github', 'vercel', 'neon', 'stripe', 'square', 'cloudflare', 'figma'].map(logo);
-  const cta = (big) => (
-    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', md: big ? 'flex-start' : 'center' } }}>
+  const cta = (left) => (
+    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', md: left ? 'flex-start' : 'center' } }}>
       <Button variant="contained" size="large" onClick={onSignup} endIcon={<ArrowForwardRounded />} sx={{ px: 3, py: 1.4, fontSize: '1.05rem' }}>Start free</Button>
-      <Button variant="outlined" size="large" onClick={onLogin} sx={{ px: 3, py: 1.4, fontSize: '1.05rem', color: big ? '#fff' : undefined, borderColor: big ? 'rgba(255,255,255,0.5)' : undefined, background: big ? 'rgba(255,255,255,0.08)' : undefined, '&:hover': big ? { borderColor: '#fff', background: 'rgba(255,255,255,0.16)' } : undefined }}>I have an account</Button>
+      <Button variant="outlined" size="large" onClick={onLogin} sx={{ px: 3, py: 1.4, fontSize: '1.05rem' }}>I have an account</Button>
     </Box>
   );
 
   return (
-    <Box sx={{ background: t.bg, minHeight: '100vh', overflowX: 'hidden' }}>
+    <Box sx={{ background: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       {/* Top bar: logo, section links, and the sign-in doors */}
-      <Box component="header" sx={{ position: 'sticky', top: 0, zIndex: 20, background: t.surface, borderBottom: `1px solid ${t.border}`, backdropFilter: 'blur(8px)' }}>
+      <Box component="header" sx={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.92)', borderBottom: '1px solid #ECEEF3', backdropFilter: 'blur(10px)' }}>
         <Box sx={{ maxWidth: 1120, mx: 'auto', px: 2, height: 64, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box component="a" href="/" aria-label="TinyAppCode home"><Logo size={20} /></Box>
           <Box component="nav" aria-label="Page" sx={{ display: { xs: 'none', md: 'flex' }, gap: 3, ml: 3 }}>
@@ -86,9 +84,6 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
             ))}
           </Box>
           <Box sx={{ ml: 'auto', display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button onClick={toggleColor} aria-label={colorMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} sx={{ minWidth: 40, width: 40, height: 40, color: 'text.secondary' }}>
-              {colorMode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
-            </Button>
             <Button variant="outlined" onClick={onLogin} sx={{ whiteSpace: 'nowrap' }}>Log in</Button>
             <Button variant="contained" onClick={onSignup} sx={{ whiteSpace: 'nowrap', display: { xs: 'none', sm: 'inline-flex' } }}>Start free</Button>
           </Box>
@@ -97,37 +92,37 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
 
       <main>
         {/* Hero */}
-        <Box component="section" aria-labelledby="hero-title" sx={{ position: 'relative', overflow: 'hidden', color: '#fff', background: 'linear-gradient(135deg, #0B1033 0%, #1B2A8F 45%, #4B2BB5 100%)', px: 2, pt: { xs: 6, md: 9 }, pb: { xs: 7, md: 10 },
-          '&::before': { content: '""', position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px', maskImage: 'radial-gradient(ellipse at center, #000 30%, transparent 75%)' } }}>
+        <Box component="section" aria-labelledby="hero-title" sx={{ background: '#fff', px: 2, pt: { xs: 5, md: 9 }, pb: { xs: 5, md: 8 } }}>
           <Box sx={{ position: 'relative', maxWidth: 1120, mx: 'auto', display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' }, gap: { xs: 4, md: 6 }, alignItems: 'center' }}>
             <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
-              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.6, borderRadius: '99px', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', fontWeight: 700, fontSize: 14 }}>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.6, borderRadius: '99px', background: t.accentSoft, color: t.accentText, fontWeight: 700, fontSize: 14 }}>
                 <AutoAwesomeRounded sx={{ fontSize: 17 }} /> Learn to vibe code in a few hours. Free.
               </Box>
               <Typography id="hero-title" variant="h1" sx={{ fontWeight: 800, mt: 2.5, fontSize: { xs: '2.4rem', sm: '3rem', md: '3.6rem' }, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
-                Build real apps just by talking to AI.
+                Build real apps just by{' '}
+                <Box component="span" sx={{ background: t.grad, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>talking to AI.</Box>
               </Typography>
-              <Typography sx={{ mt: 2.5, fontSize: { xs: '1.1rem', md: '1.25rem' }, opacity: 0.92, maxWidth: 560, mx: { xs: 'auto', md: 0 } }}>
+              <Typography sx={{ mt: 2.5, fontSize: { xs: '1.1rem', md: '1.25rem' }, color: 'text.secondary', maxWidth: 560, mx: { xs: 'auto', md: 0 } }}>
                 TinyAppCode is a free course that takes you from "I have never coded" to a real app, live on the internet, taking payments. You describe what you want in plain English, the AI writes the code, and we show you every click.
               </Typography>
               <Box sx={{ mt: 4 }}>{cta(true)}</Box>
-              <Box sx={{ mt: 3, display: 'flex', gap: { xs: 1.5, sm: 3 }, flexWrap: 'wrap', justifyContent: { xs: 'center', md: 'flex-start' }, opacity: 0.9, fontSize: 14.5 }}>
+              <Box sx={{ mt: 3, display: 'flex', gap: { xs: 1.5, sm: 3 }, flexWrap: 'wrap', justifyContent: { xs: 'center', md: 'flex-start' }, color: 'text.secondary', fontSize: 14.5 }}>
                 {['No coding experience needed', 'No ads, no paywall', 'Certificate for LinkedIn'].map((x) => (
-                  <Box key={x} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}><CheckCircleRounded sx={{ fontSize: 17, color: '#7CE0FF' }} />{x}</Box>
+                  <Box key={x} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}><CheckCircleRounded sx={{ fontSize: 17, color: t.teal }} />{x}</Box>
                 ))}
               </Box>
             </Box>
             <Box sx={{ display: 'grid', placeItems: 'center' }}>
-              <Box component="img" src="/brand/logo-full-dark.png" alt="The TinyAppCode mascot coding on a laptop next to a sleeping cat" sx={{ width: { xs: '82%', md: '100%' }, maxWidth: 480, height: 'auto', animation: `${float} 6s ease-in-out infinite`, ...still }} />
+              <Box component="img" src="/brand/logo-full.png" alt="The TinyAppCode mascot coding on a laptop next to a sleeping cat" sx={{ width: { xs: '82%', md: '100%' }, maxWidth: 480, height: 'auto', animation: `${float} 6s ease-in-out infinite`, ...still }} />
             </Box>
           </Box>
         </Box>
 
         {/* Fast-start numbers */}
-        <Box sx={{ px: 2, mt: { xs: -4, md: -5 }, position: 'relative', zIndex: 2 }}>
-          <Box sx={{ maxWidth: 1000, mx: 'auto', display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, background: t.surface, borderRadius: '6px', boxShadow: t.shadow, border: `1px solid ${t.border}`, overflow: 'hidden' }}>
+        <Box sx={{ px: 2 }}>
+          <Box sx={{ maxWidth: 1000, mx: 'auto', display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, background: '#fff', borderRadius: '10px', border: '1px solid #ECEEF3', overflow: 'hidden' }}>
             {[['~1 hour', 'to understand vibe coding and talk to Claude like a pro'], [`~${firstAppHours} hours`, 'to your first app, live online and taking payments'], [String(allLessons.length), 'bite-size lessons, most under 15 minutes'], [String(promptCount), 'copy-and-paste prompts, ready to use']].map(([n, l], i) => (
-              <Box key={l} sx={{ p: { xs: 2, md: 3 }, textAlign: 'center', borderRight: { md: i < 3 ? `1px solid ${t.border}` : 'none' }, borderLeft: { xs: i % 2 ? `1px solid ${t.border}` : 'none', md: 'none' }, borderTop: { xs: i > 1 ? `1px solid ${t.border}` : 'none', md: 'none' } }}>
+              <Box key={l} sx={{ p: { xs: 2, md: 3 }, textAlign: 'center', borderRight: { md: i < 3 ? '1px solid #ECEEF3' : 'none' }, borderLeft: { xs: i % 2 ? '1px solid #ECEEF3' : 'none', md: 'none' }, borderTop: { xs: i > 1 ? '1px solid #ECEEF3' : 'none', md: 'none' } }}>
                 <Typography sx={{ fontWeight: 800, fontSize: { xs: '1.7rem', md: '2.2rem' }, background: t.grad, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{n}</Typography>
                 <Typography sx={{ color: 'text.secondary', fontSize: 14, mt: 0.5 }}>{l}</Typography>
               </Box>
@@ -145,7 +140,7 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
                 [RocketLaunchRounded, '3. You ship it', 'You check it on your phone, ask for changes, then put it live on your own web address for real customers.'],
               ].map(([Icon, h, p], i) => (
                 <Reveal key={h} delay={i * 0.08}>
-                  <Box sx={{ display: 'flex', gap: 2, p: 2.5, borderRadius: '6px', background: t.surface, border: `1px solid ${t.border}` }}>
+                  <Box sx={{ display: 'flex', gap: 2, p: 2.5, borderRadius: '12px', background: '#fff', border: '1px solid #ECEEF3' }}>
                     <Box sx={{ width: 44, height: 44, borderRadius: '4px', background: t.grad, display: 'grid', placeItems: 'center', flexShrink: 0 }}><Icon sx={{ color: '#fff' }} /></Box>
                     <Box>
                       <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>{h}</Typography>
@@ -206,7 +201,7 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
             {[['Booking and appointment apps', 'For barbers, tutors, trainers and anyone with a calendar'], ['Phone scanning apps', 'Scan barcodes or snap receipts with a phone camera'], ['AI that knows your docs', 'A chatbot that answers from your own files (RAG)'], ['Subscription apps', 'Monthly memberships with Stripe or Square'], ['Admin dashboards', 'Manage users, data and payments like a real company'], ['Your own AI agents', 'Helpers that run errands for you, safely']].map(([h, p], i) => (
               <Reveal key={h} delay={(i % 3) * 0.06}>
-                <Box sx={{ p: 2.5, height: '100%', borderRadius: '6px', background: t.surface, border: `1px solid ${t.border}` }}>
+                <Box sx={{ p: 2.5, height: '100%', borderRadius: '12px', background: '#fff', border: '1px solid #ECEEF3' }}>
                   <Typography sx={{ fontWeight: 700, fontSize: '1.08rem' }}>{h}</Typography>
                   <Typography sx={{ color: 'text.secondary', mt: 0.5 }}>{p}</Typography>
                 </Box>
@@ -231,11 +226,6 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
               ].map((p, i) => (
                 <Typography key={i} sx={{ fontSize: { xs: '1.05rem', md: '1.12rem' }, lineHeight: 1.7, mt: i ? 2 : 0 }}>{p}</Typography>
               ))}
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2.5 }}>
-                {['Graphic design', 'Photography', 'Videography', 'AI art', 'Cybersecurity', 'AI development', 'U.S. Air Force veteran'].map((x) => (
-                  <Box key={x} sx={{ px: 1.25, py: 0.5, borderRadius: '99px', fontSize: 13.5, fontWeight: 600, background: t.accentSoft, color: t.accentText }}>{x}</Box>
-                ))}
-              </Box>
               <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: 3 }}>
                 <Button variant="contained" href="https://www.tiktok.com/@therayally" target="_blank" rel="noopener noreferrer">Follow @therayally on TikTok</Button>
                 <Button variant="outlined" href="https://therayally.com" target="_blank" rel="noopener noreferrer">therayally.com</Button>
@@ -256,7 +246,7 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
               ['Who is it for?', 'Complete beginners, small business owners, creators and side hustlers who want to build their own tools, and anyone curious about building with AI.'],
             ].map(([q, a], i) => (
               <Reveal key={q} delay={(i % 2) * 0.06}>
-                <Box sx={{ p: 2.5, height: '100%', borderRadius: '6px', background: t.surface, border: `1px solid ${t.border}` }}>
+                <Box sx={{ p: 2.5, height: '100%', borderRadius: '12px', background: '#fff', border: '1px solid #ECEEF3' }}>
                   <Typography component="h3" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>{q}</Typography>
                   <Typography sx={{ color: 'text.secondary', mt: 0.75 }}>{a}</Typography>
                 </Box>
@@ -268,16 +258,16 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
         {/* Final call to action */}
         <Box component="section" aria-label="Get started" sx={{ px: 2, pb: { xs: 7, md: 10 } }}>
           <Reveal>
-            <Box sx={{ maxWidth: 1000, mx: 'auto', textAlign: 'center', color: '#fff', borderRadius: '10px', p: { xs: 4, md: 7 }, background: 'linear-gradient(135deg, #1B2A8F 0%, #4B2BB5 100%)', boxShadow: '0 24px 60px rgba(20,30,90,0.25)' }}>
+            <Box sx={{ maxWidth: 1000, mx: 'auto', textAlign: 'center', borderRadius: '14px', p: { xs: 4, md: 7 }, background: '#F8F9FC', border: '1px solid #ECEEF3' }}>
               <Typography variant="h3" component="h2" sx={{ fontWeight: 800, fontSize: { xs: '1.8rem', md: '2.5rem' } }}>Your first app is a few hours away.</Typography>
-              <Typography sx={{ mt: 1.5, opacity: 0.9, fontSize: '1.1rem' }}>Make a free account and start the first lesson in under a minute.</Typography>
-              <Box sx={{ mt: 3.5 }}>{cta(true)}</Box>
+              <Typography sx={{ mt: 1.5, color: 'text.secondary', fontSize: '1.1rem' }}>Make a free account and start the first lesson in under a minute.</Typography>
+              <Box sx={{ mt: 3.5 }}>{cta(false)}</Box>
             </Box>
           </Reveal>
         </Box>
       </main>
 
-      <Box component="footer" sx={{ borderTop: `1px solid ${t.border}`, background: t.surface, px: 2, py: 5 }}>
+      <Box component="footer" sx={{ borderTop: '1px solid #ECEEF3', background: '#fff', px: 2, py: 5 }}>
         <Box sx={{ maxWidth: 1120, mx: 'auto', display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '2fr 1fr 1fr 1fr' }, gap: 3 }}>
           <Box sx={{ gridColumn: { xs: '1 / -1', md: 'auto' } }}>
             <Logo size={20} />
