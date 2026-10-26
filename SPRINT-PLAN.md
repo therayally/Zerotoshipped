@@ -1,4 +1,4 @@
-# Zero to Shipped: sprint plan
+# TinyAppCode: sprint plan
 
 A free course that takes someone who knows nothing to a live, paid, secured web app.
 Audience: people coming from TikTok. Easy mode reads at about a 3rd-grade level. Nerdy mode explains the why.
@@ -52,7 +52,7 @@ Sprints are 1 week each. Each sprint ends with a demo of the live site and a sho
 - [x] Email one-time codes, max 2 computers per purchase, offline for 30 days
 - [x] Free preview: modules 0–2; Unlock screen from module 3
 - [x] Super admin: sales overview, licenses, free grants, sign computers out, connect your own Square, Resend, donation and download links, add admins, activity log
-- [ ] Go live: buy zerotoshipped.app on Cloudflare, deploy, add Resend + Square keys in /admin (steps in LICENSING.md)
+- [ ] Go live: buy tinyappcode.app on Cloudflare, deploy, add Resend + Square keys in /admin (steps in LICENSING.md)
 - [ ] Real end-to-end test: buy for $2, unlock, refund
 
 ## Sprint 3: Learning polish

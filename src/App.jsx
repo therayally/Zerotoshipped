@@ -31,6 +31,15 @@ function systemDark() {
   try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch { return false; }
 }
 
+// Full-screen brand background shown behind the terms and sign-in windows.
+function GateBackdrop() {
+  return (
+    <Box aria-hidden="true" sx={{ position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #0B1033 0%, #1B2A8F 45%, #4B2BB5 100%)', overflow: 'hidden',
+      '&::before': { content: '""', position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px', maskImage: 'radial-gradient(ellipse at center, #000 30%, transparent 75%)' },
+      '&::after': { content: '""', position: 'absolute', width: 640, height: 640, right: -160, top: -200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,77,255,0.45), transparent 65%)' } }} />
+  );
+}
+
 export default function App() {
   const [colorMode, setColorMode] = useState(() => store.get('theme', systemDark() ? 'dark' : 'light'));
   const [done, setDone] = useState(() => new Set(store.get('done', [])));
@@ -112,10 +121,13 @@ export default function App() {
   const openDrink = () => setDrinkOpen(true);
   const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
   const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} />;
+  // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
+  const gated = !demo && (!termsOk || (!account && !offline));
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      {gated ? <GateBackdrop /> : (<>
       <TopBar section={view === 'home' ? 'All modules' : lesson.moduleTitle} colorMode={colorMode} toggleColor={toggleColor} openMenu={() => setMenuOpen(true)} go={go} />
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', md: `${SIDEBAR}px minmax(0,1fr)`, xl: `${SIDEBAR}px minmax(0,1fr) ${RAIL}px` }, minHeight: 'calc(100vh - 64px)' }}>
         <Box component="nav" aria-label="Course" sx={{ display: { xs: 'none', md: 'block' }, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', background: theme.t.surface, borderRight: `1px solid ${theme.t.border}` }}>
@@ -135,6 +147,8 @@ export default function App() {
             tools={view === 'home' ? [...new Map(modules.flatMap((m) => metaFor(m.id).tools).filter((i) => !i.text).map((i) => [i.title, i])).values()].slice(0, 20) : metaFor(lesson.moduleId).tools} />
         </Box>
       </Box>
+
+      </>)}
 
       <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} slotProps={{ paper: { sx: { width: 'min(320px, 88vw)', background: theme.t.surface } } }}>
         {nav}

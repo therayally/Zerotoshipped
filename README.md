@@ -1,4 +1,4 @@
-# Zero to Shipped
+# TinyAppCode
 
 A free desktop app that takes someone from zero to a live, paid, secured app built with AI.
 Every step has an **Easy** mode (short steps plus copy-ready prompts with security rules built in) and a **Nerdy** mode (the full explanation).
