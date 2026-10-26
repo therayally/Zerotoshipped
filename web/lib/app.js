@@ -17,6 +17,7 @@ const SETTINGS = {
   donate_paypal: { public: true },
   donate_eth: { public: true },
   donate_btc: { public: true },
+  contact_email: { public: true },
   download_mac: { public: true },
   download_windows: { public: true },
   min_donation_cents: { public: false, fallback: '100' },
@@ -135,6 +136,7 @@ async function sendMail(settings, to, subject, text) {
 }
 
 const MAIL = {
+  exists: () => ['Someone tried to sign up with your email', `Someone (hopefully you) tried to create a TinyAppCode account with this email, but you already have one.\n\nTo get in, sign in at https://tinyappcode.com or use "Forgot password". If this was not you, you can ignore this email.`],
   signup: (code) => ['Confirm your TinyAppCode account', `Welcome! Your confirmation code is ${code}\n\nIt works for 10 minutes. If you did not sign up, you can ignore this email.`],
   login: (code) => ['Your TinyAppCode sign-in code', `Someone (hopefully you) signed in on a new device. Your sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away: your password is known to someone else.`],
   admin: (code) => ['Your TinyAppCode admin sign-in code', `Your admin sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away.`],
@@ -144,6 +146,7 @@ const MAIL = {
 // ───────────────────────── passwords (scrypt, salted)
 
 const SCRYPT = { N: 16384, r: 8, p: 1, keylen: 64 };
+let DUMMY_HASH_CACHE;
 const LOCK_AFTER = 5;
 const LOCK_MINUTES = 15;
 
@@ -160,6 +163,9 @@ function checkPassword(password, stored) {
   const got = scryptSync(password, Buffer.from(salt, 'base64'), expected.length, { N: +N, r: +r, p: +p });
   return got.length === expected.length && timingSafeEqual(got, expected);
 }
+
+// A throwaway hash checked for unknown emails so failed sign-ins all take the same time.
+const DUMMY_HASH_GET = () => (DUMMY_HASH_CACHE ??= hashPassword('not-a-real-password-' + Math.random()));
 
 function passwordProblem(pw) {
   if (typeof pw !== 'string' || pw.length < 10) return 'Use at least 10 characters for your password.';
@@ -178,6 +184,23 @@ async function isAdmin(email) {
 async function donatedAt(email) {
   const row = await one("SELECT min(created_at) AS at FROM donations WHERE email = $1 AND status = 'completed'", [email]);
   return row?.at || null;
+}
+
+// ───────────────────────── rate limits (fixed windows, counted atomically in the database)
+
+// Adds one hit to `key` in the current window and says whether it is over `limit`.
+async function overLimit(key, limit, windowSec) {
+  const start = Math.floor(Date.now() / 1000 / windowSec) * windowSec;
+  const row = await one(`INSERT INTO rate_limits (key, window_start, count) VALUES ($1, $2, 1)
+    ON CONFLICT (key, window_start) DO UPDATE SET count = rate_limits.count + 1 RETURNING count`, [key, start]);
+  if (Math.random() < 0.02) await q('DELETE FROM rate_limits WHERE window_start < $1', [Math.floor(Date.now() / 1000) - 2 * 86400]);
+  return row.count > limit;
+}
+
+const slowDown = () => json({ error: 'Too many tries. Please wait a few minutes and try again.' }, 429);
+
+function clientIp(request) {
+  return clean((request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for') || '').split(',')[0].trim(), 64) || 'unknown';
 }
 
 // Creates a 6-digit code for an email and mails it. Rate limited per email and purpose.
@@ -200,11 +223,17 @@ async function checkCode(body, purpose) {
   if (!email || !/^\d{6}$/.test(code)) return json({ error: 'Enter the 6-digit code from the email.' }, 400);
   const row = await one('SELECT * FROM codes WHERE email = $1 AND purpose = $2 AND used = FALSE ORDER BY id DESC LIMIT 1', [email, purpose]);
   if (!row || Number(row.expires_at) < Date.now()) return json({ error: 'That code expired. Ask for a new one.' }, 400);
-  if (row.attempts >= CODE_MAX_ATTEMPTS) return json({ error: 'Too many tries. Ask for a new code.' }, 429);
-  await q('UPDATE codes SET attempts = attempts + 1 WHERE id = $1', [row.id]);
+  // Claim one attempt atomically, so parallel guesses cannot all slip under the limit.
+  const claimed = await one('UPDATE codes SET attempts = attempts + 1 WHERE id = $1 AND used = FALSE AND attempts < $2 RETURNING code_hash', [row.id, CODE_MAX_ATTEMPTS]);
+  if (!claimed) return json({ error: 'Too many tries. Ask for a new code.' }, 429);
   const hash = await sha256(`${purpose}:${email}:${code}:${secret('SESSION_SECRET')}`);
-  if (!safeEqual(hash, row.code_hash)) return json({ error: 'That code is not right. Check the email and try again.' }, 400);
-  await q('UPDATE codes SET used = TRUE WHERE id = $1', [row.id]);
+  if (!safeEqual(hash, claimed.code_hash)) {
+    // Across all codes, cap wrong guesses per email and purpose per day, then stop accepting codes.
+    if (await overLimit(`codefail:${purpose}:${email}`, 20, 86400)) await q('UPDATE codes SET used = TRUE WHERE email = $1 AND purpose = $2', [email, purpose]);
+    return json({ error: 'That code is not right. Check the email and try again.' }, 400);
+  }
+  const won = await one('UPDATE codes SET used = TRUE WHERE id = $1 AND used = FALSE RETURNING id', [row.id]);
+  if (!won) return json({ error: 'That code was already used. Ask for a new one.' }, 400);
   return email;
 }
 
@@ -244,7 +273,11 @@ async function signup(body) {
   const bad = passwordProblem(body.password);
   if (bad) return json({ error: bad }, 400);
   const existing = await one('SELECT email_verified FROM users WHERE email = $1', [email]);
-  if (existing?.email_verified) return json({ error: 'There is already an account with this email. Sign in, or use "Forgot password".' }, 409);
+  if (existing?.email_verified) {
+    // Same answer as a new signup, so nobody can probe which emails have accounts. The owner gets a heads-up instead.
+    if (!(await overLimit(`exists:${email}`, 3, 3600))) await sendMail(await loadSettings(), email, ...MAIL.exists());
+    return json(SENT);
+  }
   await q(`INSERT INTO users (email, name, password_hash, email_verified) VALUES ($1, $2, $3, FALSE)
            ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, password_hash = EXCLUDED.password_hash`, [email, name, hashPassword(body.password)]);
   const err = await sendCode(email, 'signup');
@@ -268,32 +301,36 @@ async function resendSignup(body) {
 }
 
 // Checks email + password with lockout. Returns the email, or a Response.
-async function checkLogin(body) {
+async function checkLogin(body, request) {
   const email = normEmail(body.email);
   const fail = json({ error: 'That email or password is not right.' }, 401);
   if (!email || typeof body.password !== 'string') return fail;
-  const u = await one('SELECT password_hash, email_verified, failed_logins, locked_until FROM users WHERE email = $1', [email]);
-  if (u?.locked_until && new Date(u.locked_until) > new Date()) {
-    return json({ error: `Too many wrong tries. Try again in ${LOCK_MINUTES} minutes, or reset your password.` }, 429);
-  }
-  if (!u || !u.password_hash || !checkPassword(body.password, u.password_hash)) {
-    if (u) {
-      await q(`UPDATE users SET failed_logins = failed_logins + 1,
-               locked_until = CASE WHEN failed_logins + 1 >= $2 THEN now() + ($3 || ' minutes')::interval ELSE locked_until END
-               WHERE email = $1`, [email, LOCK_AFTER, String(LOCK_MINUTES)]);
-    }
-    return fail;
+  const ip = clientIp(request);
+  const locked = json({ error: `Too many wrong tries. Try again in ${LOCK_MINUTES} minutes, or reset your password.` }, 429);
+  // Wrong tries are counted per email from this IP (so a stranger cannot lock you out everywhere) and per email overall.
+  // Checked before the slow password hash, and counted atomically, so parallel guesses cannot skip the limit.
+  const failKey = `loginfail:${email}:${ip}`, failKeyAll = `loginfail:${email}`;
+  const window = LOCK_MINUTES * 60;
+  const recent = await one('SELECT coalesce(sum(count), 0)::int AS n FROM rate_limits WHERE key = $1 AND window_start >= $2', [failKey, Math.floor(Date.now() / 1000) - window]);
+  if (recent.n >= LOCK_AFTER) return locked;
+  const u = await one('SELECT password_hash, email_verified FROM users WHERE email = $1', [email]);
+  // Unknown emails still run the hash, so response time does not reveal who has an account.
+  const ok = checkPassword(body.password, u?.password_hash || DUMMY_HASH_GET()) && !!u?.password_hash;
+  if (!ok) {
+    const tooMany = await overLimit(failKey, LOCK_AFTER - 1, window);
+    const tooManyAll = await overLimit(failKeyAll, 50, 3600);
+    return tooMany || tooManyAll ? locked : fail;
   }
   if (!u.email_verified) {
     const err = await sendCode(email, 'signup');
     return err || json({ error: 'needs_verification', message: 'Confirm your email first. We sent you a new code.' }, 403);
   }
-  await q('UPDATE users SET failed_logins = 0, locked_until = NULL WHERE email = $1', [email]);
+  await q('DELETE FROM rate_limits WHERE key = $1', [failKey]);
   return email;
 }
 
-async function login(body) {
-  const email = await checkLogin(body);
+async function login(body, request) {
+  const email = await checkLogin(body, request);
   if (email instanceof Response) return email;
   if (await isTrusted(email, body.trust)) return json(await newSession(email, body));
   const err = await sendCode(email, 'login');
@@ -331,7 +368,7 @@ async function reset(body) {
 async function sessionFrom(request) {
   const m = (request.headers.get('authorization') || '').match(/^Bearer\s+([A-Za-z0-9_-]{20,})$/);
   if (!m) return null;
-  return one('SELECT id, email FROM sessions WHERE token_hash = $1', [await sha256(m[1])]);
+  return one("SELECT id, email FROM sessions WHERE token_hash = $1 AND created_at > now() - interval '90 days'", [await sha256(m[1])]);
 }
 
 async function me(request) {
@@ -416,7 +453,7 @@ async function squareWebhook(request) {
   if (event.type === 'payment.created' || event.type === 'payment.updated') {
     const pay = obj.payment || {};
     // Prefer the account tag from our own checkout link; fall back to the email typed at checkout.
-    const acct = /acct:(\d+)/.exec(pay.note || '')?.[1];
+    const acct = /^TinyAppCode donation acct:(\d+)$/.exec(pay.note || '')?.[1];
     const tagged = acct ? await one('SELECT email FROM users WHERE id = $1', [Number(acct)]) : null;
     const email = tagged?.email || normEmail(pay.buyer_email_address);
     const amount = pay.amount_money?.amount || 0;
@@ -456,11 +493,19 @@ function sessionCookie(request, value, maxAge) {
   return `zts_admin=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure}`;
 }
 
+// A short fingerprint of the current password hash: changing the password ends every admin session.
+async function passwordVersion(email) {
+  const u = await one('SELECT password_hash FROM users WHERE email = $1', [email]);
+  return (await sha256(u?.password_hash || '')).slice(0, 16);
+}
+
 async function adminSession(request) {
   const p = await readToken(cookie(request, 'zts_admin'));
   if (!p || p.t !== 'admin') return null;
+  if (p.pv !== (await passwordVersion(p.email))) return null;
+  // The panel at /superadmin is for the super admin only.
   const role = await isAdmin(p.email);
-  return role ? { email: p.email, role } : null;
+  return role === 'super' ? { email: p.email, role } : null;
 }
 
 async function adminApi(request, path, me) {
@@ -545,6 +590,10 @@ async function adminApi(request, path, me) {
       if (!def) continue;
       const value = clean(v, 2000);
       if (def.secret && !value) continue; // blank secret field keeps the current one
+      // Keys, payment links and download links can only be changed by the super admin.
+      if ((def.secret || /^(download_|donate_|square_webhook_url|contact_email)/.test(k)) && me.role !== 'super') {
+        return json({ error: 'Only the super admin can change keys, payment links and download links.' }, 403);
+      }
       if (/^(download_|donate_paypal|donate_square|square_webhook_url)/.test(k) && value && !/^https:\/\//.test(value)) {
         return json({ error: `${k} must start with https://` }, 400);
       }
@@ -582,7 +631,8 @@ const SECURITY_HEADERS = {
 
 function corsHeaders(request) {
   const origin = request.headers.get('origin');
-  const allowed = (env('APP_ORIGINS') || 'tauri://localhost,http://tauri.localhost,http://localhost:5174,http://localhost:5175').split(',').map((s) => s.trim());
+  // The course and API share one origin now, so cross-origin calls are only for local development.
+  const allowed = (env('APP_ORIGINS') || (env('VERCEL_ENV') === 'production' ? '' : 'http://localhost:5174')).split(',').map((s) => s.trim()).filter(Boolean);
   if (!origin || !allowed.includes(origin)) return {};
   return {
     'access-control-allow-origin': origin,
@@ -610,28 +660,34 @@ async function route(request, path) {
 
   if (method === 'POST') {
     const body = await request.clone().json().catch(() => ({}));
+    // Per-IP limits on every sign-in and code endpoint, plus a tighter one on anything that sends email.
+    if (path.startsWith('/api/auth/') || path.startsWith('/api/admin/login')) {
+      const ip = clientIp(request);
+      if (await overLimit(`ip:${ip}`, 60, 600)) return slowDown();
+      if (/\/(signup|resend|forgot)$/.test(path) && (await overLimit(`ipmail:${ip}`, 20, 3600))) return slowDown();
+    }
     if (path === '/api/auth/signup') return signup(body);
     if (path === '/api/auth/confirm') return confirmSignup(body);
     if (path === '/api/auth/resend') return resendSignup(body);
-    if (path === '/api/auth/login') return login(body);
+    if (path === '/api/auth/login') return login(body, request);
     if (path === '/api/auth/login/verify') return verifyLogin(body);
     if (path === '/api/donate') return donate(request, body);
     if (path === '/api/auth/forgot') return forgot(body);
     if (path === '/api/auth/reset') return reset(body);
     if (path === '/api/auth/signout') return signout(request);
     if (path === '/api/admin/login') {
-      const email = await checkLogin(body);
+      const email = await checkLogin(body, request);
       if (email instanceof Response) return email;
-      if (!(await isAdmin(email))) return json({ error: 'Not an admin.' }, 403);
+      if ((await isAdmin(email)) !== 'super') return json({ error: 'That email or password is not right.' }, 401);
       const err = await sendCode(email, 'admin'); // the admin panel always asks for an emailed code
       return err || json({ needs_code: true, message: 'We emailed you a 6-digit sign-in code.' });
     }
     if (path === '/api/admin/login/verify') {
       const email = await checkCode(body, 'admin');
       if (email instanceof Response) return email;
-      if (!(await isAdmin(email))) return json({ error: 'Not an admin.' }, 403);
+      if ((await isAdmin(email)) !== 'super') return json({ error: 'That email or password is not right.' }, 401);
       const now = Math.floor(Date.now() / 1000);
-      const token = await signToken({ t: 'admin', email, iat: now, exp: now + ADMIN_SESSION_S });
+      const token = await signToken({ t: 'admin', email, iat: now, exp: now + ADMIN_SESSION_S, pv: await passwordVersion(email) });
       await audit(email, 'login');
       return json({ ok: true }, 200, { 'set-cookie': sessionCookie(request, token, ADMIN_SESSION_S) });
     }

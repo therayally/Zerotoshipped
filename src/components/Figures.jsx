@@ -350,7 +350,30 @@ function Branches() {
   );
 }
 
-const figures = { bigpicture: () => <BigPicture />, branches: Branches, spacing: Spacing, relay: Relay, stack: Stack, sprint: Sprint, dns: Dns, keys: Keys, agent: Agent, tenants: Tenants };
+// Subscriptions: checkout happens on the payment company's page; only a signed webhook changes the plan.
+function Subscription() {
+  return (
+    <Frame h={250} caption="How a subscription stays honest: only a signed message from Stripe or Square changes someone's plan">
+      <Node x={10} y={20} w={135} title="Customer" sub="clicks Upgrade" g="person" tone="teal" />
+      <Node x={175} y={20} w={135} title="Your server" sub="makes checkout" k="vercel" tone="sky" />
+      <Node x={340} y={20} w={135} title="Checkout" sub="Stripe or Square" k="stripe" />
+      <Node x={505} y={20} w={125} title="Card charged" sub="every month" g="clock" tone="coral" />
+      <Node x={340} y={170} w={135} title="Webhook" sub="signed: paid" g="lock" tone="coral" />
+      <Node x={175} y={170} w={135} title="Neon" sub="plan = active" k="neon" tone="teal" />
+      <Node x={10} y={170} w={135} title="Your app" sub="checks on launch" g="app" />
+      <Arrow d="M145 49 L171 49" />
+      <Arrow d="M310 49 L336 49" />
+      <Arrow d="M475 49 L501 49" />
+      <Arrow d="M567 78 L470 166" />
+      <Label x={540} y={130} text="each payment or cancel" />
+      <Arrow d="M340 199 L314 199" />
+      <Label x={327} y={238} text="verify, then save" />
+      <Arrow d="M175 199 L149 199" />
+    </Frame>
+  );
+}
+
+const figures = { subscription: Subscription, bigpicture: () => <BigPicture />, branches: Branches, spacing: Spacing, relay: Relay, stack: Stack, sprint: Sprint, dns: Dns, keys: Keys, agent: Agent, tenants: Tenants };
 
 export default function Figure({ name }) {
   if (name.startsWith('fit-')) return <BigPicture hl={name.slice(4)} />;

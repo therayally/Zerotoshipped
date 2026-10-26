@@ -6,3 +6,6 @@ dist
 src-tauri/target
 src-tauri/gen
 web/node_modules
+docs-private/
+.env
+.env.production

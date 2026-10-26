@@ -166,5 +166,55 @@ Explain how to test it with Square's sandbox test cards.` },
         ] },
       ],
     },
+    {
+      id: 'subscriptions',
+      title: 'Charge monthly: subscriptions',
+      minutes: 14,
+      figure: 'subscription',
+      body: [
+        { t: 'why', text: 'A one-time sale pays you once. A subscription pays you every month, which is how most apps become a real business. The good news: the setup is almost the same as a one-time payment, plus one rule that keeps it honest. This course\'s own donation window works exactly this way.' },
+        { t: 'h', text: 'The one rule' },
+        { t: 'p', text: 'Your app never decides someone has paid. **Only a signed webhook** from Stripe or Square changes a person\'s plan in your database. Your app just reads that plan every time it opens.' },
+        { t: 'analogy', text: 'It is like a gym membership. The front desk does not take your word that you paid; they scan your card and the system says "active" or "expired". The bank updates the system, not you.' },
+        { t: 'h', text: 'How the pieces fit (look at the picture above)' },
+        { t: 'steps', items: [
+          { do: '**Accounts first.** Each customer signs up, so you know who is paying.', why: 'You already built sign-up with email codes. A subscription attaches to that account.' },
+          { do: '**Your server makes the checkout.** When they click Upgrade, your server asks Stripe (or Square) for a checkout page for your plan, tagged with their account ID.', why: 'The price comes from your server, never the browser, so nobody can change it.' },
+          { do: '**They pay on Stripe\'s page.** Card details never touch your app.' },
+          { do: '**The webhook updates the plan.** Stripe sends a signed message when they subscribe, renew, fail a payment or cancel. Your server checks the signature, then saves `plan = active` or `plan = canceled` in Neon.' },
+          { do: '**Your app checks on launch.** Every time it opens, it asks your server "what plan is this person on?" and unlocks features to match.', why: 'That is the exact check this course does to decide whether to show the donation window.' },
+        ] },
+        { t: 'h', text: 'Which tool for subscriptions?' },
+        { t: 'table', head: ['', 'Stripe Billing', 'Square Subscriptions'], rows: [
+          ['Best for', 'Online apps and software', 'Businesses that already use Square in person'],
+          ['Customer portal', 'Built in: customers update cards and cancel themselves', 'Customers manage it through Square links and emails'],
+          ['Free trials, coupons, yearly plans', 'Yes', 'Yes, with fewer options'],
+          ['What to listen for', 'customer.subscription.created / updated / deleted, invoice.payment_failed', 'subscription.created / updated, invoice.payment_made'],
+        ] },
+        { t: 'prompt', label: 'Add a monthly plan', text: `Add a monthly subscription to my app with Stripe Billing.
+- Plan: [PLAN NAME] at [PRICE] per month. Create the product and price in Stripe test mode, and keep the price ID in my server code or settings, never in the browser.
+- Add an Upgrade button that creates a Stripe Checkout Session in subscription mode on the server, tagged with the signed-in user's ID (client_reference_id).
+- Add a webhook route that verifies the Stripe signature (STRIPE_WEBHOOK_SECRET), handles customer.subscription.created, updated and deleted plus invoice.payment_failed, and saves the user's plan and current period end in the database. Handle the same event twice safely.
+- Add a /api/me field "plan" that the app reads on launch to unlock paid features. Never trust a plan sent from the browser.
+- Add a "Manage billing" button that opens the Stripe customer portal so people can cancel or update their card themselves.
+Use my existing STRIPE_SECRET_KEY. If any new key is needed, help me add it with a hidden terminal prompt.` + SAFE },
+        { t: 'tip', tone: 'warn', text: 'Always give people an easy way to cancel. In many places it is the law that canceling must be as easy as signing up, and it keeps you out of payment disputes.' },
+        { t: 'deeper', title: 'Failed payments, grace periods and proration', blocks: [
+          { t: 'p', text: '**Failed payments** happen (expired cards). Stripe retries automatically ("Smart Retries") and emails the customer. Keep access during a short grace period (for example, until the retries finish) instead of locking people out instantly.' },
+          { t: 'p', text: 'Store `current_period_end` from the webhook. If a webhook is ever missed, the app can still lock access after that date, and a nightly job can re-sync from Stripe.' },
+          { t: 'p', text: '**Proration** means charging the difference when someone upgrades mid-month. Stripe handles it if you change the subscription\'s price through its API rather than canceling and re-subscribing.' },
+        ] },
+        { t: 'check', q: 'What should change a customer\'s plan to "active" in your database?', options: [
+          'The customer landing on your "thanks for subscribing" page',
+          'A signed webhook from Stripe or Square, after your server verifies it',
+          'A button in your app that says "I paid"',
+        ], answer: 1, explain: 'Pages and buttons can be faked. Only a verified message from the payment company is proof.' },
+        { t: 'recap', items: [
+          'Subscriptions = accounts + hosted checkout + signed webhook + a plan check on launch.',
+          'Only the webhook changes the plan; the app just reads it.',
+          'Make canceling easy, and plan for failed payments.',
+        ] },
+      ],
+    },
   ],
 };

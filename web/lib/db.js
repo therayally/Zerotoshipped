@@ -69,6 +69,12 @@ const SCHEMA = [
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`,
   'CREATE INDEX IF NOT EXISTS trusted_devices_email ON trusted_devices(email)',
+  `CREATE TABLE IF NOT EXISTS rate_limits (
+    key TEXT NOT NULL,
+    window_start BIGINT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (key, window_start)
+  )`,
   `CREATE TABLE IF NOT EXISTS admins (
     email TEXT PRIMARY KEY,
     role TEXT NOT NULL DEFAULT 'admin',

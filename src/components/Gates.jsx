@@ -14,7 +14,7 @@ import { FONT_MONO } from '../theme';
 import { getConfig, refreshAccount, startDonation } from '../account';
 import { logo } from '../content/logos';
 
-export const TERMS_VERSION = '2026-10-27';
+export const TERMS_VERSION = '2026-10-26-tos';
 
 const terms = [
   ['Education and entertainment only', 'TinyAppCode is provided strictly for educational and entertainment purposes. Nothing here is professional, legal, financial, tax, security, compliance or medical advice.'],
@@ -52,7 +52,7 @@ export function TermsGate({ open, onAccept }) {
       <Box sx={{ p: { xs: 2.5, sm: 3.5 }, pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <FormControlLabel
           control={<Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)} sx={{ '&.Mui-checked': { color: t.accent } }} />}
-          label={<Typography variant="body2">I am 18 or older, I have read these terms, and I agree to them.</Typography>}
+          label={<Typography variant="body2">I am 18 or older, and I agree to the <Box component="a" href="/terms" target="_blank" sx={{ color: t.accentText }}>Terms of Service</Box> and <Box component="a" href="/privacy" target="_blank" sx={{ color: t.accentText }}>Privacy Policy</Box>.</Typography>}
           sx={{ alignItems: 'flex-start', m: 0, '& .MuiCheckbox-root': { mt: '-7px', ml: '-9px' } }}
         />
         <Button variant="contained" size="large" fullWidth disabled={!agree} onClick={onAccept}>Agree and continue</Button>
@@ -141,6 +141,7 @@ export function DonateBody({ active = true, onClose, account, onAccount }) {
     e.preventDefault();
     setErr(''); setBusy(true);
     const tab = window.open('', '_blank');
+    if (tab) tab.opener = null;
     try {
       const { url } = await startDonation(Number(amount));
       if (tab) tab.location.href = url; else window.location.href = url;

@@ -3,11 +3,14 @@ import { Box, Button, CssBaseline, Drawer, Snackbar, Typography } from '@mui/mat
 import { ThemeProvider } from '@mui/material/styles';
 import { makeTheme } from './theme';
 import { allLessons } from './content/course';
-import { TopBar, SideNav, Home, RightRail, LogoFull, SIDEBAR, RAIL } from './components/Panels';
+import { TopBar, SideNav, Home, RightRail, Logo, LogoFull, SIDEBAR, RAIL } from './components/Panels';
 import { modules } from './content/course';
 import { metaFor } from './content/meta';
 import Lesson from './components/Lesson';
 import { TermsGate, DonateDialog, DonateBody, TERMS_VERSION } from './components/Gates';
+import { Inline } from './components/Blocks';
+import { terms as termsDoc, privacy as privacyDoc, LEGAL_UPDATED } from './content/legal';
+import { getConfig } from './account';
 import AccountGate from './components/AccountGate';
 import { getAccount, refreshAccount, signOut } from './account';
 
@@ -59,10 +62,55 @@ function DonatePage({ account, onAccount, theme }) {
           <DonateBody account={account} onAccount={onAccount} />
           <Box sx={{ textAlign: 'center', pb: 2.5 }}>
             <Button href="/" sx={{ color: t.accentText }}>Start the free course →</Button>
+            <Box sx={{ mt: 1 }}><LegalLinks /></Box>
           </Box>
         </Box>
       </Box>
     </ThemeProvider>
+  );
+}
+
+// tinyappcode.com/terms and /privacy: readable legal pages anyone can open without signing in.
+function LegalPage({ doc, theme }) {
+  const { t } = theme;
+  const [contact, setContact] = useState('');
+  useEffect(() => { document.title = `${doc.title} · TinyAppCode`; getConfig().then((c) => setContact(c.contact_email || '')); }, [doc]);
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ maxWidth: 760, mx: 'auto', px: 2, py: { xs: 3, sm: 6 } }}>
+        <Box component="a" href="/" sx={{ display: 'inline-block', mb: 4 }}><Logo size={22} /></Box>
+        <Typography variant="h3" component="h1" sx={{ fontWeight: 800 }}>{doc.title}</Typography>
+        <Typography sx={{ color: 'text.secondary', mt: 1 }}>Last updated {LEGAL_UPDATED}</Typography>
+        <Typography sx={{ mt: 3, fontSize: '1.08rem' }}>{doc.intro}</Typography>
+        {doc.sections.map(([h, paras], i) => (
+          <Box key={h} component="section" sx={{ mt: 4 }}>
+            <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 1 }}>{i + 1}. {h}</Typography>
+            {paras.map((p) => <Typography key={p} sx={{ mt: 1.25, color: 'text.primary' }}><Inline text={p} /></Typography>)}
+          </Box>
+        ))}
+        <Box component="section" sx={{ mt: 4 }}>
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 1 }}>{doc.sections.length + 1}. Contact</Typography>
+          <Typography>{contact ? <>Questions or requests: <Box component="a" href={`mailto:${contact}`} sx={{ color: t.accentText }}>{contact}</Box>. TheRayAlly, Frederick, Maryland, USA.</> : 'TheRayAlly, Frederick, Maryland, USA.'}</Typography>
+        </Box>
+        <Box sx={{ mt: 6, pt: 3, borderTop: `1px solid ${t.border}`, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <Box component="a" href="/" sx={{ color: t.accentText }}>Back to TinyAppCode</Box>
+          <Box component="a" href="/terms" sx={{ color: t.accentText }}>Terms of Service</Box>
+          <Box component="a" href="/privacy" sx={{ color: t.accentText }}>Privacy Policy</Box>
+          <Box component="a" href="/donate" sx={{ color: t.accentText }}>Donate</Box>
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
+}
+
+// Small footer links to the legal pages, used under sign-in and donation screens.
+export function LegalLinks({ color }) {
+  const sx = { color: color || 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 };
+  return (
+    <Typography variant="body2" sx={{ color: color || 'text.secondary', textAlign: 'center' }}>
+      <Box component="a" href="/terms" target="_blank" sx={sx}>Terms</Box>{' · '}<Box component="a" href="/privacy" target="_blank" sx={sx}>Privacy</Box>
+    </Typography>
   );
 }
 
@@ -146,7 +194,10 @@ export default function App() {
   const openDrink = () => setDrinkOpen(true);
   const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
   const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} />;
-  if (window.location.pathname.replace(/\/$/, '') === '/donate') return <DonatePage account={account} onAccount={setAccount} theme={theme} />;
+  const page = window.location.pathname.replace(/\/$/, '');
+  if (page === '/terms') return <LegalPage doc={termsDoc} theme={theme} />;
+  if (page === '/privacy') return <LegalPage doc={privacyDoc} theme={theme} />;
+  if (page === '/donate') return <DonatePage account={account} onAccount={setAccount} theme={theme} />;
   // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
   const gated = !demo && (!termsOk || (!account && !offline));
 

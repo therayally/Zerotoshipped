@@ -97,6 +97,12 @@ export default function AccountGate({ open, onAccount, onOffline }) {
           {{ signup: 'Create account', confirm: 'Confirm email', login: 'Sign in', verify: 'Verify and sign in', forgot: 'Email me a code', reset: 'Save new password' }[view]}
         </Button>
 
+        {view === 'signup' && (
+          <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', mt: -0.5 }}>
+            By creating an account you agree to the <Box component="a" href="/terms" target="_blank" sx={{ color: t.t.accentText }}>Terms</Box> and <Box component="a" href="/privacy" target="_blank" sx={{ color: t.t.accentText }}>Privacy Policy</Box>.
+          </Typography>
+        )}
+
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'space-between' }}>
           {view === 'signup' && <Button size="small" onClick={() => go('login')}>I already have an account</Button>}
           {view === 'login' && <Button size="small" onClick={() => go('signup')}>Create an account</Button>}
