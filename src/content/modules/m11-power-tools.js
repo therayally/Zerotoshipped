@@ -1,6 +1,6 @@
 export default {
   id: 'save-money',
-  title: 'Optimize: tokens, local AI and quantizing',
+  title: 'Optimize and local AI',
   advanced: true,
   lessons: [
     {

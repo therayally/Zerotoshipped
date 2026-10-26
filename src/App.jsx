@@ -59,7 +59,7 @@ function DonatePage({ account, onAccount, theme }) {
             <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>Buy me a drink</Typography>
             <Typography sx={{ color: 'text.secondary', mt: 0.75 }}>TinyAppCode teaches anyone to build and launch real apps with AI, for free. If it helped you, a drink keeps it going.</Typography>
           </Box>
-          <DonateBody account={account} onAccount={onAccount} />
+          <DonateBody account={account} onAccount={onAccount} onClose={() => { window.location.href = '/'; }} />
           <Box sx={{ textAlign: 'center', pb: 2.5 }}>
             <Button href="/" sx={{ color: t.accentText }}>Start the free course →</Button>
             <Box sx={{ mt: 1 }}><LegalLinks /></Box>
@@ -205,7 +205,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {gated ? <GateBackdrop /> : (<>
-      <TopBar section={view === 'home' ? 'All modules' : lesson.moduleTitle} colorMode={colorMode} toggleColor={toggleColor} openMenu={() => setMenuOpen(true)} go={go} />
+      <TopBar section={view === 'home' ? 'All modules' : lesson.moduleTitle} colorMode={colorMode} toggleColor={toggleColor} openMenu={() => setMenuOpen(true)} go={go} account={account} onSignOut={onSignOut} openDrink={openDrink} />
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', md: `${SIDEBAR}px minmax(0,1fr)`, xl: `${SIDEBAR}px minmax(0,1fr) ${RAIL}px` }, minHeight: 'calc(100vh - 64px)' }}>
         <Box component="nav" aria-label="Course" sx={{ display: { xs: 'none', md: 'block' }, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', background: theme.t.surface, borderRight: `1px solid ${theme.t.border}` }}>
           {nav}

@@ -2,7 +2,7 @@ import { SAFE } from '../safe';
 
 export default {
   id: 'capstone',
-  title: 'Final project: build for a real customer',
+  title: 'Final project: a real customer',
   advanced: true,
   lessons: [
     {

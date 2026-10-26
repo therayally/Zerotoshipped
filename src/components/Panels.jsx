@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, IconButton, InputBase, LinearProgress, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Divider, IconButton, InputBase, LinearProgress, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import LogoutRounded from '@mui/icons-material/LogoutRounded';
 import { useTheme } from '@mui/material/styles';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import LightModeRounded from '@mui/icons-material/LightModeRounded';
@@ -75,7 +76,36 @@ function Search({ go }) {
 
 // ───────── top bar
 
-export function TopBar({ section, colorMode, toggleColor, openMenu, go }) {
+// Round initial button in the top bar that opens a small account menu (donate, sign out).
+function AccountMenu({ account, onSignOut, openDrink }) {
+  const { t } = useTheme();
+  const [anchor, setAnchor] = useState(null);
+  if (!account) return null;
+  const initial = (account.name || account.email || '?').trim().charAt(0).toUpperCase();
+  const close = () => setAnchor(null);
+  return (
+    <>
+      <Tooltip title="Your account">
+        <IconButton onClick={(e) => setAnchor(e.currentTarget)} aria-label="Your account" aria-haspopup="menu" aria-expanded={!!anchor} sx={{ p: 0.5 }}>
+          <Box sx={{ width: 32, height: 32, borderRadius: '50%', background: t.grad, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 15 }}>{initial}</Box>
+        </IconButton>
+      </Tooltip>
+      <Menu anchorEl={anchor} open={!!anchor} onClose={close} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { sx: { minWidth: 240, mt: 1, borderRadius: '4px' } } }}>
+        <Box sx={{ px: 2, py: 1.25 }}>
+          <Typography sx={{ fontWeight: 700, lineHeight: 1.3 }}>{account.name || 'Signed in'}</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', wordBreak: 'break-all' }}>{account.email}</Typography>
+          {account.donated && <Typography variant="body2" sx={{ color: t.teal, fontWeight: 600, mt: 0.5 }}>Supporter, thank you!</Typography>}
+        </Box>
+        <Divider />
+        {!account.donated && <MenuItem onClick={() => { close(); openDrink(); }}><LocalBarRounded fontSize="small" sx={{ mr: 1.25, color: t.muted }} />Buy me a drink</MenuItem>}
+        <MenuItem onClick={() => { close(); onSignOut(); }}><LogoutRounded fontSize="small" sx={{ mr: 1.25, color: t.muted }} />Sign out</MenuItem>
+      </Menu>
+    </>
+  );
+}
+
+export function TopBar({ section, colorMode, toggleColor, openMenu, go, account, onSignOut, openDrink }) {
   const { t } = useTheme();
   const divider = `1px solid ${t.border}`;
   return (
@@ -92,6 +122,7 @@ export function TopBar({ section, colorMode, toggleColor, openMenu, go }) {
             {colorMode === 'dark' ? <LightModeRounded fontSize="small" /> : <DarkModeRounded fontSize="small" />}
           </IconButton>
         </Tooltip>
+        <AccountMenu account={account} onSignOut={onSignOut} openDrink={openDrink} />
       </Box>
       <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', px: 2.5, borderLeft: divider, minWidth: { md: 220, xl: 0 } }}>
         <Search go={go} />
@@ -242,12 +273,12 @@ export function ModuleCard({ m, mi, done, go }) {
   const count = ids.filter((id) => done.has(id)).length;
   return (
     <Box component="button" onClick={() => go(m.lessons[0].id)}
-      sx={{ all: 'unset', cursor: 'pointer', display: 'block', minWidth: 0, '&:hover .cover': { transform: 'translateY(-4px)' }, '&:focus-visible': { outline: `2px solid ${t.accent}`, outlineOffset: 4 } }}>
-      <Box className="cover" sx={{ position: 'relative', transition: 'transform .2s' }}>
+      sx={{ all: 'unset', cursor: 'pointer', display: 'block', minWidth: 0, '&:hover .cover': { filter: 'brightness(1.08)', boxShadow: `0 0 0 2px ${t.accent}` }, '&:focus-visible': { outline: `2px solid ${t.accent}`, outlineOffset: 4 } }}>
+      <Box className="cover" sx={{ position: 'relative', transition: 'filter .2s, box-shadow .2s', borderRadius: '3px' }}>
         <ModuleCover moduleId={m.id} index={mi} />
         {count === ids.length && <Box sx={{ position: 'absolute', top: 10, right: 10, width: 28, height: 28, borderRadius: '2px', background: t.easy, display: 'grid', placeItems: 'center' }}><CheckRounded sx={{ fontSize: 17, color: '#fff' }} /></Box>}
       </Box>
-      <Typography sx={{ fontWeight: 700, fontSize: 14.5, lineHeight: 1.3, mt: 1.25, color: t.text }}>{m.title}</Typography>
+      <Typography title={m.title} sx={{ fontWeight: 700, fontSize: 14.5, lineHeight: 1.3, mt: 1.25, color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.title}</Typography>
       <Typography sx={{ fontSize: 13, color: t.muted, mt: 0.25 }}>{m.lessons.length} {m.lessons.length === 1 ? 'lesson' : 'lessons'} · {count} done</Typography>
     </Box>
   );
