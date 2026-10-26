@@ -53,96 +53,168 @@ Every query must only return rows that belong to the signed-in user.` + SAFE },
     },
     {
       id: 'payments',
-      title: 'Take payments with Stripe',
-      minutes: 14,
+      title: 'Take payments: pick Stripe or Square',
+      minutes: 10,
       figure: 'fit-stripe',
       body: [
         { t: 'why', text: [
-          'Taking money is where mistakes get expensive. The good news: you never have to touch a card number. Stripe handles the card part on its own secure page, and your app just finds out when someone has paid.',
-          'Done right, this keeps you out of the heaviest card-security rules and makes it nearly impossible to accidentally leak a customer\'s card.',
+          'Taking money is where mistakes get expensive. The good news: you never touch a card number. A payment company shows its own secure checkout page, and your app just finds out when someone paid.',
+          'You only need **one** payment company. This lesson helps you pick, then the next lesson (Stripe) or the one after (Square) walks you through it click by click.',
         ] },
-        { t: 'h', text: 'Step 1: make your Stripe account' },
-        { t: 'steps', items: [
-          { do: 'Go to **stripe.com**, sign up, and turn on two-factor login.' },
-          { do: 'Stay in **Test mode** (the switch at the top of the dashboard).', why: 'Test mode uses fake money, so you can try everything without real charges.' },
-          { do: 'Open **Developers → API keys**. You will see two keys.' },
-          { do: 'Copy the **secret** key (sk_test_...) and save it with the **Add a key** prompt below, as STRIPE_SECRET_KEY.', why: 'Same ten-second routine as every key in this course: one paste into the hidden terminal prompt.' },
+        { t: 'h', text: 'Pick one in 10 seconds' },
+        { t: 'table', head: ['If you are building…', 'Pick', 'Why'], rows: [
+          ['An online app people pay for monthly (software, a membership)', '**Stripe**', 'Best built-in subscriptions, and Claude has seen the most Stripe code, so it gets it right fastest.'],
+          ['Something for a real-world business (shop, food truck, salon, events)', '**Square**', 'Takes cards in person **and** online with one account, plus registers, invoices and inventory.'],
+          ['Your own small business and you want a lower rate', '**Square**', 'See the partner offer in the Square lesson.'],
+          ['Not sure', '**Stripe**', 'You can always add Square later. The setup steps are almost the same.'],
         ] },
-        { t: 'prompt', label: 'Add your Stripe key', text: addKey('STRIPE_SECRET_KEY', 'Stripe') },
-        { t: 'snap', src: 'shots/stripe.jpg', url: 'dashboard.stripe.com/register', caption: 'Stripe sign-up' },
-        { t: 'table', head: ['Key starts with', 'What it is', 'Where it goes'], rows: [
-          ['pk_test_', 'Publishable key: safe to show', 'OK in your app'],
-          ['sk_test_', '**Secret** key: can move money', 'Only through the hidden terminal prompt (it lands in .env.local and Vercel)'],
-        ] },
-        { t: 'h', text: 'How a payment actually works' },
+        { t: 'p', text: 'This course\'s own donation button uses Square, so you can see a real one working at tinyappcode.com/donate.' },
+        { t: 'h', text: 'How every payment works (Stripe and Square are the same)' },
         { t: 'steps', items: [
           { do: 'A customer clicks **Buy**. Your server looks up the price from **its own** records.', why: 'Never trust a price sent from the browser. Anyone can change it to $0.01.' },
-          { do: 'Your server asks Stripe to create a **Checkout** page for that price.' },
-          { do: 'The customer is sent to Stripe\'s page and types their card there, not on your site.', why: 'Card numbers never touch your app, so they can never leak from it.' },
-          { do: 'Stripe sends your server a **webhook**: a signed message saying "this person paid."', why: 'This is the only reliable proof of payment.' },
-          { do: 'Your server checks the signature on that message, then marks the order paid.' },
+          { do: 'Your server asks Stripe or Square for a **checkout page** for that price.' },
+          { do: 'The customer pays on **their** page, not yours.', why: 'Card numbers never touch your app, so they can never leak from it.' },
+          { do: 'Stripe or Square sends your server a **webhook**: a signed message saying "this person paid."', why: 'This is the only real proof of payment.' },
+          { do: 'Your server checks the signature, then marks the order paid.' },
         ] },
-        { t: 'analogy', text: 'A webhook is like the bank calling the shop to say "the payment cleared." The "Thank you" page your customer sees is just them telling you they paid. You trust the bank\'s call, not the customer\'s word.' },
-        { t: 'tip', tone: 'warn', text: 'Your "success" page is **not** proof of payment. Anyone can type /success into their browser. Only a webhook with a valid Stripe signature counts.' },
-        { t: 'h', text: 'Step 2: build it' },
-        { t: 'prompt', label: 'Add a Buy button', text: `Add Stripe payments using Stripe Checkout (the Stripe-hosted payment page).
-- Price: [PRICE] for [WHAT THEY ARE BUYING].
-- The Stripe secret key is STRIPE_SECRET_KEY in .env.local. Only use it on the server.
-- Create the Checkout Session on the server. Never trust a price sent from the browser.
-- Add a webhook route that verifies the Stripe signature (STRIPE_WEBHOOK_SECRET) and only then marks the order paid in the database.
-- Handle the same webhook arriving twice without double-fulfilling.
-- Add success and cancel pages.
-Tell me how to test it with the Stripe CLI.` + SAFE },
-        { t: 'p', text: 'To test, use Stripe\'s fake card: **4242 4242 4242 4242**, any future date, any three digits. It always "succeeds" in test mode.' },
-        { t: 'deeper', title: 'PCI, idempotency and going live', blocks: [
-          { t: 'p', text: 'Stripe Checkout keeps you in the lightest card-security category (PCI DSS "SAQ A") because card data goes straight from the customer to Stripe. Building your own card form pulls you into much heavier compliance work.' },
-          { t: 'p', text: '**Idempotency** means handling the same event twice has the same result as handling it once. Stripe may retry webhooks, so record each event ID and skip ones you have already processed.' },
-          { t: 'p', text: 'Test locally with `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. To go live, put the live keys **only** in Vercel\'s Production settings and register your live webhook address in the Stripe dashboard.' },
-          { t: 'links', items: [{ label: 'Stripe Checkout docs', url: 'https://docs.stripe.com/payments/checkout' }] },
+        { t: 'analogy', text: 'A webhook is the bank calling the shop to say "the payment cleared." The "Thank you" page your customer sees is just them telling you they paid. You trust the bank\'s call, not the customer\'s word.' },
+        { t: 'h', text: 'The 3 keys you will collect (same idea for both)' },
+        { t: 'table', head: ['Key', 'What it does', 'Secret?'], rows: [
+          ['**Secret key** (Stripe) / **Access token** (Square)', 'Lets your server create checkouts', 'Yes. Add it with the hidden terminal prompt.'],
+          ['**Webhook secret** (Stripe) / **Signature key** (Square)', 'Lets your server check a "paid" message is real', 'Yes. Same hidden prompt.'],
+          ['**Publishable key** (Stripe) / **Location ID** (Square)', 'Says which account to use', 'No. Fine to paste anywhere.'],
         ] },
+        { t: 'tip', tone: 'safe', text: 'Every key starts in **test mode** (Stripe) or **Sandbox** (Square): fake money, fake cards. You only switch to real money at the very end, and you add the real keys the same easy way.' },
         { t: 'check', q: 'What proves a customer actually paid?', options: [
-          'They reached the /success page',
-          'A webhook from Stripe with a valid signature',
+          'They reached the "Thank you" page',
+          'A webhook from Stripe or Square with a valid signature',
           'They clicked the Buy button',
-        ], answer: 1, explain: 'Anyone can visit a page. Only Stripe\'s signed webhook is real proof.' },
+        ], answer: 1, explain: 'Anyone can visit a page. Only the signed message from the payment company is real proof.' },
         { t: 'recap', items: [
-          'Customers type cards on Stripe\'s page, never yours.',
-          'Prices come from your server; secret keys stay on the server.',
-          'Only a signature-checked webhook marks an order paid.',
+          'Stripe for online software and subscriptions; Square for real-world businesses.',
+          'Customers pay on the payment company\'s page; your app never sees cards.',
+          'Only a signed webhook marks something paid. Secret keys go in the hidden terminal prompt.',
+        ] },
+      ],
+    },
+    {
+      id: 'stripe',
+      title: 'Set up Stripe, click by click',
+      minutes: 15,
+      body: [
+        { t: 'why', text: 'This is the whole Stripe setup, start to finish, in test mode with fake money. Follow it in order and you will have a working Buy button by the end. Total time: about 15 minutes.' },
+        { t: 'h', text: 'Part 1: make your account' },
+        { t: 'snap', src: 'shots/stripe.jpg', url: 'dashboard.stripe.com/register', caption: 'Stripe sign-up' },
+        { t: 'steps', items: [
+          { do: 'Go to **stripe.com**, sign up, and turn on two-factor login when it asks.' },
+          { do: 'Look for the **Test mode** switch (top right) and make sure it is **on**.', why: 'Test mode uses fake money, so nothing you do here can charge a real card.' },
+        ] },
+        { t: 'h', text: 'Part 2: grab your secret key' },
+        { t: 'steps', items: [
+          { do: 'Click **Developers** (bottom left, or top right on some screens), then **API keys**.' },
+          { do: 'Next to **Secret key** (starts with `sk_test_`), click **Reveal**, then **Copy**.' },
+          { do: 'Paste the prompt below into Claude. It opens a hidden terminal prompt; click in it, paste the key, press Return.', why: 'It checks the key with Stripe and saves it to .env.local and Vercel for you.' },
+        ] },
+        { t: 'prompt', label: 'Add your Stripe secret key', text: addKey('STRIPE_SECRET_KEY', 'Stripe') },
+        { t: 'h', text: 'Part 3: let Claude build the Buy button' },
+        { t: 'prompt', label: 'Build Stripe checkout', text: `Add Stripe payments using Stripe Checkout (the Stripe-hosted payment page). We are in test mode.
+- Product: [WHAT THEY ARE BUYING] for [PRICE]. Create it in my Stripe account for me if it does not exist.
+- The secret key is STRIPE_SECRET_KEY in .env.local. Only use it on the server.
+- Create the Checkout Session on the server. Never trust a price sent from the browser.
+- Add a webhook route at /api/webhooks/stripe that verifies the signature (STRIPE_WEBHOOK_SECRET) and only then marks the order paid. Handle the same event twice safely.
+- Add success and cancel pages.
+- Deploy it, then tell me the exact webhook address to give Stripe.` + SAFE },
+        { t: 'h', text: 'Part 4: connect the webhook' },
+        { t: 'steps', items: [
+          { do: 'In Stripe, click **Developers → Webhooks** (newer accounts call it **Event destinations**), then **Add endpoint** (or **Add destination**).' },
+          { do: 'Paste the webhook address Claude gave you, like `https://yourapp.com/api/webhooks/stripe`.' },
+          { do: 'Choose the event **checkout.session.completed** and save.' },
+          { do: 'On the new endpoint, find **Signing secret** (starts with `whsec_`), click **Reveal**, then **Copy**.' },
+          { do: 'Add it with the prompt below, then ask Claude to redeploy.' },
+        ] },
+        { t: 'prompt', label: 'Add your Stripe webhook secret', text: addKey('STRIPE_WEBHOOK_SECRET', 'Stripe') },
+        { t: 'h', text: 'Part 5: test it with a fake card' },
+        { t: 'steps', items: [
+          { do: 'Open your app and click **Buy**.' },
+          { do: 'On Stripe\'s page, use the card **4242 4242 4242 4242**, any future date, any 3 digits, any ZIP.', why: 'This test card always succeeds and never charges anything.' },
+          { do: 'Back in Stripe, open **Payments**: you will see the test payment. In your app, the order should say paid.' },
+          { do: 'Not marked paid? Say to Claude: "The test payment went through but my order is not marked paid. Check the Stripe webhook logs and fix it."' },
+        ] },
+        { t: 'h', text: 'Part 6: go live (real money)' },
+        { t: 'steps', items: [
+          { do: 'In Stripe, finish **Activate account** (your business and bank details).' },
+          { do: 'Switch **Test mode off**, then repeat Part 2 and Part 4 with the **live** keys (`sk_live_...` and the live `whsec_...`).', why: 'Live keys are separate from test keys. The same Add a key prompt replaces the old ones.' },
+          { do: 'Make one small real purchase yourself, then refund it in Stripe to be sure everything works.' },
+        ] },
+        { t: 'deeper', title: 'PCI, idempotency and testing locally', blocks: [
+          { t: 'p', text: 'Stripe Checkout keeps you in the lightest card-security category (PCI DSS "SAQ A") because card data goes straight from the customer to Stripe.' },
+          { t: 'p', text: '**Idempotency** means handling the same event twice has the same result as once. Stripe may retry webhooks, so record each event ID and skip ones you already processed.' },
+          { t: 'p', text: 'To test webhooks on your own computer, Claude can run the Stripe CLI: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.' },
+          { t: 'links', items: [{ label: 'Stripe Checkout docs', url: 'https://docs.stripe.com/payments/checkout' }, { label: 'Stripe test cards', url: 'https://docs.stripe.com/testing' }] },
+        ] },
+        { t: 'check', q: 'You are in test mode. Which card do you use to try a purchase?', options: [
+          'Your real debit card',
+          '4242 4242 4242 4242 with any future date',
+          'Any random 16 digits',
+        ], answer: 1, explain: 'Stripe\'s test card always succeeds in test mode and never charges real money.' },
+        { t: 'recap', items: [
+          'Test mode on; copy the sk_test_ key into the hidden terminal prompt.',
+          'Let Claude build checkout plus the webhook, then add the whsec_ secret.',
+          'Test with 4242 4242 4242 4242; go live by repeating with live keys.',
         ] },
       ],
     },
     {
       id: 'square',
-      title: 'Square: payments for real-world businesses',
-      minutes: 13,
+      title: 'Set up Square, click by click',
+      minutes: 15,
       body: [
-        { t: 'why', text: 'Stripe is perfect for apps that sell online. But if you build for a coffee shop, a barber, a food truck or your own side business, they probably need to take cards **in person** too: tap to pay, a card reader, a register. That is where Square shines, and it has a developer side that works a lot like Stripe.' },
-        { t: 'h', text: 'Stripe or Square?' },
-        { t: 'table', head: ['', 'Stripe', 'Square'], rows: [
-          ['Best for', 'Online apps, subscriptions, software', 'Shops, restaurants, services, anything in person'],
-          ['In person', 'Possible, but mostly online', 'Built for it: readers, registers, tap to pay on a phone'],
-          ['Extras', 'Billing, tax tools, developer tools', 'Point of sale, inventory, staff, appointments, invoices'],
-          ['No-code option', 'Payment Links', 'Payment Links and a free online store'],
-          ['Developer tools', 'Excellent', 'Very good: Checkout API, Web Payments SDK, webhooks'],
-        ] },
-        { t: 'p', text: 'Many real businesses use **both**: Square at the counter and on their own website, Stripe for an online membership. Your job as the builder is to pick what fits how they actually sell.' },
-        { t: 'h', text: 'How Square payments work in your app' },
-        { t: 'p', text: 'It is the same safe pattern you learned with Stripe: the customer pays on **Square\'s** checkout page, and Square sends your server a signed **webhook** saying "this was paid." Your app never touches a card number.' },
+        { t: 'why', text: 'Square is the choice for real-world businesses: one account takes cards at the counter **and** online. This is the full setup in Sandbox (fake money). It is the exact setup this course\'s own donation button uses.' },
+        { t: 'h', text: 'The no-code shortcut' },
+        { t: 'p', text: 'Only need a simple "Pay" or "Donate" button? You might not need any code. In the Square Dashboard, go to **Online → Payment links → Create link**, pick **Collect a payment** or **Accept donations**, and paste the link on your site. Done. Use the steps below when your app needs to know **who** paid.' },
+        { t: 'h', text: 'Part 1: make your developer app' },
         { t: 'steps', items: [
-          { do: 'Make a free developer account at **developer.squareup.com** and create an application.', why: 'This gives you a **Sandbox** (fake money for testing) and your access tokens.' },
-          { do: 'Start in **Sandbox**. Use Square\'s test card numbers until everything works.' },
-          { do: 'Save the access token with the **Add a key** prompt as SQUARE_ACCESS_TOKEN. Never in code or chat.', why: 'A Square production token can see and refund real sales.' },
-          { do: 'Add a webhook subscription for payment events, then save its **Signature key** the same way, as SQUARE_WEBHOOK_SIGNATURE_KEY.' },
+          { do: 'Sign up for Square at **squareup.com** if you have not (turn on two-factor login).' },
+          { do: 'Go to **developer.squareup.com** and sign in with the same account.' },
+          { do: 'Click **Create an application**. If it asks "What will you build first?", tick **Accept payments** and click **Next** (or **Skip**).', why: 'That question is just a survey; it changes nothing.' },
+          { do: 'Name it after your app and open it.' },
         ] },
-        { t: 'prompt', label: 'Add your Square token', text: addKey('SQUARE_ACCESS_TOKEN', 'Square') },
-        { t: 'prompt', label: 'Add Square checkout', text: `Add Square payments to my app using Square's Checkout API (a Square-hosted payment page).
-- The access token is SQUARE_ACCESS_TOKEN and the location is SQUARE_LOCATION_ID, server-side only. Start in Sandbox.
-- Create the checkout link on the server with the price from my own records, never from the browser.
-- Put my order ID in the payment's reference so I can match it later.
-- Add a webhook route that verifies Square's signature (SQUARE_WEBHOOK_SIGNATURE_KEY) before marking anything paid, and handles the same event twice safely.
-Explain how to test it with Square's sandbox test cards.` },
-        { t: 'tip', tone: 'info', text: 'Square also has an official connector for Claude. Turn it on in Settings → Connectors, and Claude can look up sales, create payment links or check inventory for you, always showing you a preview and waiting for your OK before changing anything.' },
+        { t: 'h', text: 'Part 2: grab your keys' },
+        { t: 'steps', items: [
+          { do: 'At the top, make sure the switch says **Sandbox**.', why: 'Sandbox is Square\'s fake-money mode.' },
+          { do: 'Click **Credentials**. Next to **Sandbox Access token**, click **Show**, then copy it.' },
+          { do: 'Add it with the prompt below (one paste into the hidden terminal prompt).' },
+          { do: 'Click **Locations** in the left menu and copy the **Location ID**.', why: 'Not a secret. You can paste it straight into the chat for Claude.' },
+        ] },
+        { t: 'prompt', label: 'Add your Square access token', text: addKey('SQUARE_ACCESS_TOKEN', 'Square') },
+        { t: 'h', text: 'Part 3: let Claude build the Buy button' },
+        { t: 'prompt', label: 'Build Square checkout', text: `Add Square payments using Square's Checkout API (a Square-hosted payment page). We are in Sandbox.
+- Product: [WHAT THEY ARE BUYING] for [PRICE]. My Square location ID is [LOCATION ID].
+- The access token is SQUARE_ACCESS_TOKEN in .env.local. Only use it on the server.
+- Create the payment link on the server with the price from my own records, never from the browser. Put the order ID in the payment note so I can match it later.
+- Add a webhook route at /api/webhooks/square that verifies Square's signature (SQUARE_WEBHOOK_SIGNATURE_KEY) before marking anything paid, and handles the same event twice safely.
+- Deploy it, then tell me the exact webhook address to give Square.` + SAFE },
+        { t: 'h', text: 'Part 4: connect the webhook' },
+        { t: 'steps', items: [
+          { do: 'In your Square developer app, click **Webhooks → Subscriptions → Add subscription**.' },
+          { do: 'Paste the webhook address Claude gave you, and tick **payment.created** and **payment.updated** (plus **refund.updated** if you handle refunds). Save.' },
+          { do: 'On the subscription, find **Signature key**, click **Show**, and copy it.' },
+          { do: 'Add it with the prompt below, then ask Claude to redeploy.' },
+        ] },
+        { t: 'prompt', label: 'Add your Square signature key', text: addKey('SQUARE_WEBHOOK_SIGNATURE_KEY', 'Square') },
+        { t: 'h', text: 'Part 5: test it with a fake card' },
+        { t: 'steps', items: [
+          { do: 'Open your app and click **Buy**.' },
+          { do: 'On Square\'s page, use the Sandbox card **4111 1111 1111 1111**, CVV **111**, any future date and ZIP.', why: 'Sandbox cards never charge real money.' },
+          { do: 'In your app, the order should say paid. Not marked paid? Say to Claude: "The Square test payment went through but my order is not paid. Check the webhook and fix it."' },
+        ] },
+        { t: 'h', text: 'Part 6: go live (real money)' },
+        { t: 'steps', items: [
+          { do: 'Flip the switch at the top of your developer app to **Production**.' },
+          { do: 'Repeat Part 2 and Part 4 with the **Production** access token, location ID and a new production webhook.', why: 'Production keys are separate. The same Add a key prompt replaces the Sandbox ones.' },
+          { do: 'Make one small real purchase yourself, then refund it in the Square Dashboard.' },
+        ] },
+        { t: 'tip', tone: 'info', text: 'Square also has an official connector for Claude (Settings → Connectors). With it, Claude can look up sales and create payment links for you, always showing a preview and waiting for your OK first.' },
         { t: 'h', text: 'Starting your own business?' },
         { t: 'p', text: 'If what you build turns into a real business, or you build apps for local businesses, the payment rate matters. A fraction of a percent on every sale adds up to real money every month.' },
         { t: 'partner', eyebrow: 'Authorized Square Reseller · Course partner', title: 'Get a better rate on Square', text: 'Ray, who made this course, is an Authorized Square Reseller through **Deposyt**. Sign up through the partner page to get set up with Square at a better rate, with a real person helping you choose the right setup.',
@@ -150,19 +222,19 @@ Explain how to test it with Square's sandbox test cards.` },
           ctas: [{ label: 'See the Square partner offer', url: 'https://deposyt.partners/ray-ally' }],
           note: 'Disclosure: this is a partner link and the course creator may earn a commission. Rates and terms are set by Deposyt and Square and can change; check the page for current details. You never need to use this link to take the course.' },
         { t: 'deeper', title: 'Fees, surcharges and the fine print', blocks: [
-          { t: 'p', text: '**Processing fees** are the cut a payment company takes from each card sale, usually a percentage plus a few cents. Online and in-person rates often differ.' },
-          { t: 'p', text: '**Cash discount** and **surcharge** programs pass the card fee on to the customer. They can bring your cost close to zero, but the rules vary by state and card brand: some states restrict surcharges, and they usually do not apply to debit cards. Make sure the setup you choose is compliant where you sell.' },
-          { t: 'p', text: 'Square webhooks are signed with HMAC-SHA256 over your exact webhook URL plus the raw request body, sent in the `x-square-hmacsha256-signature` header. Verify with a constant-time comparison before trusting any event.' },
+          { t: 'p', text: '**Processing fees** are the cut a payment company takes from each sale, usually a percentage plus a few cents. Online and in-person rates often differ.' },
+          { t: 'p', text: '**Cash discount** and **surcharge** programs pass the card fee on to the customer. Rules vary by state and card brand (some states restrict surcharges, and they usually cannot apply to debit cards), so make sure your setup is compliant where you sell.' },
+          { t: 'p', text: 'Square signs webhooks with HMAC-SHA256 over your exact webhook URL plus the raw request body, in the `x-square-hmacsha256-signature` header. Verify with a constant-time comparison before trusting any event.' },
         ] },
-        { t: 'check', q: 'A food truck owner asks you for an app to take orders at the window and online. Which payment system fits best?', options: [
+        { t: 'check', q: 'A food truck owner wants to take orders at the window and online. Which fits best?', options: [
           'Stripe only',
-          'Square, because it handles in-person and online together',
+          'Square, because one account handles in-person and online',
           'Neither, cash only',
         ], answer: 1, explain: 'Square was built for in-person businesses and also does online checkout, so one system covers both.' },
         { t: 'recap', items: [
-          'Stripe for online-first apps; Square for real-world businesses.',
-          'Same safe pattern: hosted checkout plus a signed webhook.',
-          'Start in Sandbox; save every token with the hidden terminal prompt.',
+          'No code needed for a simple button: Square Payment links.',
+          'For apps: Sandbox token and signature key go in the hidden terminal prompt.',
+          'Test with 4111 1111 1111 1111; go live by repeating with Production keys.',
         ] },
       ],
     },
@@ -191,13 +263,21 @@ Explain how to test it with Square's sandbox test cards.` },
           ['Free trials, coupons, yearly plans', 'Yes', 'Yes, with fewer options'],
           ['What to listen for', 'customer.subscription.created / updated / deleted, invoice.payment_failed', 'subscription.created / updated, invoice.payment_made'],
         ] },
-        { t: 'prompt', label: 'Add a monthly plan', text: `Add a monthly subscription to my app with Stripe Billing.
+        { t: 'p', text: 'Pick the prompt that matches the payment company you set up.' },
+        { t: 'prompt', label: 'Add a monthly plan (Stripe)', text: `Add a monthly subscription to my app with Stripe Billing.
 - Plan: [PLAN NAME] at [PRICE] per month. Create the product and price in Stripe test mode, and keep the price ID in my server code or settings, never in the browser.
 - Add an Upgrade button that creates a Stripe Checkout Session in subscription mode on the server, tagged with the signed-in user's ID (client_reference_id).
 - Add a webhook route that verifies the Stripe signature (STRIPE_WEBHOOK_SECRET), handles customer.subscription.created, updated and deleted plus invoice.payment_failed, and saves the user's plan and current period end in the database. Handle the same event twice safely.
 - Add a /api/me field "plan" that the app reads on launch to unlock paid features. Never trust a plan sent from the browser.
 - Add a "Manage billing" button that opens the Stripe customer portal so people can cancel or update their card themselves.
 Use my existing STRIPE_SECRET_KEY. If any new key is needed, help me add it with a hidden terminal prompt.` + SAFE },
+        { t: 'prompt', label: 'Add a monthly plan (Square)', text: `Add a monthly subscription to my app with Square Subscriptions.
+- Plan: [PLAN NAME] at [PRICE] per month. Create the subscription plan in my Square Sandbox for me.
+- Use SQUARE_ACCESS_TOKEN and my location ID [LOCATION ID] on the server only.
+- Add an Upgrade button that sends the signed-in user to a Square checkout for that plan, tagged with their user ID.
+- Add a webhook route that verifies Square's signature (SQUARE_WEBHOOK_SIGNATURE_KEY), handles subscription.created, subscription.updated and invoice.payment_made, and saves the user's plan in the database. Handle the same event twice safely.
+- Add a /api/me field "plan" that the app reads on launch. Never trust a plan sent from the browser.
+If any new key is needed, help me add it with a hidden terminal prompt.` + SAFE },
         { t: 'tip', tone: 'warn', text: 'Always give people an easy way to cancel. In many places it is the law that canceling must be as easy as signing up, and it keeps you out of payment disputes.' },
         { t: 'deeper', title: 'Failed payments, grace periods and proration', blocks: [
           { t: 'p', text: '**Failed payments** happen (expired cards). Stripe retries automatically ("Smart Retries") and emails the customer. Keep access during a short grace period (for example, until the retries finish) instead of locking people out instantly.' },

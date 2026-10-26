@@ -20,7 +20,7 @@ export default {
           ['Neon', 'Store your data (users, orders)', 'Real Postgres, the industry standard, that sleeps when idle so it costs nothing', 'Yes'],
           ['Cloudflare', 'Your .com address', 'Sells domains at cost with no upsells, plus free protection', 'Domain costs about $10 a year'],
           ['Resend', 'Send email from your app', 'Simple for developers, good delivery, generous free plan', 'Yes (about 3,000 a month)'],
-          ['Stripe', 'Take card payments', 'Customers type cards on Stripe\'s page, so cards never touch your app', 'No monthly fee; a cut of each sale'],
+          ['Stripe or Square', 'Take card payments', 'Customers pay on their page, so cards never touch your app. Stripe for online software, Square for real-world businesses', 'No monthly fee; a cut of each sale'],
         ] },
         { t: 'p', text: 'You will see this picture again in each tool\'s lesson, with that tool highlighted, so you always know where you are on the map.' },
         { t: 'deeper', title: 'What about the alternatives?', blocks: [
