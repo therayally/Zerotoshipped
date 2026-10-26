@@ -99,7 +99,7 @@ Then turn on branch protection so pull requests cannot merge unless this check p
         { t: 'deeper', title: 'Keeping workflows safe', blocks: [
           { t: 'steps', items: [
             'Give workflows the least permissions (`permissions: contents: read`) unless they truly need more.',
-            'Store secrets in repo → Settings → Secrets and variables → Actions, never in the workflow file.',
+            'Store secrets as Actions secrets, never in the workflow file. Ask Claude to run `gh secret set NAME` in a terminal: it asks for the value with a hidden prompt, just like the Add a key routine.',
             'Be careful with workflows that run on pull requests from forks: they can run code written by strangers.',
             'Pin third-party actions to a version (or commit hash), so an update you did not review cannot change what runs.',
           ] },

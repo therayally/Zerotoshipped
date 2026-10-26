@@ -1,4 +1,4 @@
-import { SAFE } from '../safe';
+import { SAFE, addKey } from '../safe';
 
 export default {
   id: 'ai-products',
@@ -22,8 +22,9 @@ export default {
         { t: 'steps', items: [
           { do: 'Go to **console.anthropic.com** and make an account.', why: 'This is separate from your Claude Pro plan. Apps you build for others use pay-per-use API keys.' },
           { do: 'Set a **monthly spending limit first** (Settings → Limits).', why: 'If someone spams your chatbot, the limit stops the bill instead of your bank account.' },
-          { do: 'Create an API key and add it to Vercel as **ANTHROPIC_API_KEY**.' },
+          { do: 'Create an API key and save it with the **Add a key** prompt as **ANTHROPIC_API_KEY**.' },
         ] },
+        { t: 'prompt', label: 'Add your Anthropic key', text: addKey('ANTHROPIC_API_KEY', 'Anthropic') },
         { t: 'h', text: 'Step 2: build it' },
         { t: 'prompt', label: 'Build the chatbot', text: `Add a chat bubble to my site that answers questions about my business.
 - Use the Anthropic API from a server route only. The key is ANTHROPIC_API_KEY in .env.local.

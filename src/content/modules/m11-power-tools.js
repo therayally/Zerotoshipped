@@ -179,7 +179,7 @@ Keep the paid API for production. Use an environment variable to switch between 
           { t: 'p', text: 'Some models (like Meta\'s Llama) are **gated**: you accept their license on the website before downloading. For that you need a free account and an access token.' },
           { t: 'steps', items: [
             'Make tokens under Settings → Access Tokens, and choose **Read** only unless you are uploading.',
-            'Same rule as every key: never paste it into a chat. Store it with a hidden prompt, or let `hf auth login` store it for you.',
+            'Same rule as every key: one paste into a hidden terminal prompt, never into a chat. `hf auth login` asks for it that way and stores it for you.',
             'Read the license before using a model in a business. "Open" does not always mean "free for commercial use."',
           ] },
         ] },

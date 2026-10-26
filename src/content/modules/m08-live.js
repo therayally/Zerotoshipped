@@ -1,4 +1,4 @@
-import { SAFE } from '../safe';
+import { SAFE, addKey } from '../safe';
 
 export default {
   id: 'live',
@@ -20,7 +20,7 @@ export default {
         { t: 'h', text: 'Step 2: add your secret settings' },
         { t: 'steps', items: [
           { do: 'Before deploying, open **Environment Variables**.' },
-          { do: 'Add every secret your app uses (Stripe keys and so on). Your database link is already there from the Neon setup.', why: 'Your `.env.local` file never goes to GitHub, so Vercel needs its own copy of the secrets.' },
+          { do: 'Check every secret your app uses is there. Keys you saved with the hidden terminal prompt are already in Vercel, and your database link came from the Neon setup.', why: 'Your `.env.local` file never goes to GitHub, so Vercel needs its own copy of the secrets.' },
           { do: 'Click **Deploy** and wait about a minute.' },
         ] },
         { t: 'p', text: 'You will get an address like **my-app.vercel.app**. That is your app, live, on the internet. Open it on your phone. Send it to someone. You built that.' },
@@ -46,7 +46,7 @@ export default {
         ], answer: 0, explain: 'Your secrets stay off GitHub on purpose. Vercel\'s Environment Variables page is the safe place for its copy.' },
         { t: 'recap', items: [
           'Import your GitHub repo into Vercel once; every push deploys.',
-          'Add secrets in Vercel\'s Environment Variables before deploying.',
+          'Keys saved with the hidden terminal prompt are already in Vercel; check before deploying.',
           'Check the live site for leaked secrets after important deploys.',
         ] },
       ],
@@ -115,8 +115,9 @@ export default {
           { do: 'Resend shows some DNS records. Add each one in Cloudflare → your domain → **DNS**.', why: 'These records prove to Gmail and Outlook that you are allowed to send email from your domain. Without them, your emails go to spam.' },
           { do: 'Wait until Resend says **Verified** for each record.' },
           { do: 'Go to **API Keys → Create** and choose **Sending access** only.', why: 'Give each key the least power it needs. A sending-only key cannot delete your domains if it ever leaks.' },
-          { do: 'Add the key in Vercel as **RESEND_API_KEY**. Never in your code.' },
+          { do: 'Save it with the **Add a key** prompt as **RESEND_API_KEY**. Never in your code or a chat.' },
         ] },
+        { t: 'prompt', label: 'Add your Resend key', text: addKey('RESEND_API_KEY', 'Resend') },
         { t: 'mock', name: 'resend-dns' },
         { t: 'prompt', label: 'Add email to your app', text: `Add email to my app with Resend.
 - The key is RESEND_API_KEY in .env.local. Use it on the server only.
@@ -167,12 +168,10 @@ export default {
         { t: 'steps', items: [
           { do: 'Open the service (Resend, Stripe, and so on) and **delete** that key right away.', why: 'A deleted key is useless to anyone who finds it.' },
           { do: 'Create a new key with the least power it needs (for Resend: "Sending access").' },
-          { do: 'Paste the new key **directly** into Vercel → Settings → Environment Variables, and switch on **Sensitive**.', why: 'Sensitive means even you cannot read it back later, so it can never leak from the dashboard.' },
+          { do: 'Save the new key with the **Add a key** prompt: one paste into the hidden terminal prompt, which puts it in .env.local and Vercel as **Sensitive**.', why: 'Sensitive means even you cannot read it back in Vercel, so it can never leak from the dashboard.' },
           { do: 'If Claude needs a key to do a setup job, ask it to open a terminal with a **hidden prompt** so you type the key there, not in chat.' },
         ] },
-        { t: 'prompt', label: 'Handle a key safely', text: `I need to give you an API key for [SERVICE] so you can finish setup.
-Do not ask me to paste it into this chat.
-Open a terminal with a hidden prompt, save it to a private file only my user can read, and use it from there without ever printing it.` },
+        { t: 'prompt', label: 'Handle a key safely', text: addKey('[KEY_NAME]', '[SERVICE]') },
         { t: 'h', text: '2. "I connected the database" (but the app cannot see it)' },
         { t: 'p', text: 'Creating a database and connecting it to **your project** are two separate clicks. It is very easy to create one and leave it connected to nothing, or to a different project.' },
         { t: 'steps', items: [
@@ -233,7 +232,7 @@ Tell me what is missing and exactly where to click to fix it.` },
         ] },
         { t: 'check', q: 'You accidentally pasted a live API key into a chat. What should you do?', options: [
           'Delete the message and hope nobody saw it',
-          'Delete the key in the service, make a new one, and put the new one straight into Vercel as Sensitive',
+          'Delete the key in the service, make a new one, and save the new one with the hidden terminal prompt',
           'Nothing, the chat is private',
         ], answer: 1, explain: 'Once a secret has been copied somewhere, rotate it. It takes two minutes and ends the risk completely.' },
         { t: 'recap', items: [

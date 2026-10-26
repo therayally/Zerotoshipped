@@ -15,6 +15,7 @@ export default {
         { t: 'steps', items: [
           { do: 'The **.env.local** file on your computer.', why: 'It is listed in `.gitignore`, which tells Git to never save it.' },
           { do: 'The **Environment Variables** page in Vercel.', why: 'Encrypted, and only your server code can read it.' },
+          { do: 'And you put them there one way: the **Add a key** prompt (a hidden terminal prompt).', why: 'One paste, never on screen, never in a chat. See "Your secret keys: the terminal way".' },
         ] },
         { t: 'p', text: 'Look at the picture above: the left side (server) is safe; the right side (browser) is public. A secret on the right side is a published secret.' },
         { t: 'prompt', label: 'Secret check-up', text: `Do a secret check-up on this project:
@@ -40,7 +41,7 @@ If anything leaked, tell me which keys I must replace at the provider, step by s
         ], answer: 2, explain: 'The old key may already be copied. Rotating it makes the leaked copy useless.' },
         { t: 'recap', items: [
           'A secret key lets anyone act as your app.',
-          'Secrets live only in .env.local and Vercel\'s Environment Variables.',
+          'Secrets live only in .env.local and Vercel, added through the hidden terminal prompt.',
           'If one leaks, rotate it. Deleting is not enough.',
         ] },
       ],

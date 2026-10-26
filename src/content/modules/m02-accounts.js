@@ -1,3 +1,5 @@
+import { addKey } from '../safe';
+
 export default {
   id: 'accounts',
   title: 'Your free accounts',
@@ -212,6 +214,46 @@ Tell me in simple words that each connection works.` },
           'Connectors link Claude to GitHub, Vercel and Neon with a click.',
           'You sign in on each company\'s own site; Claude never sees passwords.',
           'Ask in plain English; keep approvals on for changes.',
+        ] },
+      ],
+    },
+    {
+      id: 'secret-keys',
+      title: 'Your secret keys: the terminal way',
+      minutes: 8,
+      body: [
+        { t: 'why', text: 'Almost every service you add later (payments, email, AI) gives you a **secret key**: a long password your app uses to talk to it. Where you paste that key decides whether it stays secret. In this course there is exactly one way to do it, and it takes ten seconds.' },
+        { t: 'p', text: 'The rule: a secret key is pasted **once**, into a **hidden terminal prompt** that Claude opens for you. Never into a chat, never into code, never into a screenshot.' },
+        { t: 'h', text: 'How it works' },
+        { t: 'steps', items: [
+          { do: 'Make the key on the service\'s website (Stripe, Resend, Square and so on) and click its **Copy** button.' },
+          { do: 'Paste the **Add a key** prompt below into Claude, with the key\'s name filled in.', why: 'Claude opens a terminal tab that is waiting just for your key.' },
+          { do: 'Click inside that terminal tab, paste, and press Return. **Nothing appears while you paste.** That is on purpose.', why: 'Hidden typing means the key never shows on screen, in a screenshot or in your history.' },
+          { do: 'Check the line it prints: how many characters it got and the last 4. If those match the website, you pasted the right thing.' },
+          { do: 'Done. The key is now in your private `.env.local` file and in Vercel, marked **Sensitive** so even you cannot read it back there.' },
+        ] },
+        { t: 'term', title: 'Terminal', caption: 'What the hidden prompt looks like (the key itself never appears)', lines: [
+          ['out', 'Paste your RESEND_API_KEY (hidden), then press Return:'],
+          ['dim', 'Got 36 characters, ending in ...f3a9'],
+          ['ok', '✓ Resend accepted the key'],
+          ['ok', '✓ Saved to .env.local and Vercel (Sensitive)'],
+        ] },
+        { t: 'prompt', label: 'Add a key', text: addKey('[KEY_NAME]', '[SERVICE]') },
+        { t: 'tip', tone: 'info', text: 'Pasted and nothing happened? Make sure you clicked **inside the terminal tab** first. The most common mistake is pasting into a different tab or into the chat.' },
+        { t: 'tip', tone: 'warn', text: 'Pasted a key into a chat by accident? Delete that key on the service\'s website, make a new one, and add the new one with this prompt. Treat any key that has been in a chat as public.' },
+        { t: 'deeper', title: 'What the prompt does under the hood', blocks: [
+          { t: 'p', text: 'It uses the shell\'s silent read (`read -s`), so the characters are never echoed to the screen or saved in shell history. It trims stray spaces, checks the key against the service\'s API, then writes it to `.env.local` and pipes it into `vercel env add NAME production --sensitive`.' },
+          { t: 'p', text: '**Sensitive** variables in Vercel are write-only: they can be used by your app, but nobody can view them in the dashboard again. If you ever need to change one, you replace it.' },
+        ] },
+        { t: 'check', q: 'Where do you paste a new secret key?', options: [
+          'Into the chat, so Claude can set it up',
+          'Into the hidden terminal prompt Claude opens for you',
+          'Straight into the code file that uses it',
+        ], answer: 1, explain: 'One paste into the hidden prompt puts it in .env.local and Vercel without it ever showing anywhere.' },
+        { t: 'recap', items: [
+          'Secret keys go in one place: the hidden terminal prompt.',
+          'Check the character count and last 4 to confirm the paste.',
+          'It saves to .env.local and Vercel (Sensitive) for you.',
         ] },
       ],
     },

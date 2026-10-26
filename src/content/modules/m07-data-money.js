@@ -1,4 +1,4 @@
-import { SAFE } from '../safe';
+import { SAFE, addKey } from '../safe';
 
 export default {
   id: 'data-money',
@@ -66,11 +66,13 @@ Every query must only return rows that belong to the signed-in user.` + SAFE },
           { do: 'Go to **stripe.com**, sign up, and turn on two-factor login.' },
           { do: 'Stay in **Test mode** (the switch at the top of the dashboard).', why: 'Test mode uses fake money, so you can try everything without real charges.' },
           { do: 'Open **Developers → API keys**. You will see two keys.' },
+          { do: 'Copy the **secret** key (sk_test_...) and save it with the **Add a key** prompt below, as STRIPE_SECRET_KEY.', why: 'Same ten-second routine as every key in this course: one paste into the hidden terminal prompt.' },
         ] },
+        { t: 'prompt', label: 'Add your Stripe key', text: addKey('STRIPE_SECRET_KEY', 'Stripe') },
         { t: 'snap', src: 'shots/stripe.jpg', url: 'dashboard.stripe.com/register', caption: 'Stripe sign-up' },
         { t: 'table', head: ['Key starts with', 'What it is', 'Where it goes'], rows: [
           ['pk_test_', 'Publishable key: safe to show', 'OK in your app'],
-          ['sk_test_', '**Secret** key: can move money', 'Only in Vercel settings and .env.local'],
+          ['sk_test_', '**Secret** key: can move money', 'Only through the hidden terminal prompt (it lands in .env.local and Vercel)'],
         ] },
         { t: 'h', text: 'How a payment actually works' },
         { t: 'steps', items: [
@@ -130,9 +132,10 @@ Tell me how to test it with the Stripe CLI.` + SAFE },
         { t: 'steps', items: [
           { do: 'Make a free developer account at **developer.squareup.com** and create an application.', why: 'This gives you a **Sandbox** (fake money for testing) and your access tokens.' },
           { do: 'Start in **Sandbox**. Use Square\'s test card numbers until everything works.' },
-          { do: 'Store the access token in Vercel as a Sensitive variable, never in code.', why: 'A Square production token can see and refund real sales.' },
-          { do: 'Add a webhook subscription for payment events, and verify its signature on your server.' },
+          { do: 'Save the access token with the **Add a key** prompt as SQUARE_ACCESS_TOKEN. Never in code or chat.', why: 'A Square production token can see and refund real sales.' },
+          { do: 'Add a webhook subscription for payment events, then save its **Signature key** the same way, as SQUARE_WEBHOOK_SIGNATURE_KEY.' },
         ] },
+        { t: 'prompt', label: 'Add your Square token', text: addKey('SQUARE_ACCESS_TOKEN', 'Square') },
         { t: 'prompt', label: 'Add Square checkout', text: `Add Square payments to my app using Square's Checkout API (a Square-hosted payment page).
 - The access token is SQUARE_ACCESS_TOKEN and the location is SQUARE_LOCATION_ID, server-side only. Start in Sandbox.
 - Create the checkout link on the server with the price from my own records, never from the browser.
@@ -159,7 +162,7 @@ Explain how to test it with Square's sandbox test cards.` },
         { t: 'recap', items: [
           'Stripe for online-first apps; Square for real-world businesses.',
           'Same safe pattern: hosted checkout plus a signed webhook.',
-          'Start in Sandbox; keep tokens Sensitive in Vercel.',
+          'Start in Sandbox; save every token with the hidden terminal prompt.',
         ] },
       ],
     },
