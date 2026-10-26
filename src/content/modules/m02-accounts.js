@@ -3,9 +3,47 @@ export default {
   title: 'Your free accounts',
   lessons: [
     {
+      id: 'big-picture',
+      title: 'The big picture: what each tool does',
+      minutes: 8,
+      figure: 'bigpicture',
+      body: [
+        { t: 'why', text: 'In the next few lessons you will make several free accounts. Before you do, it helps to see the whole map: which tool does which job, how they connect, and why we picked each one. Then every setup step will make sense instead of feeling like random hoops.' },
+        { t: 'p', text: 'Every real web app needs the same handful of jobs done. The picture above shows them: you build with Claude, **GitHub** saves your code, **Vercel** runs it, **Cloudflare** gives it an address, and behind the scenes **Neon** remembers data, **Resend** sends email and **Stripe** takes payments.' },
+        { t: 'analogy', text: 'Think of your app as a restaurant. GitHub is the recipe book (every version, kept safe). Vercel is the kitchen where meals are actually made. Cloudflare is the street address on the sign. Neon is the pantry and the order book. Resend is the person who mails receipts. Stripe is the cash register.' },
+        { t: 'h', text: 'Why we picked each one' },
+        { t: 'table', head: ['Tool', 'Its one job', 'Why this one', 'Free to start?'], rows: [
+          ['GitHub', 'Keep every version of your code', 'Everyone uses it; Vercel and Claude plug straight in', 'Yes'],
+          ['Vercel', 'Run your app on the internet', 'Made by the creators of Next.js; save to GitHub and it is live in a minute', 'Yes (Hobby plan)'],
+          ['Neon', 'Store your data (users, orders)', 'Real Postgres, the industry standard, that sleeps when idle so it costs nothing', 'Yes'],
+          ['Cloudflare', 'Your .com address', 'Sells domains at cost with no upsells, plus free protection', 'Domain costs about $10 a year'],
+          ['Resend', 'Send email from your app', 'Simple for developers, good delivery, generous free plan', 'Yes (about 3,000 a month)'],
+          ['Stripe', 'Take card payments', 'Customers type cards on Stripe\'s page, so cards never touch your app', 'No monthly fee; a cut of each sale'],
+        ] },
+        { t: 'p', text: 'You will see this picture again in each tool\'s lesson, with that tool highlighted, so you always know where you are on the map.' },
+        { t: 'deeper', title: 'What about the alternatives?', blocks: [
+          { t: 'table', head: ['Job', 'We use', 'Also fine', 'Why we did not start there'], rows: [
+            ['Code hosting', 'GitHub', 'GitLab, Bitbucket', 'Fewer one-click integrations with Vercel and Claude'],
+            ['Hosting', 'Vercel', 'Netlify, Cloudflare Pages, Railway', 'Good, but Next.js runs best where it is made'],
+            ['Database', 'Neon', 'Supabase, PlanetScale, Turso', 'Supabase is great too; Neon is plain Postgres with fewer moving parts'],
+            ['Email', 'Resend', 'Postmark, SendGrid, Amazon SES', 'More setup or older developer experience'],
+            ['Payments', 'Stripe', 'Square, Paddle, Lemon Squeezy', 'Paddle and Lemon Squeezy also handle sales tax for you; worth a look for digital products'],
+          ] },
+          { t: 'p', text: 'None of these choices lock you in forever. Because your code lives in GitHub and your data is standard Postgres, you can move any piece later.' },
+        ] },
+        { t: 'check', q: 'Which tool actually runs your app so people can visit it?', options: ['GitHub', 'Vercel', 'Neon'], answer: 1, explain: 'GitHub stores the code, Neon stores the data, and Vercel is the kitchen where the app actually runs.' },
+        { t: 'recap', items: [
+          'Each tool has one job: save code, run app, address, data, email, payments.',
+          'We picked tools that are free to start and plug into each other.',
+          'You can swap any piece later because nothing is locked in.',
+        ] },
+      ],
+    },
+    {
       id: 'github',
       title: 'Make a GitHub account',
       minutes: 9,
+      figure: 'fit-github',
       body: [
         { t: 'why', text: [
           'Imagine working on an essay for a month and your laptop dies. Everything gone. GitHub makes sure that never happens to your app.',
@@ -58,6 +96,7 @@ Never ask me to paste a password, token or key into this chat.` },
       id: 'vercel',
       title: 'Make a Vercel account',
       minutes: 7,
+      figure: 'fit-vercel',
       body: [
         { t: 'why', text: 'Right now your app can only live on your computer. Vercel is what puts it on the internet so anyone, anywhere, can open it. And once it is set up, you never "upload" anything again: save to GitHub, and your live site updates by itself.' },
         { t: 'p', text: '**Hosting** means running your app on a computer that is always on and connected to the internet. Vercel does that for you, on fast computers all around the world, so your app loads quickly whether someone opens it in Texas or Tokyo.' },
@@ -98,6 +137,7 @@ Never ask me to paste a password, token or key into this chat.` },
       id: 'neon',
       title: 'Get a database (Neon)',
       minutes: 8,
+      figure: 'fit-neon',
       body: [
         { t: 'why', text: 'Almost every useful app needs to **remember** things: who signed up, what they ordered, what they wrote. Without a database, your app forgets everything the moment someone closes the page.' },
         { t: 'p', text: 'A **database** stores your app\'s information in tables, a lot like a very organized, very fast spreadsheet. One table for users, one for orders, one for messages. Your app reads from and writes to these tables thousands of times a day.' },

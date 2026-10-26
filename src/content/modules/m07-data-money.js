@@ -55,6 +55,7 @@ Every query must only return rows that belong to the signed-in user.` + SAFE },
       id: 'payments',
       title: 'Take payments with Stripe',
       minutes: 14,
+      figure: 'fit-stripe',
       body: [
         { t: 'why', text: [
           'Taking money is where mistakes get expensive. The good news: you never have to touch a card number. Stripe handles the card part on its own secure page, and your app just finds out when someone has paid.',

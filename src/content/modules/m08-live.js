@@ -103,6 +103,7 @@ export default {
       id: 'resend',
       title: 'Send email with Resend',
       minutes: 11,
+      figure: 'fit-resend',
       body: [
         { t: 'why', text: 'Your app will need to send email: sign-in codes, receipts, "your order is ready." If those emails land in spam, people cannot log in or think you never sent the receipt. Setting up email properly is the difference between "it works" and "it works for real customers."' },
         { t: 'p', text: '**Resend** is a service that sends email for your app. You call it from your server code, and it handles delivery. It has a free plan that is plenty for getting started.' },
@@ -191,6 +192,21 @@ Open a terminal with a hidden prompt, save it to a private file only my user can
         { t: 'prompt', label: 'Check my domain', text: `Check whether [MYDOMAIN.COM] and www.[MYDOMAIN.COM] point to Vercel.
 Look up the A and CNAME records, tell me exactly what is wrong in plain English, and what to change in Cloudflare.
 Also check whether Vercel shows the domain as valid.` },
+        { t: 'h', text: 'The easy way: let Claude add the records for you' },
+        { t: 'p', text: 'Typing DNS records by hand is where most typos happen. Instead, give Claude a **scoped token**: a key that can only edit DNS for one domain and nothing else. This is exactly how the records for this course\'s own domain were added.' },
+        { t: 'steps', items: [
+          { do: 'In Cloudflare: **My Profile → API Tokens → Create Token**, and pick the **Edit zone DNS** template.' },
+          { do: 'Under **Zone Resources**, choose **Specific zone** and pick your domain. Create it and click **Copy**.', why: 'If this token ever leaks, the worst anyone can do is change DNS on one domain. They cannot touch billing, other domains, or your account.' },
+          { do: 'Paste the "Handle a key safely" prompt above into Claude. It opens a terminal with a hidden prompt.' },
+          { do: 'Paste the token there. You will not see it appear. The prompt tells you how many characters it got and the last 4, then tests it.', why: 'Hidden typing is easy to get wrong (we pasted the wrong thing the first time). Showing only the length and last 4 lets you confirm it without revealing it.' },
+          { do: 'Once it says it works, ask Claude to add the records.' },
+        ] },
+        { t: 'prompt', label: 'Add my DNS records', text: `Use the Cloudflare token I saved to set up DNS for [MYDOMAIN.COM]. Never print the token.
+1. List the records that are there now.
+2. Add the records Vercel needs for the domain and www, set to DNS only (grey cloud).
+3. If Resend is set up, add my domain in Resend and copy every record it gives into Cloudflare, plus a DMARC record with p=none.
+4. Ask Resend to verify, check again in a few minutes, and tell me when everything says Verified.` },
+        { t: 'tip', tone: 'info', text: 'Newer Cloudflare tokens are longer (about 50 characters) and some tools reject them by mistake. If a tool says your brand-new token is invalid, test it by asking Cloudflare to list your domain instead.' },
         { t: 'h', text: '4. "Emails only arrive in my own inbox"' },
         { t: 'p', text: 'Until you verify your own domain, Resend sends from its test address, and that address can **only email you**. Your sign-up codes look like they work in testing, then fail for every real user.' },
         { t: 'steps', items: [
@@ -224,6 +240,7 @@ Tell me what is missing and exactly where to click to fix it.` },
           'A leaked key gets deleted and replaced, never "probably fine."',
           'Connected means the variable shows up in your project, not just a database existing.',
           'Grey cloud for Vercel records; verify your email domain; test with a second inbox.',
+          'A scoped token lets Claude add DNS records for one domain, with no typos.',
           'Check the result of every setup step instead of assuming.',
         ] },
       ],

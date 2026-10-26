@@ -286,6 +286,20 @@ const scenes = {
     </g>
   ),
 
+  // GitHub: a main line with a branch that merges back, over a code window.
+  'github-pro': () => (
+    <g>
+      <Window x={60} y={120} w={180} h={130} dark>
+        <Bar x={78} y={162} w={90} c={V} /><Bar x={78} y={180} w={120} c="#2E3570" /><Bar x={78} y={198} w={70} c={M} /><Bar x={78} y={216} w={104} c="#2E3570" />
+      </Window>
+      <path d="M40 90 H260" stroke={W} strokeWidth="6" strokeLinecap="round" fill="none" />
+      <path d="M100 90 C130 90 130 46 160 46 H200 C230 46 230 90 250 90" stroke={M} strokeWidth="6" fill="none" strokeLinecap="round" />
+      {[60, 100, 250].map((x) => <circle key={x} cx={x} cy={90} r="11" fill={V} stroke={W} strokeWidth="4" />)}
+      {[160, 200].map((x) => <circle key={x} cx={x} cy={46} r="11" fill={P} stroke={W} strokeWidth="4" />)}
+      <Sparkle x={262} y={150} s={1.1} />
+    </g>
+  ),
+
   // Power tools: a laptop with a chip (local AI) and a saved coin.
   'save-money': () => (
     <g>

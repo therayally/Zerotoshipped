@@ -134,7 +134,7 @@ export function SideNav({ view, currentId, done, go, goHome }) {
             <Box key={m.id}>
               {(mi === 0 || showAdv) && (
                 <Box sx={{ mx: 2.5, mt: mi ? 3 : 0.5, mb: 1, pb: 1, borderBottom: `1px solid ${t.border}` }}>
-                  <Typography sx={{ ...label, color: t.muted }}>{showAdv ? 'Advanced' : 'Modules'}</Typography>
+                  <Typography sx={{ ...label, color: t.muted }}>{showAdv ? 'Bonus' : 'Build your app'}</Typography>
                 </Box>
               )}
               <Box component="button" onClick={() => setOpen(isOpen ? '' : m.id)} aria-expanded={isOpen} sx={row(isOpen)}>
@@ -281,10 +281,10 @@ export function Home({ currentId, done, go, openMenu, openDrink }) {
         </Box>
       </HeroBanner>
 
-      {section('Course', core.length)}
+      {section('Build your app', core.length)}
       <Box sx={grid}>{core.map(([m, mi]) => <ModuleCard key={m.id} m={m} mi={mi} done={done} go={go} />)}</Box>
 
-      {section('Advanced and final project', adv.length)}
+      {section('Bonus: level up after your app', adv.length)}
       <Box sx={grid}>{adv.map(([m, mi]) => <ModuleCard key={m.id} m={m} mi={mi} done={done} go={go} />)}</Box>
 
       <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 25, justifyContent: 'space-around', alignItems: 'center', height: 64, background: t.surface, borderTop: `1px solid ${t.border}` }}>

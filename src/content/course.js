@@ -14,8 +14,10 @@ import m11 from './modules/m11-power-tools';
 import m12 from './modules/m12-agents';
 import m13 from './modules/m13-ai-products';
 import m14 from './modules/m14-capstone';
+import m15 from './modules/m15-github';
 
-export const modules = [m00, m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14];
+// Main path (build and launch one app), then the bonus modules.
+export const modules = [m00, m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m15, m11, m12, m13, m14];
 
 export const allLessons = modules.flatMap((m, mi) =>
   m.lessons.map((l, li) => ({ ...l, moduleId: m.id, moduleTitle: m.title, moduleIndex: mi, lessonIndex: li }))

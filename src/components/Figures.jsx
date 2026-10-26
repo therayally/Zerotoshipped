@@ -269,9 +269,68 @@ function Relay() {
   );
 }
 
-const figures = { spacing: Spacing, relay: Relay, stack: Stack, sprint: Sprint, dns: Dns, keys: Keys, agent: Agent, tenants: Tenants };
+// The whole stack, one job per box. Pass `hl` to spotlight one piece ("Where Vercel fits").
+const PIECES = {
+  you: { x: 10, y: 130, w: 130, title: 'You', sub: '+ Claude', k: 'claude' },
+  github: { x: 170, y: 130, w: 130, title: 'GitHub', sub: 'saves your code', k: 'github', tone: 'plain' },
+  vercel: { x: 330, y: 130, w: 140, title: 'Vercel', sub: 'runs your app', k: 'vercel', tone: 'sky' },
+  users: { x: 500, y: 130, w: 130, title: 'Visitors', sub: 'phones, laptops', g: 'person', tone: 'teal' },
+  cloudflare: { x: 330, y: 20, w: 140, title: 'Cloudflare', sub: 'your .com address', k: 'cloudflare', tone: 'coral' },
+  neon: { x: 190, y: 250, w: 135, title: 'Neon', sub: 'remembers data', k: 'neon', tone: 'teal' },
+  resend: { x: 340, y: 250, w: 135, title: 'Resend', sub: 'sends email', k: 'resend' },
+  stripe: { x: 490, y: 250, w: 140, title: 'Stripe', sub: 'takes payments', k: 'stripe' },
+};
+const NAMES = { github: 'GitHub', vercel: 'Vercel', neon: 'Neon', cloudflare: 'Cloudflare', resend: 'Resend', stripe: 'Stripe' };
+
+function BigPicture({ hl }) {
+  const { t } = useTheme();
+  const dim = (k) => (hl && hl !== k && k !== 'you' && k !== 'users' ? 0.3 : 1);
+  return (
+    <Frame h={320} caption={hl ? `Where ${NAMES[hl]} fits in your app` : 'Every piece of your app, and the one job each piece does'}>
+      {Object.entries(PIECES).map(([k, p]) => (
+        <g key={k} opacity={dim(k)}>
+          <Node {...p} />
+          {hl === k && <rect x={p.x - 3} y={p.y - 3} width={p.w + 6} height={64} rx="4" fill="none" stroke={t.accent} strokeWidth="2.5" />}
+        </g>
+      ))}
+      <Arrow d="M140 159 L166 159" />
+      <Label x={153} y={118} text="save" />
+      <Arrow d="M300 159 L326 159" />
+      <Label x={313} y={204} text="auto-deploy" />
+      <Arrow d="M500 159 L474 159" />
+      <Label x={487} y={118} text="visit" />
+      <Arrow d="M400 78 L400 126" dashed />
+      <Label x={448} y={104} text="points to" />
+      <Arrow d="M372 188 L270 246" />
+      <Arrow d="M400 188 L405 246" />
+      <Arrow d="M430 188 L555 246" />
+    </Frame>
+  );
+}
+
+// Git branches: main stays safe while a feature is built on its own line, previewed, then merged.
+function Branches() {
+  const { t } = useTheme();
+  const dot = (x, y, c) => <circle cx={x} cy={y} r="9" fill={c} stroke={t.surface} strokeWidth="3" />;
+  return (
+    <Frame h={210} caption="Build on a branch, preview it, then merge it into main">
+      <path d="M30 150 H610" stroke={t.accent} strokeWidth="4" fill="none" />
+      <path d="M170 150 C210 150 210 70 250 70 H440 C480 70 480 150 520 150" stroke={t.teal} strokeWidth="4" fill="none" />
+      {[70, 170, 520, 600].map((x) => <g key={x}>{dot(x, 150, t.accent)}</g>)}
+      {[290, 360, 430].map((x) => <g key={x}>{dot(x, 70, t.teal)}</g>)}
+      <text x="30" y="185" fontSize="13" fontWeight="700" fill={t.accent} fontFamily={FONT_BODY}>main: the live app</text>
+      <text x="250" y="40" fontSize="13" fontWeight="700" fill={t.teal} fontFamily={FONT_BODY}>branch: add-dark-mode</text>
+      <Label x={360} y={104} text="Vercel preview link" />
+      <Label x={520} y={118} text="merge (pull request)" />
+      <Label x={360} y={185} text="each dot = a commit (a save point)" />
+    </Frame>
+  );
+}
+
+const figures = { bigpicture: () => <BigPicture />, branches: Branches, spacing: Spacing, relay: Relay, stack: Stack, sprint: Sprint, dns: Dns, keys: Keys, agent: Agent, tenants: Tenants };
 
 export default function Figure({ name }) {
+  if (name.startsWith('fit-')) return <BigPicture hl={name.slice(4)} />;
   const F = figures[name];
   return F ? <F /> : null;
 }

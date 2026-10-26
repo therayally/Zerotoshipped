@@ -22,9 +22,10 @@ export const moduleMeta = {
   live: { short: 'Go live', g: G.teal, tools: L('vercel', 'cloudflare', 'resend') },
   secure: { short: 'Security', g: G.indigo, tools: L('owasp', 'dependabot', 'docker') },
   'grown-up': { short: 'Grown-up stuff', g: G.lavender, tools: L('git', 'github') },
-  'save-money': { short: 'Power tools', g: G.teal, tools: L('ollama', 'qwen', 'blender', 'krita') },
+  'save-money': { short: 'Optimize', g: G.teal, tools: L('lmstudio', 'ollama', 'huggingface', 'qwen') },
   agents: { short: 'Agents', g: G.blue, tools: L('telegram', 'docker') },
   'ai-products': { short: 'AI products', g: G.rose, tools: L('anthropic', 'postgres') },
+  'github-pro': { short: 'GitHub', g: G.blue, tools: L('git', 'github', 'githubactions') },
   capstone: { short: 'Final project', g: G.indigo, tools: L('telegram', 'elevenlabs', 'stripe') },
 };
 
