@@ -65,6 +65,9 @@ const BRANDS = {
   Drizzle: 'drizzle', 'Drizzle ORM': 'drizzle', MCP: 'mcp', Rust: 'rust', Tauri: 'tauri', Electron: 'electron', Python: 'python',
   SQLite: 'sqlite', Dependabot: 'dependabot', OWASP: 'owasp', Blender: 'blender', Krita: 'krita', ElevenLabs: 'elevenlabs', Figma: 'figma',
   'Node.js': 'node', Node: 'node', 'Google Fonts': 'googlefonts', Mermaid: 'mermaid',
+  MongoDB: 'mongodb', 'MongoDB Atlas': 'mongodb', Supabase: 'supabase', 'Supabase Auth': 'supabase', Firebase: 'firebase', 'Firebase Auth': 'firebase', Turso: 'turso',
+  Expo: 'expo', Sentry: 'sentry', Clerk: 'clerk', Auth0: 'auth0', v0: 'v0', Replit: 'replit', Kaggle: 'kaggle', 'Google Gemini': 'gemini',
+  'Kaggle Datasets': 'kaggle', 'Hugging Face Datasets': 'huggingface', 'Better Auth': 'betterauth',
   Cursor: 'cursor', 'GitHub Copilot': 'githubcopilot', PostHog: 'posthog', TikTok: 'tiktok', 'Product Hunt': 'producthunt',
 };
 

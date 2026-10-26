@@ -92,52 +92,77 @@ Explain each step simply.` },
     },
     {
       id: 'databases-compared',
-      title: 'SQLite vs Postgres (and no base64)',
-      minutes: 11,
+      title: 'Pick a database: SQLite, Postgres, MongoDB (and the Base44 trap)',
+      minutes: 14,
       body: [
-        { t: 'why', text: 'AI tools make one database mistake constantly: they cram pictures and files straight into the database as giant blobs of text. Everything works fine with three test users, then slows to a crawl and gets expensive with three hundred. This lesson shows you how to spot it and what to ask for instead.' },
-        { t: 'h', text: 'Two kinds of database' },
-        { t: 'table', head: ['', 'SQLite', 'Postgres (Neon)'], rows: [
-          ['Lives', 'In one file on the device', 'On a server in the cloud'],
-          ['Best for', 'Desktop, phone and offline apps', 'Websites with many users'],
-          ['Many people writing at once', 'Not really', 'Yes, that is what it is built for'],
-          ['Setup', 'None', 'A few clicks in Vercel'],
+        { t: 'why', text: [
+          'Your database is where your customers\' data lives: their accounts, orders and history. Picking it is one of the few choices that is genuinely hard to change later, so it is worth ten minutes now.',
+          'This lesson compares the databases vibe coders actually use, and explains why "all-in-one" AI builders like Base44 can quietly lock your app and its data in.',
         ] },
-        { t: 'analogy', text: 'SQLite is a personal notebook you carry in your pocket: instant, private, perfect for one person. Postgres is the shared order book in a busy restaurant kitchen: built so many people can write in it at the same time without stepping on each other.' },
-        { t: 'h', text: 'The base64 trap' },
-        { t: 'p', text: '**Base64** is a way of turning a file (like a photo) into a long string of letters and numbers so it can be stored as text. AI loves this trick because it is easy. But it makes every file about a third bigger, and every time your app reads that row from the database, it drags the whole picture along with it, even when it only needed the customer\'s name.' },
-        { t: 'p', text: 'The professional pattern is simple:' },
+        { t: 'analogy', text: 'A database is a filing cabinet. **SQLite** is a filing box you keep under your own desk. **Postgres** is a big, locked office cabinet with labelled folders that a whole team can use at once. **MongoDB** is a cabinet of loose folders where every folder can hold different papers. **Base44** is renting a furnished office where the landlord owns the cabinet: easy to move in, hard to move out with your files.' },
+        { t: 'h', text: 'The three kinds you will meet' },
+        { t: 'table', head: ['', 'SQLite', 'Postgres', 'MongoDB'], rows: [
+          ['Type', 'SQL (tables), in one file', 'SQL (tables), on a server', 'Documents (JSON-like), on a server'],
+          ['Best for', 'Desktop, phone and offline apps, prototypes', 'Most web apps with many users', 'Data with no fixed shape, like logs or flexible forms'],
+          ['Many people writing at once', 'Not really', 'Yes', 'Yes'],
+          ['Hosted options', 'Turso (SQLite in the cloud)', 'Neon, Supabase', 'MongoDB Atlas'],
+          ['Free tier', 'Free (it is a file)', 'Neon and Supabase both have one', 'Atlas has a free cluster'],
+          ['Can you export everything?', 'Yes, it is one file', 'Yes (pg_dump)', 'Yes (mongodump)'],
+        ] },
+        { t: 'p', text: '**SQL** means your data lives in tables with fixed columns, like a spreadsheet with strict rules. **Document** databases like MongoDB store each record as a flexible bundle, so two customers can have completely different fields. Flexibility sounds nice, but for apps with users, orders and payments, strict tables catch mistakes early. That is why this course defaults to Postgres.' },
+        { t: 'h', text: 'The hosted databases vibe coders use most' },
+        { t: 'snap', src: 'shots/supabase.jpg', url: 'supabase.com', caption: 'Supabase: Postgres plus sign-in, file storage and realtime in one dashboard.' },
+        { t: 'table', head: ['Service', 'What it is', 'Pick it when'], rows: [
+          ['**Neon**', 'Plain Postgres, serverless, built into Vercel', 'You host on Vercel and want the simplest setup (this course\'s default)'],
+          ['**Supabase**', 'Postgres plus sign-in, file storage and realtime', 'You want login, uploads and database from one company'],
+          ['**Turso**', 'SQLite in the cloud, copies close to your users', 'Small, fast apps, or one database per customer'],
+          ['**MongoDB Atlas**', 'Hosted MongoDB', 'Your data truly has no fixed shape, or a team already uses Mongo'],
+          ['**Firebase**', 'Google\'s document database plus sign-in', 'Simple mobile apps that sync live; harder to query and to leave'],
+        ] },
+        { t: 'snap', src: 'shots/turso.jpg', url: 'turso.tech', caption: 'Turso: the SQLite file you already know, hosted in the cloud.' },
+        { t: 'h', text: 'The Base44 trap (and builders like it)' },
+        { t: 'snap', src: 'shots/base44.jpg', url: 'base44.com', caption: 'Base44 builds a working app from one sentence. The catch is where the app and its data live.' },
+        { t: 'p', text: '**Base44** (owned by Wix) builds a full app, database and login included, from a chat. It is genuinely great for trying an idea in an afternoon. To be fair, Base44 says you own what you build. But when we checked (October 2026), the details matter:' },
         { t: 'steps', items: [
-          { do: 'Put files in **file storage** (Vercel Blob or Cloudflare R2).', why: 'File storage is built and priced for big files, and can serve them quickly around the world.' },
-          { do: 'Put only the **file\'s details** in the database: its path, size, type and who owns it.', why: 'Rows stay tiny, so lists and searches stay fast.' },
-          { do: 'Keep files **private** and hand out short-lived links only to the right people.', why: 'A file someone can guess the address of is a public file.' },
+          { do: 'Exporting your code to GitHub needs a **paid plan**.', why: 'On the free plan your app only exists inside Base44.' },
+          { do: 'The export gives you the **code and database layout, not your data**.', why: 'Your customers\' records stay in Base44\'s database. Moving them out is a separate, manual job.' },
+          { do: 'The exported app still talks to **Base44\'s backend** for its database and login.', why: 'There is no official way to run that backend yourself, so "leaving" means rebuilding those parts.' },
+          { do: 'Prices and limits are set by them.', why: 'If they raise prices or change limits after you have customers, you have little room to move.' },
         ] },
-        { t: 'tip', tone: 'warn', text: 'Be wary of "no-code" database tools that do not let you download all your data. Data you cannot export is data you do not really own. SQLite and Postgres can always be exported completely.' },
+        { t: 'p', text: 'So the honest answer is: you own the code on paper, but you do not fully control where your app runs or your data lives. That is called **vendor lock-in**. It is fine for a prototype; it is risky for a business.' },
+        { t: 'tip', tone: 'warn', text: 'The test for any tool: "Can I download all my data and run my app somewhere else this weekend?" With Postgres on Neon, code on GitHub and hosting on Vercel, the answer is yes. That is why this course builds that way.' },
+        { t: 'h', text: 'Never put files in the database' },
+        { t: 'p', text: 'One more classic AI mistake: storing photos and PDFs inside the database as giant blocks of text (called base64). It makes everything slow and expensive. Files go in file storage; the database only keeps a small note saying where each file is and who owns it. The file uploads lesson shows exactly how.' },
+        { t: 'prompt', label: 'Help me pick my database', text: `Help me pick a database for [MY APP]. It has about [NUMBER] users at first, and stores [WHAT, e.g. "customers, bookings and payments"]. It [does / does not] need to work offline.
+Compare SQLite (Turso), Postgres (Neon or Supabase) and MongoDB Atlas for my case in a short table: cost at my size, how hard it is to set up with you, and how easy it is to export everything and leave.
+Recommend one in plain words and explain why. Then add the database rules below to CLAUDE.md.` },
         { t: 'prompt', label: 'Add this to your CLAUDE.md', text: `Database rules:
 - Web apps with many users: use Postgres (Neon) with Drizzle ORM.
-- Desktop, mobile or offline apps: use SQLite in a file in the app's data folder.
-- Never store images, PDFs, audio or video as base64 (or any blob) in the database. Upload them to object storage (Vercel Blob or Cloudflare R2), keep them private, and save only the path, size, type and owner in the database.
+- Desktop, mobile or offline apps: use SQLite in a file in the app's data folder (or Turso if it must sync).
+- Only use MongoDB if the data truly has no fixed shape, and explain why first.
+- Never store images, PDFs, audio or video in the database. Upload them to file storage (Vercel Blob or Cloudflare R2) and save only the path, size, type and owner.
 - Every table that holds user data has an owner column, and every query filters on it.
-- All schema changes go through migration files.` },
-        { t: 'deeper', title: 'Why base64 in the database really hurts', blocks: [
-          { t: 'steps', items: [
-            'Base64 inflates size by about **33%**, and the row is then read, backed up and copied in full every time.',
-            'Big rows blow up memory and network use on every query that touches them, and serverless databases bill for that.',
-            'You lose browser caching, partial downloads (needed to skip ahead in videos) and per-file access control.',
-            'Object storage is far cheaper per gigabyte than database storage.',
-          ] },
-          { t: 'p', text: 'The upload pattern: your server gives the browser a short-lived, signed upload link for a path inside that user\'s own folder; the browser uploads straight to storage; the database saves the details; downloads go through a signed, expiring link.' },
-          { t: 'p', text: 'SQLite writes one change at a time (WAL mode helps), which is perfect for single-user and offline apps. Postgres handles many simultaneous writers and adds row-level security, JSON columns and `pgvector` for AI search.' },
+- All schema changes go through migration files.
+- Keep a working export script so all data can be downloaded at any time.` },
+        { t: 'prompt', label: 'Escape a builder (Base44, Lovable, Bolt)', text: `I built a prototype in [BASE44 / LOVABLE / BOLT] and exported the code to this folder.
+1. Read it and list everything that still depends on that builder's servers (database, login, file storage, AI calls).
+2. Make a step-by-step plan to replace each one with Neon Postgres, a normal sign-in, Vercel Blob and my own API keys (keys only through a hidden terminal prompt).
+3. Write a script to export my data from the builder (or tell me exactly how to download it) and import it into Neon.
+Do not change anything until I approve the plan.` },
+        { t: 'deeper', title: 'SQL vs documents, in more detail', blocks: [
+          { t: 'p', text: 'Postgres can also store flexible JSON in a `jsonb` column, so you get strict tables where they matter and flexible fields where you need them. That is why many teams that once picked MongoDB for flexibility now use Postgres for both.' },
+          { t: 'p', text: 'SQLite writes one change at a time (WAL mode helps a lot), which is perfect for single-user and offline apps. Postgres handles many simultaneous writers and adds row-level security and `pgvector` for AI search (see the RAG lesson).' },
+          { t: 'p', text: 'MongoDB shines for event logs, content with very different shapes, and huge write volumes. Its trade-off is that the database will not stop you saving a record with a missing or misspelled field, so your code must.' },
         ] },
-        { t: 'check', q: 'Your app lets users upload profile photos. Where should the photo itself go?', options: [
-          'In the database as base64 text',
-          'In file storage, with only its path and owner saved in the database',
-          'In the app\'s code folder',
-        ], answer: 1, explain: 'Files go in file storage; the database keeps a small record pointing to them.' },
+        { t: 'check', q: 'You built an app on an all-in-one AI builder. Which question tells you if you are locked in?', options: [
+          '"Does it look good on phones?"',
+          '"Can I download all my data and run my app somewhere else this weekend?"',
+          '"Does it have dark mode?"',
+        ], answer: 1, explain: 'If the honest answer is no, you are renting, not owning. That is fine for a prototype, risky for a business.' },
         { t: 'recap', items: [
-          'SQLite for single-user/offline apps; Postgres for multi-user web apps.',
-          'Never store files as base64 in the database: file storage + a small record.',
-          'Prefer databases you can fully export.',
+          'SQLite for one-device or offline apps; Postgres (Neon/Supabase) for most web apps; MongoDB only for truly shapeless data.',
+          'Base44 and similar builders are great for prototypes but keep your data and backend on their servers.',
+          'Files go in file storage, never inside the database.',
         ] },
       ],
     },

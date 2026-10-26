@@ -7,6 +7,8 @@ import {
   siHuggingface, siGithubactions, siLmstudio, siSquare,
   siVisa, siMastercard, siAmericanexpress, siDiscover, siApplepay, siGooglepay, siCashapp,
   siGithubcopilot, siCursor, siPosthog, siTiktok, siProducthunt, siGooglesearchconsole,
+  siMongodb, siSupabase, siFirebase, siTurso, siExpo, siSentry, siClerk, siAuth0, siV0, siReplit, siKaggle, siGooglegemini,
+  siPwa, siAndroid, siApple, siBetterauth,
 } from 'simple-icons';
 
 const text = (title, hex) => ({ title, hex, text: true });
@@ -20,6 +22,10 @@ export const LOGOS = {
   dribbble: siDribbble, figma: siFigma, owasp: siOwasp, dependabot: siDependabot, docker: siDocker, ollama: siOllama,
   qwen: siQwen, blender: siBlender, krita: siKrita, telegram: siTelegram, elevenlabs: siElevenlabs, mermaid: siMermaid, huggingface: siHuggingface, githubactions: siGithubactions, lmstudio: siLmstudio, square: siSquare,
   githubcopilot: siGithubcopilot, cursor: siCursor, posthog: siPosthog, tiktok: siTiktok, producthunt: siProducthunt, googlesearchconsole: siGooglesearchconsole,
+  mongodb: siMongodb, supabase: siSupabase, firebase: siFirebase, turso: siTurso, expo: siExpo, sentry: siSentry, clerk: siClerk,
+  auth0: siAuth0, v0: siV0, replit: siReplit, kaggle: siKaggle, gemini: siGooglegemini, pwa: siPwa, android: siAndroid, apple: siApple,
+  betterauth: siBetterauth, playwright: text('Playwright', '2EAD33'), lovable: text('Lovable', 'FF4F7A'), bolt: text('Bolt', '1389FD'),
+  base44: text('Base44', 'FF6B2C'),
   visa: siVisa, mastercard: siMastercard, amex: siAmericanexpress, discover: siDiscover, applepay: siApplepay, googlepay: siGooglepay, cashapp: siCashapp,
 };
 

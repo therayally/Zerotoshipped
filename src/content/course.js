@@ -20,6 +20,9 @@ import m16 from './modules/m16-product';
 import m17 from './modules/m17-claude-pro';
 import { buildMcp, aiCoders, evals, analytics } from './modules/m18-pro-tools';
 import { grow, run } from './modules/m19-grow-run';
+import { designPlus } from './modules/m20-design-plus';
+import smartFeatures from './modules/m21-smart-features';
+import { mobileApps, quality, authServices, aiBuilders, businessBasics } from './modules/m22-pro-gaps';
 
 const pick = (mod, ...ids) => ids.map((id) => {
   const lesson = mod.lessons.find((l) => l.id === id);
@@ -39,7 +42,7 @@ const track1 = [
   m02,
   { ...m03, title: 'Plan your app', lessons: pick(m03, 'architecture') },
   m04,
-  m05,
+  { ...m05, lessons: [...pick(m05, 'look-good', 'ui-rules', 'ui-references'), ...designPlus, ...pick(m05, 'ui-polish')] },
   without(m07, 'subscriptions'),
   m08,
   { ...without(m09, 'security-tools', 'security-standards'), title: 'Lock it down' },
@@ -52,11 +55,14 @@ const track2 = [
   m15,
   without(m06, 'mcp'),
   { id: 'mcp', title: 'MCP: connect and build your own', lessons: [...pick(m06, 'mcp'), buildMcp] },
-  { id: 'ai-coders', title: 'Other AI coders', lessons: [aiCoders] },
+  smartFeatures,
+  { id: 'ai-coders', title: 'Other AI coders and app builders', lessons: [aiCoders, aiBuilders] },
+  { id: 'mobile', title: 'Get your app on phones', lessons: [mobileApps] },
+  quality,
   { id: 'evals', title: 'Test your AI (evals)', lessons: evals },
   { id: 'analytics', title: 'Analytics and experiments', lessons: analytics },
   { id: 'grow', title: 'Launch and grow', lessons: [...grow, ...pick(m07, 'subscriptions')] },
-  { id: 'company', title: 'Run it like a company', lessons: [...run, ...pick(m10, 'soc2', 'run-like-a-pro'), ...pick(m09, 'security-tools', 'security-standards')] },
+  { id: 'company', title: 'Run it like a company', lessons: [...run, authServices, businessBasics, ...pick(m10, 'soc2', 'run-like-a-pro'), ...pick(m09, 'security-tools', 'security-standards')] },
   m11,
   m12,
   m13,
