@@ -373,7 +373,33 @@ function Subscription() {
   );
 }
 
-const figures = { subscription: Subscription, bigpicture: () => <BigPicture />, branches: Branches, spacing: Spacing, relay: Relay, stack: Stack, sprint: Sprint, dns: Dns, keys: Keys, agent: Agent, tenants: Tenants };
+// VRAM: a model that fits on the GPU runs fast; the part that spills into RAM drags every word.
+function Vram() {
+  const { t } = useTheme();
+  const block = (x, y, w, fill, key) => <g key={key} className="fig-node" style={{ transitionDelay: `${x * 2}ms` }}><rect x={x} y={y} width={w} height={22} rx="2" fill={fill} /></g>;
+  const row = (y, title, sub, fits) => (
+    <g>
+      <text x="10" y={y + 4} fontSize="13.5" fontWeight="700" fill={t.text} fontFamily={FONT_BODY}>{title}</text>
+      <text x="10" y={y + 21} fontSize="11.5" fill={t.muted} fontFamily={FONT_BODY}>{sub}</text>
+      <rect x="190" y={y - 14} width="250" height="46" rx="3" fill="none" stroke={t.accent} strokeWidth="2" />
+      <text x="198" y={y - 19} fontSize="11" fontWeight="700" fill={t.accentText} fontFamily={FONT_BODY}>GPU VRAM (fast)</text>
+      <rect x="470" y={y - 14} width="160" height="46" rx="3" fill="none" stroke={t.border} strokeWidth="2" strokeDasharray="4 4" />
+      <text x="478" y={y - 19} fontSize="11" fontWeight="700" fill={t.muted} fontFamily={FONT_BODY}>RAM + CPU (slow)</text>
+      {[0, 1, 2, 3, 4].map((i) => block(198 + i * 46, y - 2, 40, t.teal, `a${i}`))}
+      {!fits && [0, 1, 2].map((i) => block(478 + i * 50, y - 2, 44, t.coral, `b${i}`))}
+    </g>
+  );
+  return (
+    <Frame h={250} caption="If the whole model fits in VRAM it runs fast. Any part that spills into RAM slows down every single word.">
+      {row(50, 'Model fits', '8B model on an 8 GB GPU', true)}
+      {row(160, 'Model spills over', '32B model on an 8 GB GPU', false)}
+      <Label x={335} y={102} text="fast: faster than you can read" />
+      <Label x={335} y={212} text="slow: a few words a second" />
+    </Frame>
+  );
+}
+
+const figures = { vram: Vram, subscription: Subscription, bigpicture: () => <BigPicture />, branches: Branches, spacing: Spacing, relay: Relay, stack: Stack, sprint: Sprint, dns: Dns, keys: Keys, agent: Agent, tenants: Tenants };
 
 export default function Figure({ name }) {
   if (name.startsWith('fit-')) return <BigPicture hl={name.slice(4)} />;

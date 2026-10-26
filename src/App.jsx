@@ -179,7 +179,19 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
   const toggleColor = () => { const m = colorMode === 'dark' ? 'light' : 'dark'; setColorMode(m); store.set('theme', m); };
-  const markDone = (id) => setDone((prev) => { const n = new Set(prev); n.add(id); store.set('done', [...n]); return n; });
+  // Progress: mark a lesson done (button, reaching the end, or "Done, next") or undo it. Finishing a module's last lesson celebrates.
+  const setLessonDone = (id, on) => setDone((prev) => {
+    if (prev.has(id) === on) return prev;
+    const n = new Set(prev);
+    if (on) n.add(id); else n.delete(id);
+    store.set('done', [...n]);
+    if (on) {
+      const mod = modules.find((m) => m.lessons.some((l) => l.id === id));
+      if (mod && mod.lessons.every((l) => n.has(l.id))) setToast(`Module complete: ${mod.title}. Nice work!`);
+    }
+    return n;
+  });
+  const markDone = (id) => setLessonDone(id, true);
 
   const onNext = () => {
     markDone(lesson.id);
@@ -214,7 +226,7 @@ export default function App() {
           {view === 'home' ? (
             <Home currentId={currentId} done={done} go={go} openMenu={() => setMenuOpen(true)} openDrink={openDrink} />
           ) : (
-            <Lesson lesson={lesson} index={index} onBack={onBack} onNext={onNext} onSkipModule={onSkipModule} />
+            <Lesson lesson={lesson} index={index} onBack={onBack} onNext={onNext} onSkipModule={onSkipModule} complete={done.has(lesson.id)} setComplete={(on) => setLessonDone(lesson.id, on)} />
           )}
         </Box>
         <Box component="aside" sx={{ display: { xs: 'none', xl: 'block' }, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', overflowY: 'auto', background: theme.t.surface, borderLeft: `1px solid ${theme.t.border}`, scrollbarWidth: 'thin' }}>
