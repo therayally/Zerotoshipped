@@ -60,7 +60,7 @@ export default {
           'What if some of your AI work cost nothing, worked without internet, and never sent a single word to anyone else\'s servers? That is local AI. It is not as smart as Claude, but for private documents, bulk jobs and simple tasks, it is a superpower.',
           'There is one catch nobody tells beginners: whether local AI feels fast or painfully slow depends almost entirely on **one number** in your computer. This lesson shows you how to find it and pick a model that fits.',
         ] },
-        { t: 'p', text: '**Local AI** means the AI model runs on your own computer instead of in a company\'s data center. You download the model once, like a big game, and then it is yours: no bill, no limit, and your data stays on your machine. We use **Qwen**, a free, open model family from Alibaba that is especially good at code and chat.' },
+        { t: 'p', text: '**Local AI** means the AI model runs on your own computer instead of in a company\'s data center. You download the model once, like a big game, and then it is yours: no bill, no limit, and your data stays on your machine. We use **Qwen**, a free, open model family from Alibaba that is especially good at code and chat. The newest version is **Qwen 3.5**.' },
         { t: 'h', text: 'The one number that matters: VRAM' },
         { t: 'p', text: 'Your computer has two kinds of memory. **RAM** is the normal memory your apps use. **VRAM** is the memory on your **GPU** (graphics card), the chip built for doing millions of math operations at once. AI models are giant piles of math, so they run on the GPU, and the whole model has to fit in VRAM to be fast.' },
         { t: 'analogy', text: 'VRAM is the desk you work at; RAM is a filing cabinet across the room. If the whole project fits on your desk, you fly. If it does not, you keep walking to the cabinet and back for every page. Same model, 5 to 20 times slower.' },
@@ -74,18 +74,19 @@ export default {
         ] },
         { t: 'prompt', label: 'Check my computer for local AI', text: `Check this computer for running local AI models. Do not install anything yet.
 Tell me in plain English: my GPU name, how much VRAM it has (or unified memory on a Mac, and how much of it the GPU can use), my RAM, and free disk space.
-Then recommend the biggest Qwen model I can run fully on the GPU, the size to download (like Q4_K_M), and roughly how fast it will feel.` },
+Then recommend the biggest Qwen 3.5 model (from ollama.com/library/qwen3.5) I can run fully on the GPU, and roughly how fast it will feel.` },
         { t: 'h', text: 'Step 2: pick a model that fits' },
         { t: 'p', text: 'Sizes are for the common 4-bit version (Q4_K_M, explained in the quantizing lesson). Leave about 1 to 2 GB of VRAM free for the conversation itself.' },
-        { t: 'table', head: ['Your VRAM', 'Model size that fits', 'Try', 'What it is good for'], rows: [
-          ['No GPU / under 4 GB', '1 to 4 billion parameters (about 1 to 3 GB)', 'qwen3:1.7b, qwen3:4b', 'Summaries, short answers, tagging. Slow on CPU.'],
-          ['6 to 8 GB', '7 to 8B (about 5 GB)', 'qwen3:8b', 'Everyday chat, writing, simple code. The sweet spot for most people.'],
-          ['12 GB', 'up to 14B (about 9 GB)', 'qwen3:14b', 'Noticeably smarter answers and better code.'],
-          ['16 GB', '14B with long documents, or about 20 to 24B', 'qwen3:14b with a big context', 'Reading long files and longer conversations.'],
-          ['24 GB (RTX 3090, 4090, 5090)', 'about 30 to 32B (about 18 to 20 GB)', 'qwen3:32b, qwen3-coder:30b', 'Strong coding help. Real competition for paid models on simple tasks.'],
-          ['Mac with 32 GB+', 'about 30B; 64 GB+ can try 70B class', 'qwen3:30b, qwen3-coder:30b', 'Same as above, often a bit slower than a big NVIDIA card.'],
+        { t: 'table', head: ['Your VRAM', 'Try this (download size)', 'What it is good for'], rows: [
+          ['No GPU / under 4 GB', 'qwen3.5:2b (about 2.7 GB) or qwen3.5:0.8b', 'Summaries, short answers, tagging. Slow on CPU.'],
+          ['6 GB', 'qwen3.5:4b (about 3.3 GB)', 'Everyday chat and writing; can also read images.'],
+          ['8 GB', 'qwen3.5:9b (about 6.6 GB)', 'The sweet spot: good chat, writing and simple code. Keep conversations short.'],
+          ['12 to 16 GB', 'qwen3.5:9b with long documents, or qwen3:14b (about 9.3 GB)', 'Long files, longer chats, better code.'],
+          ['24 GB (RTX 3090, 4090, 5090)', 'qwen3.5:27b (about 17 GB)', 'Strong coding help. Real competition for paid models on simple tasks.'],
+          ['Mac with 32 GB+', 'qwen3.5:27b, or the -mlx versions (like qwen3.5:9b-mlx)', 'Same as above; the -mlx versions are tuned for Apple chips.'],
         ] },
-        { t: 'tip', tone: 'info', text: 'Models with "A3B" or "MoE" in the name (like qwen3:30b-a3b) only use a small part of themselves for each word, so they run much faster than their size suggests. They still need enough memory to hold the whole model.' },
+        { t: 'tip', tone: 'info', text: 'Qwen 3.5 is the newest family (it can also read images and use tools). Some models are "mixture of experts" (MoE), like qwen3:30b: they only use a small part of themselves for each word, so they run faster than their size suggests, but still need memory to hold the whole model.' },
+        { t: 'snap', src: 'shots/ollama-qwen35.jpg', url: 'ollama.com/library/qwen3.5', caption: 'Ollama\'s Qwen 3.5 page lists every size with its download size, so you can match it to your VRAM.' },
         { t: 'h', text: 'How fast is fast enough?' },
         { t: 'table', head: ['Speed (tokens per second)', 'How it feels'], rows: [
           ['Under 5', 'Painful. Like watching someone type with one finger. The model probably does not fit in VRAM.'],
@@ -94,7 +95,7 @@ Then recommend the biggest Qwen model I can run fully on the GPU, the size to do
         ] },
         { t: 'p', text: 'A **token** is a chunk of a word (roughly 3 to 4 letters). Ollama shows the speed if you type `/set verbose` in its chat; LM Studio shows it under every answer.' },
         { t: 'h', text: 'Step 3: install Ollama and chat' },
-        { t: 'snap', src: 'shots/ollama.jpg', url: 'ollama.com/download', caption: 'Download Ollama for your computer' },
+        { t: 'snap', src: 'shots/ollama-download.jpg', url: 'ollama.com/download', caption: 'The official Ollama download page. Pick your system (1), then use Download manually (2) to get the normal app installer.', marks: [{ x: 31, y: 38, w: 17, h: 4, n: 1 }, { x: 37.5, y: 51.5, w: 11, h: 4.5, n: 2 }] },
         { t: 'steps', items: [
           { do: 'Go to **ollama.com/download**, download it, and open it.', why: 'It installs like any other app and runs quietly in the background.' },
           { do: 'In the Ollama window, pick the Qwen model from the table that fits **your** VRAM, and type a message.', why: 'The first time, it downloads the model (a few gigabytes). After that it works offline.' },
@@ -102,12 +103,12 @@ Then recommend the biggest Qwen model I can run fully on the GPU, the size to do
         ] },
         { t: 'tip', tone: 'info', text: 'Prefer more buttons? **LM Studio** does the same thing with a friendlier window, and it tells you which downloads fit your GPU. It has its own lesson next.' },
         { t: 'h', text: 'Step 4: use Qwen inside Claude Code' },
-        { t: 'p', text: 'Claude Code can use Qwen as its brain: great for private projects, or when your Claude plan limit runs out mid-session. Coding needs a big model and a long memory, so this works best with 16 GB+ of VRAM. The setup changes as Ollama updates, so let Claude look up the current instructions:' },
+        { t: 'p', text: 'Claude Code can use a local Qwen as its brain: great for private projects, or when your Claude plan limit runs out mid-session. Ollama made this one command: **ollama launch claude**. Coding needs a big model and a long memory (Ollama recommends a 64K+ context), so this works best with 16 GB+ of VRAM.' },
         { t: 'prompt', label: 'Hook Claude Code to Qwen', text: `Help me run Claude Code with a local Qwen model through Ollama.
-1. Check my GPU, VRAM and Ollama version, and update Ollama if needed.
-2. Look up Ollama's current official instructions for using it with Claude Code, and follow them.
-3. Pick the biggest Qwen coding model that fits fully in my VRAM, and give it a large enough context window for Claude Code without spilling out of VRAM.
-4. Give me two short commands: one to start Claude Code with Qwen, one with normal Claude.` },
+1. Check my GPU and VRAM, and update Ollama to the latest version.
+2. Pick the biggest tool-capable Qwen 3.5 model that fits fully in my VRAM with a 64K context, and download it.
+3. Start it the official way: ollama launch claude --model [that model]. Check Ollama's docs (docs.ollama.com/integrations/claude-code) if anything changed.
+4. Tell me the one command to start Claude Code with Qwen, and remind me that plain "claude" still uses normal Claude.` },
         { t: 'deeper', title: 'GPU brands, memory math and the context trap', blocks: [
           { t: 'table', head: ['GPU', 'How well local AI works'], rows: [
             ['NVIDIA (RTX)', 'Best supported everywhere (CUDA). The easy choice.'],
@@ -117,14 +118,14 @@ Then recommend the biggest Qwen model I can run fully on the GPU, the size to do
           ] },
           { t: 'p', text: '**Memory math:** billions of parameters × bits per number ÷ 8 ≈ gigabytes. An 8B model at 4 bits ≈ 8 × 4 ÷ 8 = 4 GB, plus overhead.' },
           { t: 'p', text: '**The context trap:** the model also keeps a working memory of the conversation (the "KV cache") in VRAM. A long context window (say 32K tokens) can add several gigabytes. If a model fits but slows down as the chat grows, the context is spilling out of VRAM; shorten it or pick a smaller model.' },
-          { t: 'p', text: 'Ollama\'s `ollama ps` shows how much of a loaded model is on the GPU ("100% GPU" is what you want). Terminal users can start a model with `ollama run qwen3:8b`.' },
+          { t: 'p', text: 'Ollama\'s `ollama ps` shows how much of a loaded model is on the GPU ("100% GPU" is what you want). Terminal users can start a model with `ollama run qwen3.5:9b`.' },
           { t: 'p', text: 'Most Qwen models use the Apache-2.0 license, which allows commercial use. Always check the model card before using one in a business.' },
         ] },
-        { t: 'check', q: 'Your laptop has 6 GB of VRAM. Which model will feel fast?', options: [
-          'qwen3:32b, because bigger is smarter',
-          'qwen3:8b at Q4 (about 5 GB), because it fits fully in VRAM',
+        { t: 'check', q: 'Your laptop has 8 GB of VRAM. Which model will feel fast?', options: [
+          'qwen3.5:27b, because bigger is smarter',
+          'qwen3.5:9b (about 6.6 GB), because it fits fully in VRAM',
           'Any model, VRAM does not matter',
-        ], answer: 1, explain: 'A model that fits fully in VRAM runs on the GPU. A 32B model would spill into RAM and crawl.' },
+        ], answer: 1, explain: 'A model that fits fully in VRAM runs on the GPU. A 27B model (about 17 GB) would spill into RAM and crawl.' },
         { t: 'recap', items: [
           'Local AI speed depends on VRAM: the whole model should fit on the GPU.',
           'Check yours (Task Manager → GPU, or About This Mac), then pick a model from the table.',
@@ -140,13 +141,14 @@ Then recommend the biggest Qwen model I can run fully on the GPU, the size to do
         { t: 'why', text: 'LM Studio is the friendliest way to run local AI: browse thousands of free models, see which ones fit your GPU **before** downloading, chat with them, chat with your own documents, give them tools like web search, and plug them into apps you build. No terminal needed.' },
         { t: 'p', text: '**LM Studio** is a free desktop app for Mac, Windows and Linux. Think of it as a music player for AI models: a library to browse, a download button, and a chat window.' },
         { t: 'h', text: 'Step 1: install it' },
+        { t: 'snap', src: 'shots/lmstudio-download.jpg', url: 'lmstudio.ai/download', caption: 'Pick your system and chip (1), then Download LM Studio (2). Bionic, above it on the real page, is a separate agent app.', marks: [{ x: 16.5, y: 56, w: 57, h: 9, n: 1 }, { x: 16.5, y: 68.5, w: 26.5, h: 8, n: 2 }] },
         { t: 'steps', items: [
-          { do: 'Go to **lmstudio.ai** and download it for your computer.', why: 'Only download it from the official site, like every app in this course.' },
+          { do: 'Go to **lmstudio.ai/download** and download the regular **LM Studio** app (not Bionic, their separate agent app).', why: 'Only download it from the official site, like every app in this course.' },
           { do: 'Open it. You do not need an account. If it asks to pick a first model, you can skip and use Step 2.' },
         ] },
         { t: 'h', text: 'Step 2: find a model that fits your GPU' },
         { t: 'steps', items: [
-          { do: 'Click the **Discover** tab (the magnifying glass) and search for **Qwen3**.' },
+          { do: 'Click the **Discover** tab (the magnifying glass) and search for **Qwen3.5**.' },
           { do: 'Pick a result from a well-known uploader, like **Qwen**, **lmstudio-community** or **unsloth**.', why: 'Anyone can upload a model. Known names are like the official app store.' },
           { do: 'On the right, look at the download options. LM Studio labels each one: **Full GPU offload possible** (fast, fits in VRAM), **Partial GPU offload** (some runs on slow RAM), or **Likely too large**.', why: 'This label is the VRAM lesson done for you. Pick one that says full GPU offload.' },
           { do: 'Prefer the **Q4_K_M** version if it fits; Q5 or Q6 if you have room to spare.' },
@@ -176,7 +178,7 @@ Keep the paid API for production. Use an environment variable to switch between 
         { t: 'tip', tone: 'warn', text: 'Leave **Serve on local network** off unless you truly need it. When it is on, anyone on your Wi-Fi can use your model and see what is sent to it.' },
         { t: 'deeper', title: 'Tools (MCP), the lms command and presets', blocks: [
           { t: 'p', text: 'Since version 0.3.17, LM Studio can use **MCP** tools, the same plug-in standard as Claude\'s connectors. In the right sidebar open **Program → Install → Edit mcp.json**, or click an "Add to LM Studio" button on a tool\'s page. The next lesson uses this to give your local AI web search.' },
-          { t: 'p', text: 'Tools only work with models trained for "tool use" (Qwen3 is). LM Studio asks you to approve each tool call; read what it is about to do before clicking allow.' },
+          { t: 'p', text: 'Tools only work with models trained for "tool use" (Qwen 3.5 is). LM Studio asks you to approve each tool call; read what it is about to do before clicking allow.' },
           { t: 'p', text: '**Presets** save a system prompt plus settings under a name, like "Code helper" or "Contract reader", so you can switch in one click.' },
           { t: 'p', text: 'The `lms` command line tool can download models, load them and start the server from scripts, if you ever want to automate it.' },
         ] },
@@ -221,10 +223,11 @@ Keep the paid API for production. Use an environment variable to switch between 
           { do: 'Ollama is open source, so anyone can check what it does. LM Studio is free but closed source, so you are trusting its privacy policy.', why: 'Both are widely used; for very sensitive work, the open-source option is easier to verify.' },
         ] },
         { t: 'h', text: 'Give your local AI web search' },
-        { t: 'p', text: 'Three ways, from easiest to most powerful. All of them work best with a model trained for tool use, like **Qwen3** at 8B or bigger.' },
+        { t: 'p', text: 'Three ways, from easiest to most powerful. All of them work best with a model trained for tool use, like **Qwen 3.5** at 9B or bigger.' },
         { t: 'h', text: 'Option 1 (easiest): Page Assist + Ollama' },
+        { t: 'snap', src: 'shots/page-assist.jpg', url: 'addons.mozilla.org · Page Assist', caption: 'Page Assist, a free and open-source browser extension for local AI. On Chrome, find it in the Chrome Web Store.' },
         { t: 'steps', items: [
-          { do: 'Make sure Ollama is running with a Qwen3 model downloaded.' },
+          { do: 'Make sure Ollama is running with a Qwen 3.5 model downloaded.' },
           { do: 'Install **Page Assist** from the Chrome Web Store or Firefox Add-ons. It is free and open source.', why: 'It gives your local model a chat window in your browser, with a web search switch.' },
           { do: 'Open Page Assist, choose **Ollama** and your Qwen model in its settings.' },
           { do: 'Turn on the **internet search** switch in the chat and ask something current, like "What changed in the latest Next.js release?"' },
@@ -233,7 +236,7 @@ Keep the paid API for production. Use an environment variable to switch between 
         { t: 'steps', items: [
           { do: 'In LM Studio, open the right sidebar → **Program** → **Install** → **Edit mcp.json**.' },
           { do: 'Let Claude add a trustworthy web search tool with the prompt below.', why: 'Some search tools need a free API key; Claude will open the hidden terminal prompt for it, like every key in this course.' },
-          { do: 'Back in a chat with Qwen3, ask a current question. LM Studio asks to approve each search; read it and click allow.' },
+          { do: 'Back in a chat with Qwen 3.5, ask a current question. LM Studio asks to approve each search; read it and click allow.' },
         ] },
         { t: 'prompt', label: 'Add web search to LM Studio', text: `Help me add a web search tool to LM Studio using MCP.
 1. Recommend a well-maintained, widely used web search MCP server and tell me who makes it and what data it sends where.
@@ -244,11 +247,11 @@ Keep the paid API for production. Use an environment variable to switch between 
         { t: 'p', text: 'Ollama has a web search service your code can call, so a local model can search while it answers. It needs a free Ollama account and an API key (OLLAMA_API_KEY). Your **searches go to Ollama\'s servers**, even though the model runs on your machine.' },
         { t: 'prompt', label: 'Add Ollama web search to my app', text: addKey('OLLAMA_API_KEY', 'Ollama') + `
 
-Then add web search to my app's local AI using Ollama's web search and web fetch tools with a tool-capable Qwen3 model.
+Then add web search to my app's local AI using Ollama's web search and web fetch tools with a tool-capable Qwen 3.5 model.
 Only search when the question needs current information, show the sources in the answer, and add a setting to turn search off for private chats.` },
         { t: 'deeper', title: 'How tool use and search actually work', blocks: [
           { t: 'p', text: 'The model does not browse by itself. When it decides it needs information, it outputs a structured "tool call" (like `web_search({ query: "..." })`). The app runs the search, pastes the results back into the conversation, and the model writes its answer using them. That is the same loop as the agents module.' },
-          { t: 'p', text: 'Small models (under about 8B) often call tools badly: wrong format, or searching when they do not need to. If search acts strangely, move up a model size before blaming the tool.' },
+          { t: 'p', text: 'Small models (under about 9B) often call tools badly: wrong format, or searching when they do not need to. If search acts strangely, move up a model size before blaming the tool.' },
           { t: 'p', text: 'Search results can contain **prompt injection**: a web page that says "ignore your instructions." Keep tools that can change things (files, email, payments) off in the same chat where you search the web.' },
           { t: 'p', text: 'For a fully self-hosted setup, **Open WebUI** with a private **SearXNG** search engine keeps even the search engine on your own machine. Ask Claude to set it up with Docker if you want to go that far.' },
         ] },
@@ -272,6 +275,7 @@ Only search when the question needs current information, show the sources in the
         { t: 'why', text: 'Almost every free AI model in the world lives on one website: Hugging Face. LM Studio and Ollama quietly download from it. Knowing how to read it lets you find the right model for any job, and spot the ones to avoid.' },
         { t: 'p', text: '**Hugging Face** (huggingface.co) is like GitHub, but for AI. Companies and researchers upload models, datasets and demos there. Browsing and downloading is free.' },
         { t: 'h', text: 'How to read a model page' },
+        { t: 'snap', src: 'shots/hf-qwen3-gguf.jpg', url: 'huggingface.co/Qwen/Qwen3-8B-GGUF', caption: 'A real model page: Files and versions (1), each download size by quality level (2), and the Use this model button (3).', marks: [{ x: 14.5, y: 23.5, w: 14, h: 4, n: 1 }, { x: 60, y: 59, w: 38, h: 18, n: 2 }, { x: 84.5, y: 23.5, w: 12, h: 4, n: 3 }] },
         { t: 'table', head: ['Look at', 'What it tells you', 'Good sign'], rows: [
           ['Who uploaded it', 'The company or person behind it', 'A known organization (Qwen, Meta, Google, Mistral)'],
           ['Downloads and likes', 'How many people use it', 'Thousands or more'],
@@ -331,6 +335,7 @@ Only search when the question needs current information, show the sources in the
         ] },
         { t: 'p', text: 'Quick memory math: **billions of parameters × bits ÷ 8 = gigabytes**, plus about 1 to 2 GB extra while it runs. So an 8B model at 4 bits needs roughly 8 × 4 ÷ 8 = 4 GB, plus extra.' },
         { t: 'h', text: 'The easiest way: no install at all' },
+        { t: 'snap', src: 'shots/gguf-my-repo.jpg', url: 'huggingface.co/spaces/ggml-org/gguf-my-repo', caption: 'GGUF-my-repo: sign in (1), type the model (2), pick Q4_K_M (3), press Submit (4).', marks: [{ x: 5.5, y: 12.5, w: 90, h: 5, n: 1 }, { x: 6, y: 32.5, w: 44, h: 6.5, n: 2 }, { x: 7.5, y: 49, w: 41.5, h: 5, n: 3 }, { x: 28, y: 83, w: 22.5, h: 5, n: 4 }] },
         { t: 'steps', items: [
           { do: 'On Hugging Face, search Spaces for **GGUF-my-repo** (by ggml-org).' },
           { do: 'Sign in, paste the name of the model you want to shrink (for example a Qwen model), and pick **Q4_K_M**.' },

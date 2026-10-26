@@ -30,6 +30,7 @@ Commit as you go with clear messages and push the branch.
 When it works, give me the Vercel preview link to test, then open a pull request with a plain-English summary of what changed and anything I should check.
 Do not merge until I say so.` },
         { t: 'tip', tone: 'info', text: 'Prefer buttons? **GitHub Desktop** (desktop.github.com) is a free app that shows your commits, branches and changes visually. It is a great way to see what Claude has been doing.' },
+        { t: 'snap', src: 'shots/github-desktop.jpg', url: 'desktop.github.com', caption: 'GitHub Desktop: see every change, commit and branch in a normal app window.', marks: [{ x: 36.5, y: 53.3, w: 27, h: 5.8 }] },
         { t: 'deeper', title: 'What Git is actually storing', blocks: [
           { t: 'p', text: 'Each commit is a snapshot of every file, identified by a unique hash (like `a1b2c3d`). A branch is just a movable label pointing at one commit. Merging creates a commit with two parents, joining the lines.' },
           { t: 'p', text: 'A **merge conflict** happens when both lines changed the same lines of the same file. Git cannot guess which is right, so it asks. Claude is very good at resolving these: ask it to explain both sides before choosing.' },
@@ -124,6 +125,7 @@ Then turn on branch protection so pull requests cannot merge unless this check p
         { t: 'why', text: 'The fastest way to get good is to study how experienced builders did it. Thousands of real, professional apps are open source on GitHub, built with the exact tools from this course. You can read every line, run them on your computer, and borrow the patterns, as long as you respect the license.' },
         { t: 'p', text: '**Reverse engineering** here means taking a working app apart to understand how it works. With open-source code that is easy and completely allowed: the authors published it so people could learn from it.' },
         { t: 'h', text: 'Repos that use this course\'s stack' },
+        { t: 'snap', src: 'shots/saas-starter.jpg', url: 'github.com/nextjs/saas-starter', caption: 'A real repo to study: nextjs/saas-starter. The About box (1) lists the tools it uses; the file list is the code you can read.', marks: [{ x: 73, y: 18, w: 26, h: 30, n: 1 }] },
         { t: 'table', head: ['Repo', 'What it is', 'Learn this from it', 'License'], rows: [
           ['nextjs/saas-starter', 'A starter for paid apps, from the Next.js team', 'Sign-in, Postgres with Drizzle, Stripe subscriptions, dashboard layout', 'MIT'],
           ['vercel/chatbot', 'Vercel\'s full AI chatbot', 'Streaming AI replies, saving chat history in Postgres, file uploads', 'Apache-2.0'],

@@ -59,6 +59,7 @@ Sort by how serious they are, and point to the file and line for each.` },
       body: [
         { t: 'why', text: 'This is the only install in the whole course, and you will not type a single command. Claude Code lives inside the free Claude desktop app. Once it is installed, Claude does the technical typing for you for the rest of the course.' },
         { t: 'h', text: 'Step 1: download the Claude app' },
+        { t: 'snap', src: 'shots/claude-download.jpg', url: 'claude.com/download', caption: 'The official Claude download page. The button shows the right version for your computer.', marks: [{ x: 40, y: 44, w: 20, h: 8 }] },
         { t: 'steps', items: [
           { do: 'Go to **claude.com/download** and click the download for your computer (Mac or Windows).', why: 'Only download it from Anthropic\'s own site. Copies on other sites can contain malware.' },
           { do: '**Mac:** open the file you downloaded and drag Claude into your **Applications** folder. **Windows:** open the installer and click through it.' },

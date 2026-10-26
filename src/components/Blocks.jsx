@@ -400,7 +400,7 @@ function block(b, i) {
       case 'table': return <Table key={i} head={b.head} rows={b.rows} />;
       case 'links': return <Links key={i} items={b.items} />;
       case 'partner': return <Partner key={i} {...b} />;
-      case 'snap': return <Snapshot key={i} src={b.src} url={b.url} caption={b.caption} />;
+      case 'snap': return <Snapshot key={i} src={b.src} url={b.url} caption={b.caption} marks={b.marks} />;
       case 'mock': return <Mock key={i} name={b.name} />;
       case 'term': return <TerminalShot key={i} title={b.title} lines={b.lines} caption={b.caption} />;
       case 'why': return <Why key={i} text={b.text} />;

@@ -117,6 +117,7 @@ Security goes inside every sprint.` },
       minutes: 14,
       body: [
         { t: 'why', text: 'Small businesses miss calls constantly: during the lunch rush, after hours, while helping someone in person. Each missed call is a missed booking. An AI receptionist answers every call, handles the common questions with the same facts as your chat, and books appointments, then texts the owner a summary.' },
+        { t: 'snap', src: 'shots/elevenlabs.jpg', url: 'elevenlabs.io', caption: 'ElevenLabs: realistic AI voices and voice agents, the voice for your receptionist.' },
         { t: 'p', text: 'You do not build the phone technology yourself. A **voice AI service** gives you a phone number and handles listening and speaking. Your job is to give it the business\'s knowledge and connect it to your app so it can check times and book.' },
         { t: 'table', head: ['Service', 'Good for'], rows: [
           ['Vapi', 'Lots of control, works with many AI models'],

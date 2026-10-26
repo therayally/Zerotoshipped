@@ -47,13 +47,27 @@ export default {
       body: [
         { t: 'why', text: 'Hermes turns everything you learned about agents into something you can actually use today: an assistant that lives on your computer, that you can message from your phone, and that can learn new skills and run jobs on a schedule. It is free and open source.' },
         { t: 'p', text: '**Hermes Agent** is made by Nous Research. You can talk to it in the Terminal, or connect it to Telegram, Discord, Slack, WhatsApp and more, so you can text it like a person. It can use almost any AI as its brain, including Claude or a free local Qwen model.' },
-        { t: 'h', text: 'Step 1: let Claude install it' },
-        { t: 'prompt', label: 'Install Hermes for me', text: `Install Hermes Agent by Nous Research on this computer.
+        { t: 'h', text: 'Step 1: install the desktop app' },
+        { t: 'snap', src: 'shots/hermes-home.jpg', url: 'hermes-agent.nousresearch.com', caption: 'The official Hermes Agent site: click Download for your computer (1). Linux users use the install command (2).', marks: [{ x: 9.5, y: 68.5, w: 13, h: 4.5, n: 1 }, { x: 9.5, y: 74, w: 34, h: 17, n: 2 }] },
+        { t: 'steps', items: [
+          { do: 'Go to **hermes-agent.nousresearch.com** (the official site; check the address).' },
+          { do: 'Click **Download desktop app** and pick your computer: **Mac** (macOS 12 or newer) or **Windows** (10 or 11).', why: 'The desktop app is the easiest way in. No terminal needed.' },
+          { do: 'Open the file you downloaded and install it like any other app.' },
+          { do: '**Linux**, or prefer the terminal? Let Claude run the official install command for you with the prompt below.' },
+        ] },
+        { t: 'prompt', label: 'Install Hermes for me (Linux or terminal)', text: `Install Hermes Agent by Nous Research on this computer.
 Use only the official installer from hermes-agent.nousresearch.com, and show me the exact command before you run it.
-Then help me choose a cheap model for it to start with (or a free local Qwen model from Ollama), and tell me how to open it.
-If it needs any API key, tell me where to paste it myself. Never ask me to paste a key into this chat.` },
-        { t: 'p', text: 'Claude runs the official installer, then walks you through choosing its "brain": Claude through an API key, OpenRouter, Nous Portal, or a free local Qwen model. Starting cheap is smart while you learn.' },
-        { t: 'h', text: 'Step 2: say hello' },
+Then help me connect a model (see the options in my course) and tell me how to open Hermes.
+If it needs any API key, open a hidden terminal prompt so I can paste it there, never in this chat.` },
+        { t: 'h', text: 'Step 2: give it a brain' },
+        { t: 'p', text: 'The first time you open Hermes, it asks which AI to use as its brain. Pick one:' },
+        { t: 'table', head: ['Option', 'Cost', 'Good for'], rows: [
+          ['**Nous Portal** (made by Hermes\'s makers)', 'Free plan with free models; paid plans unlock 200+ models', 'The easiest start: make an account and sign in from Hermes.'],
+          ['**Your own API key** (Claude, OpenRouter and others)', 'Pay per use; set a spending limit', 'The smartest results. Add the key with the hidden terminal prompt.'],
+          ['**Free local Qwen** through Ollama', 'Free', 'Private and offline. Needs a GPU with enough VRAM (see the local AI lesson). One command: **ollama launch hermes --model qwen3.5:9b**'],
+        ] },
+        { t: 'tip', tone: 'safe', text: 'Start on the free option while you learn. Agents can take many steps quickly, so a paid key should always have a monthly spending limit before you connect it.' },
+        { t: 'h', text: 'Step 3: say hello' },
         { t: 'p', text: 'Hermes opens in its own window, or on your phone once you connect Telegram (next lesson). Here is what the first run looks like:' },
         { t: 'term', title: 'Terminal', caption: 'Hermes the first time you start it (example)', lines: [
           ['cmd', 'hermes model'],
@@ -76,7 +90,8 @@ If it needs any API key, tell me where to paste it myself. Never ask me to paste
             'Lock the messaging gateway to your own user ID so strangers cannot command it.',
             'Back up `~/.hermes`, and never commit it to a public repo: it holds tokens.',
           ] },
-          { t: 'links', items: [{ label: 'Hermes Agent docs', url: 'https://hermes-agent.nousresearch.com/docs/' }] },
+          { t: 'snap', src: 'shots/hermes-github.jpg', url: 'github.com/NousResearch/hermes-agent', caption: 'Hermes is open source: anyone can read exactly what it does on GitHub.' },
+          { t: 'links', items: [{ label: 'Hermes Agent docs', url: 'https://hermes-agent.nousresearch.com/docs/' }, { label: 'Hermes on GitHub', url: 'https://github.com/NousResearch/hermes-agent' }] },
         ] },
         { t: 'check', q: 'What is a Hermes "skill"?', options: [
           'A paid add-on',
@@ -85,7 +100,7 @@ If it needs any API key, tell me where to paste it myself. Never ask me to paste
         ], answer: 1, explain: 'Skills are how Hermes learns: it saves what worked so next time is faster and more reliable.' },
         { t: 'recap', items: [
           'Hermes is a free agent you can text from your phone.',
-          'Claude installs it from the official site; pick a cheap brain to start.',
+          'Install the desktop app, then pick a brain: Nous Portal free, your own key, or local Qwen.',
           'Skills make it improve; spending limits and separate accounts keep it safe.',
         ] },
       ],
@@ -108,6 +123,7 @@ Before you save it, show me exactly what it will do and when, and wait for my OK
 Only read things. Do not change, delete or buy anything in this job.` },
         { t: 'p', text: 'Look at the last two lines. "Show me first and wait for my OK" means no surprises. "Only read things" means even if something goes wrong, nothing gets broken.' },
         { t: 'h', text: 'Talk to it from your phone' },
+        { t: 'snap', src: 'shots/telegram-bots.jpg', url: 'core.telegram.org/bots/tutorial', caption: 'Telegram\'s official bot guide. Bots are made by chatting with @BotFather, which gives you the bot token.' },
         { t: 'prompt', label: 'Connect Telegram', text: `Help me connect you to Telegram so I can message you from my phone.
 Walk me through making a bot with BotFather step by step.
 Lock it so only my Telegram account can talk to you.

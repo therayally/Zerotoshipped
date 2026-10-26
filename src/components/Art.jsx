@@ -138,10 +138,23 @@ export function BrowserFrame({ url, children, caption }) {
   );
 }
 
-export function Snapshot({ src, url, caption }) {
+const glow = keyframes`0%, 100% { box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.35); } 50% { box-shadow: 0 0 0 8px rgba(255, 196, 0, 0.12); }`;
+
+// A real screenshot in a browser frame. `marks` draws highlight boxes over the parts to click,
+// each as { x, y, w, h } in percent of the image, with an optional number badge `n`.
+export function Snapshot({ src, url, caption, marks = [] }) {
   return (
     <BrowserFrame url={url} caption={caption}>
-      <Box component="img" src={src} alt={caption} loading="lazy" sx={{ display: 'block', width: '100%', height: 'auto' }} />
+      <Box sx={{ position: 'relative' }}>
+        <Box component="img" src={src} alt={caption} loading="lazy" sx={{ display: 'block', width: '100%', height: 'auto' }} />
+        {marks.map((m, i) => (
+          <Box key={i} aria-hidden="true" sx={{ position: 'absolute', left: `${m.x}%`, top: `${m.y}%`, width: `${m.w}%`, height: `${m.h}%`, border: '3px solid #FFC400', borderRadius: '6px', animation: `${glow} 1.8s ease-in-out infinite`, '@media (prefers-reduced-motion: reduce)': { animation: 'none' } }}>
+            {m.n && (
+              <Box sx={{ position: 'absolute', top: -14, left: -14, width: 26, height: 26, borderRadius: '50%', background: '#FFC400', color: '#1A1300', fontWeight: 800, fontSize: 14, display: 'grid', placeItems: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>{m.n}</Box>
+            )}
+          </Box>
+        ))}
+      </Box>
     </BrowserFrame>
   );
 }

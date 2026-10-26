@@ -19,6 +19,7 @@ export default {
         ] },
         { t: 'p', text: 'Your server bundles those three together, sends them to Claude, and streams the answer back to the chat bubble on the website.' },
         { t: 'h', text: 'Step 1: get an API key (with a limit)' },
+        { t: 'snap', src: 'shots/anthropic-console.jpg', url: 'console.anthropic.com', caption: 'The Claude Platform (the Anthropic Console): sign in here (highlighted) to create API keys and set spending limits.', marks: [{ x: 36, y: 46, w: 28, h: 23 }] },
         { t: 'steps', items: [
           { do: 'Go to **console.anthropic.com** and make an account.', why: 'This is separate from your Claude Pro plan. Apps you build for others use pay-per-use API keys.' },
           { do: 'Set a **monthly spending limit first** (Settings → Limits).', why: 'If someone spams your chatbot, the limit stops the bill instead of your bank account.' },

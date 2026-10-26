@@ -8,6 +8,7 @@ export default {
       minutes: 10,
       body: [
         { t: 'why', text: 'People decide whether to trust your app in about one second, before they read a single word. Good fonts and well-made buttons are not decoration. They are what makes a stranger believe your app is real and safe to put their card into.' },
+        { t: 'snap', src: 'shots/google-fonts.jpg', url: 'fonts.google.com', caption: 'Google Fonts: thousands of free fonts you can use in any app, even commercial ones.' },
         { t: 'p', text: '**UI** stands for **user interface**: everything a person sees and touches. The good news is you do not have to design buttons from scratch. Free, professional building blocks already exist, and Claude Code knows how to use them.' },
         { t: 'h', text: 'Fonts: where to get them, and the license trap' },
         { t: 'links', items: [

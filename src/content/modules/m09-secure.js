@@ -52,6 +52,7 @@ If anything leaked, tell me which keys I must replace at the provider, step by s
       minutes: 13,
       body: [
         { t: 'why', text: 'Hackers are not usually geniuses inventing new tricks. They try the same ten or so mistakes on every app, because those mistakes are everywhere. If you check for those ten, you are safer than the vast majority of apps on the internet, including plenty built by big companies.' },
+        { t: 'snap', src: 'shots/owasp-top10.jpg', url: 'owasp.org/Top10', caption: 'The official OWASP Top 10, updated for 2025: the list security pros check every app against.' },
         { t: 'p', text: '**OWASP** (the Open Worldwide Application Security Project) is a nonprofit of security experts. Every few years they publish the **Top 10**: the most common and dangerous ways web apps get hacked, based on real data. Here is the 2025 list in plain English:' },
         { t: 'table', head: ['#', 'Risk', 'What it looks like in a real app'], rows: [
           ['A01', 'Broken access control', 'Changing /orders/123 to /orders/124 shows someone else\'s order'],

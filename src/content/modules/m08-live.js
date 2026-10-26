@@ -66,6 +66,7 @@ export default {
           ['Extras', 'Free privacy, fast DNS, attack protection', 'Often paid add-ons'],
         ] },
         { t: 'h', text: 'Buy it and point it at your app' },
+        { t: 'snap', src: 'shots/cloudflare-registrar.jpg', url: 'cloudflare.com/products/registrar', caption: 'Cloudflare Registrar: type the name you want into the search box to see if it is free.', marks: [{ x: 29.5, y: 44.5, w: 41.5, h: 6 }] },
         { t: 'steps', items: [
           { do: 'Make a Cloudflare account and turn on two-factor login.', why: 'Whoever controls your domain controls your website **and** your email. Treat this account like your bank.' },
           { do: 'Go to **Domain Registration → Register Domains**, search for your name, and buy it.' },
@@ -108,7 +109,7 @@ export default {
         { t: 'why', text: 'Your app will need to send email: sign-in codes, receipts, "your order is ready." If those emails land in spam, people cannot log in or think you never sent the receipt. Setting up email properly is the difference between "it works" and "it works for real customers."' },
         { t: 'p', text: '**Resend** is a service that sends email for your app. You call it from your server code, and it handles delivery. It has a free plan that is plenty for getting started.' },
         { t: 'h', text: 'Set it up' },
-        { t: 'snap', src: 'shots/resend.jpg', url: 'resend.com/signup', caption: 'Resend sign-up' },
+        { t: 'snap', src: 'shots/resend-signup.jpg', url: 'resend.com/signup', caption: 'Create your Resend account. Signing in with GitHub (highlighted) is quickest.', marks: [{ x: 50, y: 33.5, w: 19.5, h: 6 }] },
         { t: 'steps', items: [
           { do: 'Sign up at **resend.com** and turn on two-factor login.' },
           { do: 'Click **Domains → Add Domain** and type your domain.' },
