@@ -6,7 +6,6 @@ import GavelRounded from '@mui/icons-material/GavelRounded';
 import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
-import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded';
 import AutoStoriesRounded from '@mui/icons-material/AutoStoriesRounded';
 import LockOpenRounded from '@mui/icons-material/LockOpenRounded';
 import BlockRounded from '@mui/icons-material/BlockRounded';
@@ -103,6 +102,18 @@ function DrinkArt() {
   );
 }
 
+// The Square logo (mark + wordmark) for the "Secure checkout by Square" line; follows the text color in both themes.
+function SquareMark() {
+  const { t } = useTheme();
+  const icon = logo('square');
+  return (
+    <Box component="span" aria-label="Square" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: t.text, fontWeight: 700, fontSize: 14.5 }}>
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d={icon.path} fill="currentColor" /></svg>
+      Square
+    </Box>
+  );
+}
+
 // Card brands shown under the donate button, each in its own small tile.
 const CARDS = ['visa', 'mastercard', 'amex', 'discover', 'applepay', 'googlepay', 'cashapp'];
 
@@ -131,7 +142,6 @@ export function DonateBody({ active = true, onClose, account, onAccount }) {
   const { t } = useTheme();
   const [config, setConfig] = useState({});
   const [waiting, setWaiting] = useState(false);
-  const [other, setOther] = useState(false);
   const [amount, setAmount] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -180,17 +190,17 @@ export function DonateBody({ active = true, onClose, account, onAccount }) {
 
       <Box component="form" onSubmit={give} sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
       {config.donate_card && account ? (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, width: '100%', maxWidth: 340, alignSelf: 'center' }}>
           <TextField value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Any amount" aria-label="Donation amount in dollars"
             slotProps={{ input: { startAdornment: <InputAdornment position="start">$</InputAdornment>, sx: { borderRadius: '3px', fontSize: 18, fontWeight: 600 } }, htmlInput: { inputMode: 'decimal', maxLength: 7 } }}
             sx={{ width: 150, flexShrink: 0 }} />
-          <Button type="submit" variant="contained" size="large" disabled={busy || !(Number(amount) > 0)} startIcon={<LocalBarRounded />} sx={{ flex: 1, fontSize: 16 }}>
+          <Button type="submit" variant="contained" disabled={busy || !(Number(amount) > 0)} startIcon={<LocalBarRounded fontSize="small" />} sx={{ flex: 1, py: 0.9, fontSize: 15 }}>
             {busy ? 'Opening…' : 'Buy me a drink'}
           </Button>
         </Box>
       ) : (
-        <Button variant="contained" size="large" href={config.donate_square || undefined} target="_blank" rel="noopener noreferrer"
-          disabled={!config.donate_square} onClick={() => setWaiting(true)} startIcon={<LocalBarRounded />} sx={{ py: 1.4, fontSize: 16 }}>
+        <Button variant="contained" href={config.donate_square || undefined} target="_blank" rel="noopener noreferrer"
+          disabled={!config.donate_square} onClick={() => setWaiting(true)} startIcon={<LocalBarRounded fontSize="small" />} sx={{ py: 0.9, px: 4, fontSize: 15, alignSelf: 'center', minWidth: 220 }}>
           Buy me a drink
         </Button>
       )}
@@ -202,9 +212,17 @@ export function DonateBody({ active = true, onClose, account, onAccount }) {
         ) : err ? (
           <Typography variant="body2" role="alert" sx={{ color: t.warn, fontWeight: 600, textAlign: 'center' }}>{err}</Typography>
         ) : (
-          <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-            {config.donate_card || config.donate_square ? `Any amount helps. Secure checkout by Square${account ? `, use ${account.email} so we can thank you` : ''}.` : 'Card donations are almost ready. PayPal and crypto work below.'}
-          </Typography>
+          config.donate_card || config.donate_square ? (
+            <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, color: 'text.secondary' }}>
+                <Typography variant="body2">Any amount helps. Secure checkout by</Typography>
+                <SquareMark />
+              </Box>
+              {account && <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>Use {account.email} so we can thank you.</Typography>}
+            </Box>
+          ) : (
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>Card donations are almost ready. PayPal and crypto work below.</Typography>
+          )
         )}
         <Box aria-label="Accepted: Visa, Mastercard, American Express, Discover, Apple Pay, Google Pay, Cash App Pay" sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, flexWrap: 'wrap' }}>
           {CARDS.map((k) => <CardMark key={k} k={k} />)}
@@ -212,12 +230,9 @@ export function DonateBody({ active = true, onClose, account, onAccount }) {
       </Box>
 
       <Box sx={{ borderTop: `1px solid ${t.border}`, pt: 1.5 }}>
-        <Button size="small" fullWidth onClick={() => setOther(!other)} endIcon={<ExpandMoreRounded sx={{ transition: 'transform .2s', transform: other ? 'rotate(180deg)' : 'none' }} />}
-          sx={{ color: 'text.secondary' }}>
-          PayPal or crypto
-        </Button>
-        {other && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', fontWeight: 600 }}>Or give with PayPal or crypto</Typography>
+        {(
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1.25 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, borderRadius: '4px', background: t.surface2 }}>
               <Box component="img" src="/paypal-qr.png" alt="PayPal QR code" width={80} height={80} sx={{ borderRadius: '2px', background: '#fff', p: 0.5, flexShrink: 0 }} />
               <Box sx={{ minWidth: 0 }}>
