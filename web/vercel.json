@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/donate",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/api/:path+",
