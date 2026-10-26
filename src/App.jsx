@@ -8,6 +8,7 @@ import { modules } from './content/course';
 import { metaFor } from './content/meta';
 import Lesson from './components/Lesson';
 import { TermsGate, DonateDialog, TERMS_VERSION } from './components/Gates';
+import AccountGate from './components/AccountGate';
 import { getAccount, refreshAccount, signOut } from './account';
 
 // Browser storage is a convenience only: every read and write is guarded.
@@ -45,6 +46,7 @@ export default function App() {
   const [splashFade, setSplashFade] = useState(false);
 
   const [account, setAccount] = useState(() => getAccount());
+  const [offline, setOffline] = useState(false);
   const theme = useMemo(() => makeTheme(colorMode), [colorMode]);
   const index = allLessons.findIndex((l) => l.id === currentId);
   const lesson = allLessons[index];
@@ -62,12 +64,12 @@ export default function App() {
 
   // Show the donation window once per launch until the server has a donation recorded for this account.
   useEffect(() => {
-    if (termsOk && !splash && !demo && !account?.donated && !session.get('drinkSeen')) {
+    if (termsOk && !splash && (account || offline) && !demo && !account?.donated && !session.get('drinkSeen')) {
       session.set('drinkSeen');
       const id = setTimeout(() => setDrinkOpen(true), 400);
       return () => clearTimeout(id);
     }
-  }, [termsOk, splash, demo, account?.donated]);
+  }, [termsOk, splash, demo, account, offline]);
 
   useEffect(() => {
     const onHash = () => { const id = idFromHash(); if (id) { setCurrentId(id); setView('lesson'); } else setView('home'); };
@@ -143,6 +145,7 @@ export default function App() {
         </Box>
       )}
       <TermsGate open={!termsOk && !splash} onAccept={() => { store.set('terms', TERMS_VERSION); setTermsOk(true); }} />
+      <AccountGate open={termsOk && !splash && !demo && !account && !offline} onAccount={(a) => { setAccount(a); setToast(`Welcome${a.name ? ', ' + a.name.split(' ')[0] : ''}!`); }} onOffline={() => setOffline(true)} />
       <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => setDrinkOpen(false)} account={account}
         onAccount={(a) => { setAccount(a); if (a?.donated) { setDrinkOpen(false); setToast('Cheers! Your drink arrived. Thank you.'); } }} />
       <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} message={toast} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />

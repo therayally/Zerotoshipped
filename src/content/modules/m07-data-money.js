@@ -11,9 +11,11 @@ export default {
       body: [
         { t: 'why', text: 'You created a Neon database earlier. Now your app needs to actually use it: save things, read them back, and, most importantly, only ever show each person **their own** data. Getting that last part wrong is the most common serious bug in AI-built apps.' },
         { t: 'h', text: 'Step 1: bring your secret settings home' },
-        { t: 'p', text: 'Vercel is already holding your database\'s connection details. These two commands copy them into a private file on your computer, so your local app can use the same database:' },
-        { t: 'cmd', label: 'Get your secret settings from Vercel', text: 'npx vercel link\nnpx vercel env pull .env.local' },
-        { t: 'p', text: '`vercel link` connects this folder to your Vercel project. `vercel env pull` writes the secret settings into a file called `.env.local`. That file must **never** be saved to GitHub, which is exactly what your house rules already tell Claude.' },
+        { t: 'p', text: 'Vercel is already holding your database\'s connection details. Ask Claude to copy them into a private file on your computer, so your app can use the same database while you build:' },
+        { t: 'prompt', label: 'Bring the secret settings over', text: `Link this folder to my Vercel project and copy its environment variables into a private .env.local file.
+If you need me to sign in to Vercel, open it in my browser.
+Make sure .env.local is listed in .gitignore, and never print the values.` },
+        { t: 'p', text: 'That `.env.local` file must **never** be saved to GitHub, which is exactly what your house rules already tell Claude. (Under the hood Claude runs `vercel link` and `vercel env pull .env.local`.)' },
         { t: 'h', text: 'Step 2: connect and create your tables' },
         { t: 'prompt', label: 'Connect the database', text: `My Neon database link is in .env.local as DATABASE_URL (do not print it).
 1. Make sure .env.local is in .gitignore.
@@ -43,7 +45,7 @@ Every query must only return rows that belong to the signed-in user.` + SAFE },
           'A prettier error page',
         ], answer: 1, explain: 'Broken access control. Every query for user data must include "belongs to the signed-in user", decided by the server.' },
         { t: 'recap', items: [
-          '`vercel env pull` brings secret settings into a private .env.local file.',
+          'Claude copies your secret settings into a private .env.local file.',
           'Drizzle talks to the database safely; migrations record table changes.',
           'Every query for user data checks it belongs to the signed-in user.',
         ] },

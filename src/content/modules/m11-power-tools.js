@@ -55,14 +55,14 @@ export default {
       body: [
         { t: 'why', text: 'What if some of your AI work cost nothing, worked without internet, and never sent a single word to anyone else\'s servers? That is local AI. It is not as smart as Claude, but for private documents, bulk jobs and simple tasks, it is a superpower.' },
         { t: 'p', text: '**Local AI** means the AI model runs on your own computer instead of in a company\'s data center. You download the model once, like downloading a big game, and then it is yours. No bill, no limit, and your data never leaves your machine.' },
-        { t: 'p', text: 'We use **Qwen**, a free, open AI model family from Alibaba that is especially good at code and chat. To run it, we use **Ollama**, a free app that makes running local models as easy as one command.' },
+        { t: 'p', text: 'We use **Qwen**, a free, open AI model family from Alibaba that is especially good at code and chat. To run it, we use **Ollama**, a free app with a simple chat window.' },
         { t: 'h', text: 'Step 1: install Ollama' },
         { t: 'snap', src: 'shots/ollama.jpg', url: 'ollama.com/download', caption: 'Download Ollama for your computer' },
         { t: 'steps', items: [
-          { do: 'Go to **ollama.com**, download it, and open it once.', why: 'It runs quietly in the background, ready to serve models.' },
-          { do: 'Open Terminal and run the command below.', why: 'The first time, it downloads the model (a few gigabytes), then opens a chat.' },
+          { do: 'Go to **ollama.com/download**, download it, and open it.', why: 'It installs like any other app and runs quietly in the background.' },
+          { do: 'In the Ollama window, pick a **Qwen** model from the model menu (see the table below) and type a message.', why: 'The first time, it downloads the model (a few gigabytes). After that it works offline.' },
         ] },
-        { t: 'cmd', label: 'Chat with Qwen', text: 'ollama run qwen3' },
+        { t: 'tip', tone: 'info', text: 'Prefer more buttons? **LM Studio** (lmstudio.ai) does the same thing: search for "Qwen", click Download, then Chat.' },
         { t: 'h', text: 'Which Qwen fits your computer' },
         { t: 'p', text: 'Bigger models are smarter but need more memory (RAM). Pick the biggest one your computer can comfortably run:' },
         { t: 'table', head: ['Your computer\'s memory', 'Try this model', 'What to expect'], rows: [
@@ -79,6 +79,7 @@ export default {
 4. Give me two short commands: one to start Claude Code with Qwen, one with normal Claude.` },
         { t: 'tip', tone: 'info', text: 'A local model on a laptop is slower and less clever than Claude. Use it for simple, private or high-volume jobs. Keep Claude for building and hard problems.' },
         { t: 'deeper', title: 'How local models fit in, and the gotchas', blocks: [
+          { t: 'p', text: 'Terminal users can start a model with `ollama run qwen3`.' },
           { t: 'p', text: 'Ollama and LM Studio download **quantized** models (compressed to about 4 to 8 bits per number) so they fit in normal computer memory with only a small loss in quality. Most Qwen models use the Apache-2.0 license, which allows commercial use.' },
           { t: 'p', text: 'Recent Ollama versions speak the same language (API) as Claude, so Claude Code can connect by pointing `ANTHROPIC_BASE_URL` at your local Ollama. Claude Code needs a big context window, so the model\'s `num_ctx` must be raised (64K or more); Ollama\'s default is much smaller.' },
           { t: 'steps', items: [

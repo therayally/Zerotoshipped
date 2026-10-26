@@ -47,15 +47,14 @@ export default {
       body: [
         { t: 'why', text: 'Hermes turns everything you learned about agents into something you can actually use today: an assistant that lives on your computer, that you can message from your phone, and that can learn new skills and run jobs on a schedule. It is free and open source.' },
         { t: 'p', text: '**Hermes Agent** is made by Nous Research. You can talk to it in the Terminal, or connect it to Telegram, Discord, Slack, WhatsApp and more, so you can text it like a person. It can use almost any AI as its brain, including Claude or a free local Qwen model.' },
-        { t: 'h', text: 'Step 1: install it' },
-        { t: 'cmd', label: 'Mac / Linux', text: 'curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash' },
-        { t: 'cmd', label: 'Windows PowerShell', text: 'iex (irm https://hermes-agent.nousresearch.com/install.ps1)' },
-        { t: 'p', text: 'Same rule as before: install commands are only safe from the official site. Close the Terminal, open a new one, and continue.' },
-        { t: 'h', text: 'Step 2: pick its brain' },
-        { t: 'cmd', label: 'Choose a model', text: 'hermes model' },
-        { t: 'p', text: 'This lets you choose which AI Hermes uses: Claude through an API key, OpenRouter, Nous Portal, or a free local Qwen model from Ollama. Starting cheap is smart while you learn.' },
-        { t: 'h', text: 'Step 3: say hello' },
-        { t: 'cmd', label: 'Start Hermes', text: 'hermes' },
+        { t: 'h', text: 'Step 1: let Claude install it' },
+        { t: 'prompt', label: 'Install Hermes for me', text: `Install Hermes Agent by Nous Research on this computer.
+Use only the official installer from hermes-agent.nousresearch.com, and show me the exact command before you run it.
+Then help me choose a cheap model for it to start with (or a free local Qwen model from Ollama), and tell me how to open it.
+If it needs any API key, tell me where to paste it myself. Never ask me to paste a key into this chat.` },
+        { t: 'p', text: 'Claude runs the official installer, then walks you through choosing its "brain": Claude through an API key, OpenRouter, Nous Portal, or a free local Qwen model. Starting cheap is smart while you learn.' },
+        { t: 'h', text: 'Step 2: say hello' },
+        { t: 'p', text: 'Hermes opens in its own window, or on your phone once you connect Telegram (next lesson). Here is what the first run looks like:' },
         { t: 'term', title: 'Terminal', caption: 'Hermes the first time you start it (example)', lines: [
           ['cmd', 'hermes model'],
           ['out', 'Choose a provider:  Anthropic · OpenRouter · Nous Portal · Ollama (local)'],
@@ -68,6 +67,7 @@ export default {
         { t: 'p', text: 'When Hermes figures out how to do a complicated job, it can save the steps as a **skill**: a little instruction pack it reuses next time. So the more you use it, the better it gets at your specific tasks.' },
         { t: 'tip', tone: 'safe', text: 'Set a monthly spending limit on any API key you give Hermes. Agents can run many steps quickly, and a limit turns a surprise bill into a polite stop.' },
         { t: 'deeper', title: 'How Hermes is put together, and how to harden it', blocks: [
+          { t: 'p', text: 'Terminal install: `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash` on Mac/Linux, or `iex (irm https://hermes-agent.nousresearch.com/install.ps1)` in Windows PowerShell. Then `hermes model` to choose a model and `hermes` to start.' },
           { t: 'p', text: 'Hermes is a general-purpose agent runtime: a terminal interface, a **gateway** that connects messaging apps, a skills system it can extend itself, memory with session search, helper sub-agents, and a built-in scheduler. Commands can run on your machine, in Docker, over SSH or in remote sandboxes.' },
           { t: 'steps', items: [
             'Settings, memory, skills and scheduled jobs live in `~/.hermes/`.',
@@ -85,7 +85,7 @@ export default {
         ], answer: 1, explain: 'Skills are how Hermes learns: it saves what worked so next time is faster and more reliable.' },
         { t: 'recap', items: [
           'Hermes is a free agent you can text from your phone.',
-          '`hermes model` picks its brain; start cheap.',
+          'Claude installs it from the official site; pick a cheap brain to start.',
           'Skills make it improve; spending limits and separate accounts keep it safe.',
         ] },
       ],

@@ -17,15 +17,23 @@
     <div class="card login-card">
       <a class="logo" href="/"><picture><source srcset="/assets/brand/logo-on-dark.png" media="(prefers-color-scheme: dark)" /><img class="brand" src="/assets/brand/logo-on-light.png" alt="Zero to Shipped" /></picture></a>
       <h1>Admin sign in</h1>
-      <p class="muted">We email you a 6-digit code. No passwords.</p>
-      <form id="login-email" class="stack">
+      <p class="muted">Use the same email and password as your Zero to Shipped account. No account yet? Create one in the app first.</p>
+      <form id="login-form" class="stack">
         <div><label for="email">Email</label><input id="email" type="email" autocomplete="email" required /></div>
-        <button class="btn btn-primary" type="submit">Send my code</button>
-      </form>
-      <form id="login-code" class="stack" hidden>
-        <div><label for="code">6-digit code</label><input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required /></div>
+        <div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required /></div>
         <button class="btn btn-primary" type="submit">Sign in</button>
-        <button class="btn btn-outline" type="button" id="login-back">Use a different email</button>
+        <button class="btn btn-outline" type="button" id="forgot-link">Forgot password?</button>
+      </form>
+      <form id="forgot-form" class="stack" hidden>
+        <div><label for="f-email">Email</label><input id="f-email" type="email" autocomplete="email" required /></div>
+        <button class="btn btn-primary" type="submit">Email me a code</button>
+        <button class="btn btn-outline" type="button" data-back>Back to sign in</button>
+      </form>
+      <form id="reset-form" class="stack" hidden>
+        <div><label for="r-code">6-digit code</label><input id="r-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required /></div>
+        <div><label for="r-password">New password (10+ characters)</label><input id="r-password" type="password" autocomplete="new-password" minlength="10" required /></div>
+        <button class="btn btn-primary" type="submit">Save new password</button>
+        <button class="btn btn-outline" type="button" data-back>Back to sign in</button>
       </form>
       <p id="login-msg" class="msg" role="status"></p>
     </div>

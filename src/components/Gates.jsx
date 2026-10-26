@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import LocalBarRounded from '@mui/icons-material/LocalBarRounded';
 import GavelRounded from '@mui/icons-material/GavelRounded';
@@ -8,7 +8,7 @@ import CheckRounded from '@mui/icons-material/CheckRounded';
 import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded';
 import { FONT_MONO } from '../theme';
-import { getConfig, sendCode, verifyCode, refreshAccount } from '../account';
+import { getConfig, refreshAccount } from '../account';
 
 export const TERMS_VERSION = '2026-10-26';
 
@@ -84,19 +84,12 @@ function WalletRow({ label, addr }) {
   );
 }
 
-const field = { '& .MuiOutlinedInput-root': { borderRadius: '3px' } };
-
 // Shows at every launch until the server has a donation recorded for this person's account.
 // There is deliberately no "I already donated" button: only a recorded donation closes it for good.
 export function DonateDialog({ open, onClose, account, onAccount }) {
   const { t } = useTheme();
   const [config, setConfig] = useState({});
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [step, setStep] = useState('email');
-  const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [other, setOther] = useState(false);
 
@@ -111,20 +104,6 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
     }, 5000);
     return () => clearInterval(id);
   }, [open, waiting, account, onAccount]);
-
-  const run = async (fn) => {
-    setBusy(true); setErr('');
-    try { await fn(); } catch (e) { setErr(e.message); } finally { setBusy(false); }
-  };
-
-  const askCode = (e) => {
-    e?.preventDefault();
-    run(async () => { const r = await sendCode(email.trim()); setMsg(r.message); setCode(''); setStep('code'); });
-  };
-  const confirm = (e) => {
-    e?.preventDefault();
-    run(async () => { const acct = await verifyCode(email.trim(), code.trim()); onAccount(acct); });
-  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth aria-labelledby="drink-title"
@@ -144,32 +123,10 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
           It is built by one person. If it helps you, a drink keeps it free and up to date. This window stops showing once your donation is recorded on your account.
         </Typography>
 
-        {!account && (
-          <Box sx={{ p: 2, borderRadius: '3px', background: t.surface2, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>Step 1: sign in, so your drink is linked to you</Typography>
-            {step === 'email' ? (
-              <Box component="form" onSubmit={askCode} sx={{ display: 'flex', gap: 1 }}>
-                <TextField size="small" type="email" required fullWidth placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} sx={field} slotProps={{ htmlInput: { autoComplete: 'email', 'aria-label': 'Email' } }} />
-                <Button type="submit" variant="outlined" disabled={busy || !email} sx={{ flexShrink: 0 }}>Send code</Button>
-              </Box>
-            ) : (
-              <Box component="form" onSubmit={confirm} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>{msg}</Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <TextField size="small" required fullWidth placeholder="6-digit code" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} sx={field}
-                    slotProps={{ htmlInput: { inputMode: 'numeric', autoComplete: 'one-time-code', 'aria-label': '6-digit code', style: { letterSpacing: '0.3em', fontWeight: 700 } } }} />
-                  <Button type="submit" variant="contained" disabled={busy || code.length !== 6} sx={{ flexShrink: 0 }}>Sign in</Button>
-                </Box>
-                <Button size="small" onClick={() => setStep('email')} sx={{ alignSelf: 'flex-start' }}>Use a different email</Button>
-              </Box>
-            )}
-          </Box>
-        )}
-
         <Box sx={{ p: 2, borderRadius: '3px', border: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: 1.25, opacity: account ? 1 : 0.55 }}>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>{account ? 'Donate with a card' : 'Step 2: donate with a card'}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>Donate with a card</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {account ? <>Use <b>{account.email}</b> at checkout so it is matched to you.</> : 'Sign in first so we can match your donation.'}
+            {account ? <>Use <b>{account.email}</b> at checkout so it is matched to your account.</> : 'Sign in first so we can match your donation to you.'}
           </Typography>
           <Button variant="contained" href={account && config.donate_square ? config.donate_square : undefined} target="_blank" rel="noopener noreferrer"
             disabled={!account || !config.donate_square} onClick={() => setWaiting(true)} startIcon={<LocalBarRounded />}>

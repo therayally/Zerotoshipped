@@ -50,14 +50,24 @@ export async function getConfig() {
   }
 }
 
-export const sendCode = (email) => call('/api/auth/start', { body: { email, purpose: 'account' } });
+const device = () => ({ device_id: deviceId(), device_name: deviceName() });
 
-export async function verifyCode(email, code) {
-  const r = await call('/api/auth/verify', { body: { email, code, device_id: deviceId(), device_name: deviceName() } });
-  const acct = { token: r.token, email: r.email, donated: !!r.donated };
+function saveSession(r) {
+  const acct = { token: r.token, email: r.email, name: r.name || '', donated: !!r.donated };
   write('account', acct);
   return acct;
 }
+
+// Create account: name, email, password, then a 6-digit code emailed to confirm the address.
+export const signup = (name, email, password) => call('/api/auth/signup', { body: { name, email, password } });
+export const resendSignup = (email) => call('/api/auth/resend', { body: { email } });
+export const confirmSignup = async (email, code) => saveSession(await call('/api/auth/confirm', { body: { email, code, ...device() } }));
+
+export const login = async (email, password) => saveSession(await call('/api/auth/login', { body: { email, password, ...device() } }));
+
+// Forgot password: a 6-digit code by email, then a new password.
+export const forgotPassword = (email) => call('/api/auth/forgot', { body: { email } });
+export const resetPassword = async (email, code, password) => saveSession(await call('/api/auth/reset', { body: { email, code, password, ...device() } }));
 
 // Asks the server whether this account has a recorded donation. The server's database is the only source of truth.
 export async function refreshAccount() {
@@ -65,7 +75,7 @@ export async function refreshAccount() {
   if (!acct) return null;
   try {
     const r = await call('/api/me', { method: 'GET', token: acct.token });
-    const next = { ...acct, email: r.email, donated: !!r.donated };
+    const next = { ...acct, email: r.email, name: r.name || acct.name || '', donated: !!r.donated };
     write('account', next);
     return next;
   } catch (e) {

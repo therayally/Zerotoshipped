@@ -108,8 +108,7 @@ Do not fix anything yet. Wait for me to say which ones to fix.` },
         { t: 'why', text: 'Your app is built on hundreds of small code packages written by other people. When a security hole is found in one of them, it gets published publicly, which means attackers learn about it at the same moment you do. Keeping packages updated is how you close the door before they walk through it.' },
         { t: 'p', text: 'Each publicly known hole gets an ID like **CVE-2025-12345** (CVE stands for Common Vulnerabilities and Exposures), plus a severity score from 0 to 10. You do not need to read them all. You need a tool that checks for you.' },
         { t: 'h', text: 'Check right now' },
-        { t: 'cmd', label: 'In your project folder', text: 'npm audit' },
-        { t: 'p', text: 'This compares every package your app uses against a public database of known holes and lists anything risky. Then let Claude handle the fixing:' },
+        { t: 'p', text: 'Paste this into Claude. It runs a tool called `npm audit`, which compares every package your app uses against a public list of known holes, then fixes what it safely can:' },
         { t: 'prompt', label: 'Fix the holes', text: `Run npm audit. For each High or Critical problem:
 1. Explain in one simple sentence what could go wrong.
 2. Fix it by updating the package if there is a safe update.
@@ -149,7 +148,8 @@ Then run the app and the build again to make sure nothing broke. Commit with a c
       body: [
         { t: 'why', text: 'You are one person. Big companies have whole security teams. The trick is to let free tools be your security team: they check every change automatically, never get tired, and catch the mistakes you would never spot by eye.' },
         { t: 'h', text: 'Start with the one built into Claude Code' },
-        { t: 'cmd', label: 'Inside Claude Code', text: '/security-review' },
+        { t: 'p', text: 'In the Claude app\'s Code tab, type this into the message box (it is a Claude command, not a terminal command):' },
+        { t: 'prompt', label: 'Type into Claude', text: '/security-review' },
         { t: 'p', text: 'This reads your recent changes and looks for common holes: injection, cross-site scripting, broken logins, unsafe data handling. Then just say "Fix the most serious one first."' },
         { t: 'h', text: 'Free tools that run automatically' },
         { t: 'table', head: ['Tool', 'What it checks', 'Think of it as'], rows: [

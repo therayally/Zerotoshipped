@@ -1,4 +1,5 @@
 // Zero to Shipped API: accounts (email codes), verified donations (Square webhook), and the super admin.
+import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { q, one } from './db.js';
 
 const enc = new TextEncoder();
@@ -115,19 +116,51 @@ async function loadSettings() {
 
 // ───────────────────────── email
 
-async function sendCodeEmail(settings, to, code, purpose) {
-  const subject = purpose === 'admin' ? 'Your Zero to Shipped admin sign-in code' : 'Your Zero to Shipped sign-in code';
-  const text = `Your code is ${code}\n\nIt works for 10 minutes. If you did not ask for this, you can ignore this email.`;
-  if (!settings.resend_api_key) {
-    if (env('DEV_MODE') === '1') { console.log(`[dev] ${purpose} code for ${to}: ${code}`); return; }
-    throw new Error('Email is not set up yet. The owner needs to add a Resend API key in the admin panel.');
+// Resend: the key and sender come from the admin panel, or from Vercel env vars (RESEND_API_KEY, MAIL_FROM).
+async function sendMail(settings, to, subject, text) {
+  const key = settings.resend_api_key || env('RESEND_API_KEY');
+  if (!key) {
+    if (env('DEV_MODE') === '1') { console.log(`[dev] mail to ${to}: ${subject}\n${text}`); return; }
+    throw new Error('Email is not set up yet. The owner needs to add a Resend API key.');
   }
+  const from = settings.mail_from || env('MAIL_FROM') || 'Zero to Shipped <onboarding@resend.dev>';
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { authorization: `Bearer ${settings.resend_api_key}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: settings.mail_from || 'Zero to Shipped <onboarding@resend.dev>', to: [to], subject, text }),
+    headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ from, to: [to], subject, text }),
   });
   if (!res.ok) throw new Error(`Email failed (${res.status}).`);
+}
+
+const MAIL = {
+  signup: (code) => ['Confirm your Zero to Shipped account', `Welcome! Your confirmation code is ${code}\n\nIt works for 10 minutes. If you did not sign up, you can ignore this email.`],
+  reset: (code) => ['Reset your Zero to Shipped password', `Your password reset code is ${code}\n\nIt works for 10 minutes. If you did not ask for this, you can ignore this email; your password stays the same.`],
+};
+
+// ───────────────────────── passwords (scrypt, salted)
+
+const SCRYPT = { N: 16384, r: 8, p: 1, keylen: 64 };
+const LOCK_AFTER = 5;
+const LOCK_MINUTES = 15;
+
+function hashPassword(password) {
+  const salt = randomBytes(16);
+  const hash = scryptSync(password, salt, SCRYPT.keylen, { N: SCRYPT.N, r: SCRYPT.r, p: SCRYPT.p });
+  return `scrypt$${SCRYPT.N}$${SCRYPT.r}$${SCRYPT.p}$${salt.toString('base64')}$${hash.toString('base64')}`;
+}
+
+function checkPassword(password, stored) {
+  const [alg, N, r, p, salt, hash] = String(stored || '').split('$');
+  if (alg !== 'scrypt') return false;
+  const expected = Buffer.from(hash, 'base64');
+  const got = scryptSync(password, Buffer.from(salt, 'base64'), expected.length, { N: +N, r: +r, p: +p });
+  return got.length === expected.length && timingSafeEqual(got, expected);
+}
+
+function passwordProblem(pw) {
+  if (typeof pw !== 'string' || pw.length < 10) return 'Use at least 10 characters for your password.';
+  if (pw.length > 200) return 'That password is too long.';
+  return null;
 }
 
 // ───────────────────────── accounts and codes
@@ -143,23 +176,17 @@ async function donatedAt(email) {
   return row?.at || null;
 }
 
-async function startCode(body) {
-  const email = normEmail(body.email);
-  const purpose = body.purpose === 'admin' ? 'admin' : 'account';
-  if (!email) return json({ error: 'Please enter a valid email.' }, 400);
-
-  const generic = json({ ok: true, message: purpose === 'admin' ? 'If this email is an admin, a code is on its way.' : 'A 6-digit code is on its way. Check your inbox and spam folder.' });
-  if (purpose === 'admin' && !(await isAdmin(email))) return generic; // same answer, so admin emails cannot be probed
-
+// Creates a 6-digit code for an email and mails it. Rate limited per email and purpose.
+async function sendCode(email, purpose) {
   const recent = await one('SELECT count(*)::int AS n FROM codes WHERE email = $1 AND purpose = $2 AND created_at > $3', [email, purpose, Date.now() - 15 * 60 * 1000]);
   if (recent.n >= CODE_MAX_SENDS) return json({ error: 'Too many codes asked for. Wait 15 minutes and try again.' }, 429);
-
   const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(6, '0');
   const hash = await sha256(`${purpose}:${email}:${code}:${secret('SESSION_SECRET')}`);
   await q('UPDATE codes SET used = TRUE WHERE email = $1 AND purpose = $2 AND used = FALSE', [email, purpose]);
   await q('INSERT INTO codes (email, purpose, code_hash, expires_at, created_at) VALUES ($1, $2, $3, $4, $5)', [email, purpose, hash, Date.now() + CODE_TTL_MS, Date.now()]);
-  await sendCodeEmail(await loadSettings(), email, code, purpose);
-  return generic;
+  const [subject, text] = MAIL[purpose](code);
+  await sendMail(await loadSettings(), email, subject, text);
+  return null;
 }
 
 // Checks a code. Returns the email on success, or a Response to send back.
@@ -177,14 +204,97 @@ async function checkCode(body, purpose) {
   return email;
 }
 
-async function verifyAccount(body) {
-  const email = await checkCode(body, 'account');
-  if (email instanceof Response) return email;
-  await q('INSERT INTO users (email) VALUES ($1) ON CONFLICT (email) DO UPDATE SET last_seen = now()', [email]);
+async function newSession(email, body) {
   const token = b64url(crypto.getRandomValues(new Uint8Array(32)));
   await q('INSERT INTO sessions (email, token_hash, device_id, device_name) VALUES ($1, $2, $3, $4)',
     [email, await sha256(token), clean(body.device_id, 64), clean(body.device_name, 80) || 'Computer']);
-  return json({ ok: true, email, token, donated: !!(await donatedAt(email)) });
+  await q('UPDATE users SET last_seen = now() WHERE email = $1', [email]);
+  const u = await one('SELECT name FROM users WHERE email = $1', [email]);
+  return { ok: true, email, name: u?.name || '', token, donated: !!(await donatedAt(email)) };
+}
+
+const SENT = { ok: true, message: 'We sent a 6-digit code to your email. Check your inbox and spam folder.' };
+
+async function signup(body) {
+  const email = normEmail(body.email);
+  const name = clean(body.name, 80);
+  if (!email) return json({ error: 'Please enter a valid email.' }, 400);
+  if (!name) return json({ error: 'Please enter your name.' }, 400);
+  const bad = passwordProblem(body.password);
+  if (bad) return json({ error: bad }, 400);
+  const existing = await one('SELECT email_verified FROM users WHERE email = $1', [email]);
+  if (existing?.email_verified) return json({ error: 'There is already an account with this email. Sign in, or use "Forgot password".' }, 409);
+  await q(`INSERT INTO users (email, name, password_hash, email_verified) VALUES ($1, $2, $3, FALSE)
+           ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, password_hash = EXCLUDED.password_hash`, [email, name, hashPassword(body.password)]);
+  const err = await sendCode(email, 'signup');
+  return err || json(SENT);
+}
+
+async function confirmSignup(body) {
+  const email = await checkCode(body, 'signup');
+  if (email instanceof Response) return email;
+  await q('UPDATE users SET email_verified = TRUE WHERE email = $1', [email]);
+  await audit(email, 'account_created');
+  return json(await newSession(email, body));
+}
+
+async function resendSignup(body) {
+  const email = normEmail(body.email);
+  if (!email) return json({ error: 'Please enter a valid email.' }, 400);
+  const u = await one('SELECT email_verified FROM users WHERE email = $1', [email]);
+  if (u && !u.email_verified) { const err = await sendCode(email, 'signup'); if (err) return err; }
+  return json(SENT);
+}
+
+// Checks email + password with lockout. Returns the email, or a Response.
+async function checkLogin(body) {
+  const email = normEmail(body.email);
+  const fail = json({ error: 'That email or password is not right.' }, 401);
+  if (!email || typeof body.password !== 'string') return fail;
+  const u = await one('SELECT password_hash, email_verified, failed_logins, locked_until FROM users WHERE email = $1', [email]);
+  if (u?.locked_until && new Date(u.locked_until) > new Date()) {
+    return json({ error: `Too many wrong tries. Try again in ${LOCK_MINUTES} minutes, or reset your password.` }, 429);
+  }
+  if (!u || !u.password_hash || !checkPassword(body.password, u.password_hash)) {
+    if (u) {
+      await q(`UPDATE users SET failed_logins = failed_logins + 1,
+               locked_until = CASE WHEN failed_logins + 1 >= $2 THEN now() + ($3 || ' minutes')::interval ELSE locked_until END
+               WHERE email = $1`, [email, LOCK_AFTER, String(LOCK_MINUTES)]);
+    }
+    return fail;
+  }
+  if (!u.email_verified) {
+    const err = await sendCode(email, 'signup');
+    return err || json({ error: 'needs_verification', message: 'Confirm your email first. We sent you a new code.' }, 403);
+  }
+  await q('UPDATE users SET failed_logins = 0, locked_until = NULL WHERE email = $1', [email]);
+  return email;
+}
+
+async function login(body) {
+  const email = await checkLogin(body);
+  if (email instanceof Response) return email;
+  return json(await newSession(email, body));
+}
+
+async function forgot(body) {
+  const email = normEmail(body.email);
+  if (!email) return json({ error: 'Please enter a valid email.' }, 400);
+  const u = await one('SELECT email_verified FROM users WHERE email = $1', [email]);
+  // Same answer either way, so nobody can use this to find out who has an account.
+  if (u?.email_verified) { const err = await sendCode(email, 'reset'); if (err) return err; }
+  return json({ ok: true, message: 'If there is an account with this email, we sent a 6-digit reset code.' });
+}
+
+async function reset(body) {
+  const bad = passwordProblem(body.password);
+  if (bad) return json({ error: bad }, 400);
+  const email = await checkCode(body, 'reset');
+  if (email instanceof Response) return email;
+  await q('UPDATE users SET password_hash = $2, failed_logins = 0, locked_until = NULL WHERE email = $1', [email, hashPassword(body.password)]);
+  await q('DELETE FROM sessions WHERE email = $1', [email]); // sign out everywhere after a reset
+  await audit(email, 'password_reset');
+  return json(await newSession(email, body));
 }
 
 async function sessionFrom(request) {
@@ -197,8 +307,9 @@ async function me(request) {
   const s = await sessionFrom(request);
   if (!s) return json({ error: 'Please sign in.' }, 401);
   await q('UPDATE sessions SET last_seen = now() WHERE id = $1', [s.id]);
+  const u = await one('SELECT name FROM users WHERE email = $1', [s.email]);
   const at = await donatedAt(s.email);
-  return json({ email: s.email, donated: !!at, donated_at: at });
+  return json({ email: s.email, name: u?.name || '', donated: !!at, donated_at: at });
 }
 
 async function signout(request) {
@@ -412,11 +523,15 @@ async function route(request, path) {
 
   if (method === 'POST') {
     const body = await request.clone().json().catch(() => ({}));
-    if (path === '/api/auth/start') return startCode(body);
-    if (path === '/api/auth/verify') return verifyAccount(body);
+    if (path === '/api/auth/signup') return signup(body);
+    if (path === '/api/auth/confirm') return confirmSignup(body);
+    if (path === '/api/auth/resend') return resendSignup(body);
+    if (path === '/api/auth/login') return login(body);
+    if (path === '/api/auth/forgot') return forgot(body);
+    if (path === '/api/auth/reset') return reset(body);
     if (path === '/api/auth/signout') return signout(request);
     if (path === '/api/admin/login') {
-      const email = await checkCode(body, 'admin');
+      const email = await checkLogin(body);
       if (email instanceof Response) return email;
       if (!(await isAdmin(email))) return json({ error: 'Not an admin.' }, 403);
       const now = Math.floor(Date.now() / 1000);

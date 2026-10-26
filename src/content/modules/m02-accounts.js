@@ -25,20 +25,21 @@ export default {
           { do: 'Turn on **two-factor login**: Settings → Password and authentication. Use an authenticator app or a passkey, not text messages.', why: 'Text-message codes can be stolen by tricking your phone company (a "SIM swap"). App codes and passkeys cannot.' },
           { do: 'Save your **recovery codes** somewhere safe, like a password manager.', why: 'If you lose your phone, these codes are the only way back in.' },
         ] },
-        { t: 'h', text: 'Connect GitHub to your computer' },
-        { t: 'p', text: 'Now your computer needs permission to save to your GitHub account. You could do this by hand, but this is exactly the kind of fiddly setup Claude Code is great at. Open Terminal in any folder, type `claude`, and paste:' },
-        { t: 'prompt', label: 'Connect this computer to GitHub', text: `Help me connect this computer to GitHub.
-1. Check if git and the GitHub CLI (gh) are installed. If not, install them for my operating system and explain each command before running it.
-2. Set my git name and email.
-3. Run "gh auth login" and walk me through it, choosing GitHub.com, HTTPS, and login with a web browser.
-Do not ask me to paste any password or token into this chat.` },
-        { t: 'p', text: 'Notice the last line of that prompt. You should **never** paste passwords or secret keys into any AI chat. The `gh` tool signs you in through your browser and stores the key safely, so nobody, including the AI, ever needs to see it.' },
+        { t: 'h', text: 'Let Claude save to GitHub for you' },
+        { t: 'p', text: 'You do not need access tokens, keys or terminal commands for this. In the Claude app\'s **Code** tab, just paste this:' },
+        { t: 'prompt', label: 'Connect this computer to GitHub', text: `Set up this computer to save my projects to GitHub.
+Install anything that is missing and explain each step in one simple sentence before you do it.
+When it is time to sign in, open GitHub in my web browser so I can sign in and click Authorize there.
+Never ask me to paste a password, token or key into this chat.` },
+        { t: 'p', text: 'Claude installs what is needed and opens GitHub in your browser. You sign in **on GitHub\'s own website** and click **Authorize**. Your computer gets permission, and nobody (including the AI) ever sees your password.' },
+        { t: 'tip', tone: 'warn', text: 'If any app, video or AI ever asks you to paste a GitHub "personal access token" into a chat, say no. Signing in through the browser is safer and you never have to handle a token.' },
         { t: 'deeper', title: 'Locking down your GitHub like a pro', blocks: [
           { t: 'steps', items: [
             '**Keep repos private** until you are ready to share. Bots scan public repos for leaked keys within minutes of a push.',
             '**Turn on secret scanning and push protection** (repo → Settings → Code security). GitHub will then block a save that contains a known type of key.',
             '**Turn on Dependabot alerts.** GitHub will warn you when a package your app uses has a known security hole.',
           ] },
+          { t: 'p', text: 'Under the hood, Claude installs **Git** and the **GitHub CLI** (`gh`) and runs `gh auth login` with web sign-in. `gh` stores the resulting token in your computer\'s secure keychain, which is why you never touch it.' },
           { t: 'p', text: 'If a secret ever does reach GitHub, deleting the file is not enough: it is still in the history (every old snapshot). The real fix is to **rotate** it: make a new key at the provider and delete the old one.' },
         ] },
         { t: 'check', q: 'Why use an authenticator app instead of text-message codes for two-factor login?', options: [
@@ -127,6 +128,50 @@ Do not ask me to paste any password or token into this chat.` },
           'A database is your app\'s memory, organized in tables.',
           'Neon runs Postgres and is created from inside Vercel.',
           'Connection details are secret: environment variables only.',
+        ] },
+      ],
+    },
+    {
+      id: 'connectors',
+      title: 'Connect your accounts to Claude',
+      minutes: 8,
+      body: [
+        { t: 'why', text: 'This is the shortcut that removes almost all the technical setup. Once Claude is connected to GitHub, Vercel and Neon, you can say "put my app online" or "make me a database" and Claude does it in those services for you, with your permission, instead of you clicking through five dashboards.' },
+        { t: 'p', text: 'A **connector** is a safe, official link between Claude and another service. You turn it on once, sign in to that service in your browser, and choose what Claude is allowed to do. You can turn it off any time.' },
+        { t: 'analogy', text: 'Connectors are like giving a trusted assistant a key card that only opens certain doors. You decide which doors. You can cancel the card whenever you want, and you never hand over your actual password.' },
+        { t: 'h', text: 'Turn them on' },
+        { t: 'steps', items: [
+          { do: 'In the Claude app, open **Settings → Connectors**.' },
+          { do: 'Find **GitHub**, click **Connect**, sign in on GitHub\'s website, and click **Authorize**.' },
+          { do: 'Do the same for **Vercel** and **Neon**.', why: 'Now Claude can see your projects, deployments and databases when you ask it to.' },
+          { do: 'If you do not see one in the list, click **Add custom connector** and use its official address: Vercel `https://mcp.vercel.com`, Neon `https://mcp.neon.tech/mcp`.' },
+        ] },
+        { t: 'h', text: 'Then just ask' },
+        { t: 'prompt', label: 'Example: check everything is connected', text: `Using my GitHub, Vercel and Neon connectors:
+1. List my GitHub repositories.
+2. List my Vercel projects.
+3. List my Neon databases.
+Only read. Do not create, change or delete anything.
+Tell me in simple words that each connection works.` },
+        { t: 'tip', tone: 'safe', text: 'Keep Claude asking for your OK before it creates, changes, deletes or deploys anything. Reading is safe; changing live services deserves a quick look from you first.' },
+        { t: 'deeper', title: 'What connectors are under the hood', blocks: [
+          { t: 'p', text: 'Connectors use the **Model Context Protocol (MCP)**: each service runs an official MCP server, and Claude talks to it on your behalf. Sign-in uses **OAuth**, so the service gives Claude a limited, revocable permission instead of your password.' },
+          { t: 'steps', items: [
+            'Only connect official servers from the companies themselves.',
+            'Choose the narrowest permissions offered (read-only where possible).',
+            'Review and remove connectors you no longer use in Settings → Connectors.',
+          ] },
+          { t: 'p', text: 'Terminal users can add the same servers to Claude Code with `claude mcp add --transport http vercel https://mcp.vercel.com` and sign in with `/mcp`.' },
+        ] },
+        { t: 'check', q: 'What does Claude get when you turn on the GitHub connector?', options: [
+          'Your GitHub password',
+          'A limited permission you approved, which you can remove any time',
+          'Full control of your computer',
+        ], answer: 1, explain: 'Connectors use sign-in permissions, not passwords, and you can switch them off in Settings → Connectors.' },
+        { t: 'recap', items: [
+          'Connectors link Claude to GitHub, Vercel and Neon with a click.',
+          'You sign in on each company\'s own site; Claude never sees passwords.',
+          'Ask in plain English; keep approvals on for changes.',
         ] },
       ],
     },

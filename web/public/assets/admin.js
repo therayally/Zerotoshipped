@@ -9,7 +9,7 @@ async function api(path, { method = 'GET', body } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401 && !path.startsWith('/api/admin/login')) { showLogin(); throw new Error('Please sign in.'); }
+  if (res.status === 401 && path.startsWith('/api/admin/') && path !== '/api/admin/login') { showLogin(); throw new Error('Please sign in.'); }
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
   return data;
 }
@@ -53,39 +53,46 @@ function fillRows(tbody, rows, cols, emptyText) {
 
 // ───────── sign in
 
-let loginEmail = '';
+function showForm(id) {
+  for (const f of ['login-form', 'forgot-form', 'reset-form']) $(f).hidden = f !== id;
+}
 
 function showLogin() {
   $('app').hidden = true;
   $('login').hidden = false;
 }
 
-$('login-email').addEventListener('submit', async (e) => {
+$('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  loginEmail = $('email').value.trim();
-  setMsg($('login-msg'), 'Sending…');
+  setMsg($('login-msg'), 'Signing in…');
   try {
-    const r = await api('/api/auth/start', { method: 'POST', body: { email: loginEmail, purpose: 'admin' } });
-    setMsg($('login-msg'), r.message, 'ok');
-    $('login-email').hidden = true;
-    $('login-code').hidden = false;
-    $('code').focus();
-  } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
-});
-
-$('login-code').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  try {
-    await api('/api/admin/login', { method: 'POST', body: { email: loginEmail, code: $('code').value.trim() } });
+    await api('/api/admin/login', { method: 'POST', body: { email: $('email').value.trim(), password: $('password').value } });
+    $('password').value = '';
     setMsg($('login-msg'), '');
     start();
   } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
 });
 
-$('login-back').addEventListener('click', () => {
-  $('login-code').hidden = true;
-  $('login-email').hidden = false;
-  setMsg($('login-msg'), '');
+$('forgot-link').addEventListener('click', () => { $('f-email').value = $('email').value; showForm('forgot-form'); setMsg($('login-msg'), ''); });
+document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => { showForm('login-form'); setMsg($('login-msg'), ''); }));
+
+$('forgot-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const r = await api('/api/auth/forgot', { method: 'POST', body: { email: $('f-email').value.trim() } });
+    setMsg($('login-msg'), r.message, 'ok');
+    showForm('reset-form');
+  } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
+});
+
+$('reset-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('/api/auth/reset', { method: 'POST', body: { email: $('f-email').value.trim(), code: $('r-code').value.trim(), password: $('r-password').value } });
+    $('email').value = $('f-email').value;
+    showForm('login-form');
+    setMsg($('login-msg'), 'Password changed. Sign in with your new password.', 'ok');
+  } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
 });
 
 $('logout').addEventListener('click', async () => {

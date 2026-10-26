@@ -147,11 +147,14 @@ Explain each step simply.` },
       minutes: 10,
       body: [
         { t: 'why', text: 'Out of the box, Claude can only see what is on your computer. With **MCP**, it can also look at your live website\'s errors on Vercel, check your database on Neon, or read your GitHub issues, and then fix things for you. It is one of the most powerful upgrades you can make, and one of the easiest to do unsafely.' },
-        { t: 'p', text: '**MCP** stands for **Model Context Protocol**. It is a standard way for AI tools to plug into other apps and services. On claude.ai and in the Claude apps, these plug-ins are called **connectors** (find them under Settings → Connectors). In Claude Code, you add them with a command.' },
+        { t: 'p', text: '**MCP** stands for **Model Context Protocol**. It is a standard way for AI tools to plug into other apps and services. In the Claude app, these plug-ins are called **connectors**, and you already turned on GitHub, Vercel and Neon in the "Connect your accounts to Claude" lesson.' },
         { t: 'analogy', text: 'MCP is like a USB port for AI. Before USB, every device needed its own special cable. Now one standard plug works with everything. MCP does the same for connecting AI to apps.' },
-        { t: 'h', text: 'Add one to Claude Code' },
-        { t: 'cmd', label: 'Connect Vercel', text: 'claude mcp add --transport http vercel https://mcp.vercel.com' },
-        { t: 'p', text: 'Then start Claude Code, type **/mcp**, pick the server, and sign in. Your browser handles the login, so the AI never sees your password.' },
+        { t: 'h', text: 'Add more connectors' },
+        { t: 'steps', items: [
+          { do: 'In the Claude app, open **Settings → Connectors** and browse the list (Stripe, Notion, Google Drive and many more).' },
+          { do: 'Click **Connect**, sign in on that company\'s own website, and approve.', why: 'Your browser handles the login, so the AI never sees your password.' },
+          { do: 'For a service not in the list, use **Add custom connector** with the company\'s official MCP address from its docs.' },
+        ] },
         { t: 'h', text: 'Using it safely' },
         { t: 'p', text: 'An MCP connection gives the AI hands inside another service. That is the whole point, and also the risk. A few rules:' },
         { t: 'steps', items: [

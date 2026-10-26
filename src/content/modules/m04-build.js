@@ -14,9 +14,11 @@ export default {
         { t: 'p', text: 'We will use **Next.js**, the most popular way to build web apps with React (the code library behind Facebook, Netflix and many others). We pick it for three reasons: it handles both the page people see and the private server code in one project, it is made by the same company as Vercel so deploying is effortless, and AI tools have seen a huge amount of it, so they write it well.' },
         { t: 'p', text: 'We will also use **TypeScript**, which is regular JavaScript with labels on everything ("this is a number", "this is an email"). Those labels let the computer catch mistakes before your app even runs. That is extremely helpful when an AI is writing most of the code.' },
         { t: 'h', text: 'Step 1: make a home for your project' },
-        { t: 'p', text: 'Every project lives in its own folder. Open the Terminal and run these three lines, one at a time:' },
-        { t: 'cmd', label: 'Mac / Windows', text: 'mkdir my-app\ncd my-app\nclaude' },
-        { t: 'p', text: '`mkdir` means **make directory** (a directory is a folder). `cd` means **change directory**, so you step inside it. `claude` starts Claude Code in that folder, so it only has access to this project.' },
+        { t: 'p', text: 'Every project lives in its own folder, so Claude only ever touches that one project.' },
+        { t: 'steps', items: [
+          { do: 'Open the Claude app and click the **Code** tab.' },
+          { do: 'Start a new session and choose **New folder**. Name it **my-app** (in Documents is fine).', why: 'Claude can read and change only the folder you pick, never the rest of your computer.' },
+        ] },
         { t: 'h', text: 'Step 2: set the house rules' },
         { t: 'p', text: 'Paste the **house rules** prompt from the "Talk to it like a pro" lesson. Do this before anything else, every time you start a project. It takes ten seconds and protects you for the life of the app.' },
         { t: 'h', text: 'Step 3: build the starter app' },
@@ -31,6 +33,7 @@ Then make a GitHub repo for it (private), push the code, and tell me the link.` 
         { t: 'h', text: 'Step 4: make a change' },
         { t: 'p', text: 'Try asking for something small, like "Add a section under the title that explains what my app does, in two sentences." Watch the page in your browser: it updates on its own as Claude saves files. That instant loop (ask, see, adjust) is how you will build everything from here.' },
         { t: 'deeper', title: 'Server components, client components, and the secret-key trap', blocks: [
+          { t: 'p', text: 'Terminal users can do the folder step by hand: `mkdir my-app`, `cd my-app`, then `claude`.' },
           { t: 'p', text: 'In Next.js, components are **server components** by default: they run only on the server, so they can safely read the database and secret keys. A file that starts with `"use client"` is sent to the browser, so anything in it is public.' },
           { t: 'p', text: 'Environment variables follow the same split. `DATABASE_URL` and `STRIPE_SECRET_KEY` stay on the server. Anything starting with `NEXT_PUBLIC_` is copied into the browser code at build time, where anyone can read it.' },
           { t: 'tip', tone: 'warn', text: 'A very common AI mistake: it hits an "undefined" error and "fixes" it by renaming a secret to `NEXT_PUBLIC_...`. That publishes your secret. If you ever see that prefix on a key, stop and ask why.' },
@@ -43,7 +46,7 @@ Then make a GitHub repo for it (private), push the code, and tell me the link.` 
         ], answer: 1, explain: 'localhost is your private workshop. It goes public only when you deploy.' },
         { t: 'recap', items: [
           'Next.js + TypeScript: front end and server in one project, with mistake-catching labels.',
-          'Each project gets its own folder; start Claude Code inside it.',
+          'Each project gets its own folder, chosen in the Claude app.',
           'localhost is private. Commit and push every time something works.',
         ] },
       ],
