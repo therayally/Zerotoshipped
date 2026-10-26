@@ -438,8 +438,8 @@ export async function handle(request) {
   const cors = corsHeaders(request);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   const url = new URL(request.url);
-  // vercel.json rewrites /api/<anything> to /api?route=<anything>.
-  const path = url.searchParams.has('route') ? `/api/${url.searchParams.get('route')}`.replace(/\/+$/, '') : url.pathname.replace(/\/+$/, '');
+  // vercel.json sends every /api/* request to this one function; the original path is kept in the URL.
+  const path = url.pathname.replace(/\/+$/, '');
   let res;
   try {
     res = await route(request, path);

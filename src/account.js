@@ -1,7 +1,7 @@
 // Talks to the Zero to Shipped server. The course is free; an account only links donations to a person,
 // so the donation window can stop showing once a real donation is recorded in the database.
 
-export const API_BASE = import.meta.env.VITE_API_BASE || 'https://zerotoshipped.vercel.app';
+export const API_BASE = import.meta.env.VITE_API_BASE || 'https://zerotoshipped-ruddy.vercel.app';
 
 const read = (k) => { try { return JSON.parse(localStorage.getItem('zts.' + k)); } catch { return null; } };
 const write = (k, v) => { try { v == null ? localStorage.removeItem('zts.' + k) : localStorage.setItem('zts.' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } };
