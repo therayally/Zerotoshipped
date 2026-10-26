@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Dialog, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
@@ -18,7 +18,7 @@ const TITLES = {
 };
 
 // Shown at launch until the person has an account on this computer.
-export default function AccountGate({ open, onAccount, onOffline }) {
+export default function AccountGate({ open, onAccount, onOffline, startView = 'login', onBack }) {
   const t = useTheme();
   const [view, setView] = useState('login');
   const [name, setName] = useState('');
@@ -32,6 +32,8 @@ export default function AccountGate({ open, onAccount, onOffline }) {
   const [offline, setOffline] = useState(false);
 
   const go = (v) => { setView(v); setErr(''); setMsg(''); setCode(''); };
+  // Opening from the landing page picks the right form: "Start free" signs up, "Log in" signs in.
+  useEffect(() => { if (open) go(startView); }, [open, startView]);
 
   const run = async (fn) => {
     setBusy(true); setErr('');
@@ -69,7 +71,7 @@ export default function AccountGate({ open, onAccount, onOffline }) {
   const [title, sub] = TITLES[view];
 
   return (
-    <Dialog open={open} maxWidth="xs" fullWidth aria-labelledby="acct-title" slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } } }}>
+    <Dialog open={open} onClose={onBack} maxWidth="xs" fullWidth aria-labelledby="acct-title" slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } } }}>
       <Box sx={{ height: 6, background: t.t.grad }} />
       <Box component="form" onSubmit={submit} sx={{ p: { xs: 2.5, sm: 3.5 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Box sx={{ alignSelf: 'center', mb: -0.5 }}><LogoFull height={118} /></Box>
@@ -111,6 +113,8 @@ export default function AccountGate({ open, onAccount, onOffline }) {
           {view === 'verify' && <Button size="small" disabled={busy} onClick={() => run(async () => { const r = await login(email.trim(), password); setMsg(r.message || ''); })}>Send a new code</Button>}
           {(view === 'confirm' || view === 'verify' || view === 'forgot' || view === 'reset') && <Button size="small" onClick={() => go('login')}>Back to sign in</Button>}
         </Box>
+
+        {onBack && <Button size="small" onClick={onBack} sx={{ alignSelf: 'center', color: 'text.secondary', mt: -1 }}>← Back to the home page</Button>}
 
         {offline && (
           <Box sx={{ p: 1.5, borderRadius: '3px', background: t.t.surface2 }}>

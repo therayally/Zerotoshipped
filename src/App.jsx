@@ -16,6 +16,7 @@ import { A11yButton, A11yDialog, A11yStyles, loadA11y } from './components/Acces
 import PromptLibrary from './components/PromptLibrary';
 import { TRACKS, lessonsInTrack } from './content/course';
 import AccountGate from './components/AccountGate';
+import Landing from './components/Landing';
 import { getAccount, refreshAccount, signOut } from './account';
 
 // Browser storage is a convenience only: every read and write is guarded.
@@ -132,7 +133,9 @@ export default function App() {
   const [finishedMod, setFinishedMod] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
-  const [splash, setSplash] = useState(() => !session.get('splashSeen'));
+  // Visitors who are not signed in see the landing page first; "Log in" or "Start free" opens the sign-in window.
+  const [entered, setEntered] = useState(null);
+  const [splash, setSplash] = useState(() => !session.get('splashSeen') && !!getAccount());
   const [splashFade, setSplashFade] = useState(false);
 
   const [account, setAccount] = useState(() => getAccount());
@@ -194,8 +197,9 @@ export default function App() {
     store.set('view', view);
     const ownPage = /^\/(donate|terms|privacy|accessibility|certificate)(\/|$)/.test(window.location.pathname);
     if (!ownPage && (window.location.pathname !== '/' || window.location.hash)) history.replaceState(null, '', '/' + window.location.search);
-    document.title = view === 'home' ? 'TinyAppCode' : view === 'prompts' ? 'Prompt library · TinyAppCode' : `${lesson.title} · TinyAppCode`;
-  }, [currentId, lesson.title, view]);
+    if (!demo && !account && !offline && !entered) document.title = 'TinyAppCode: learn to vibe code, free';
+    else document.title = view === 'home' ? 'TinyAppCode' : view === 'prompts' ? 'Prompt library · TinyAppCode' : `${lesson.title} · TinyAppCode`;
+  }, [currentId, lesson.title, view, demo, account, offline, entered]);
 
   useEffect(() => {
     document.documentElement.style.colorScheme = colorMode;
@@ -243,7 +247,7 @@ export default function App() {
 
   const goHome = () => { setView('home'); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); };
   const openDrink = () => { setFinishedMod(null); setDrinkOpen(true); };
-  const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
+  const onSignOut = async () => { await signOut(); setAccount(null); setEntered(null); setToast('Signed out on this computer.'); };
   const openPrompts = () => { setView('prompts'); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); };
   const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} openPrompts={openPrompts} />;
   const page = window.location.pathname.replace(/\/$/, '');
@@ -263,6 +267,9 @@ export default function App() {
   if (page === '/donate') return standalone(<DonatePage account={account} onAccount={setAccount} theme={theme} />);
   // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
   const gated = !demo && (!termsOk || (!account && !offline));
+  if (!demo && !account && !offline && !entered) {
+    return standalone(<Landing onLogin={() => setEntered('login')} onSignup={() => setEntered('signup')} colorMode={colorMode} toggleColor={toggleColor} />);
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -302,7 +309,7 @@ export default function App() {
         </Box>
       )}
       <TermsGate open={!termsOk && !splash} onAccept={() => { store.set('terms', TERMS_VERSION); setTermsOk(true); }} />
-      <AccountGate open={termsOk && !splash && !demo && !account && !offline} onAccount={(a) => { setAccount(a); setToast(`Welcome${a.name ? ', ' + a.name.split(' ')[0] : ''}!`); }} onOffline={() => setOffline(true)} />
+      <AccountGate open={termsOk && !splash && !demo && !account && !offline} startView={entered || 'login'} onBack={() => setEntered(null)} onAccount={(a) => { setAccount(a); setToast(`Welcome${a.name ? ', ' + a.name.split(' ')[0] : ''}!`); }} onOffline={() => setOffline(true)} />
       <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => { setDrinkOpen(false); setTimeout(() => setFinishedMod(null), 300); }} account={account} finished={finishedMod}
         onAccount={(a) => { setAccount(a); if (a?.donated) { setDrinkOpen(false); setToast('Cheers! Your drink arrived. Thank you.'); } }} />
       {a11yLayer(gated)}
