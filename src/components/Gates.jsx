@@ -16,7 +16,7 @@ import { getConfig, refreshAccount } from '../account';
 export const TERMS_VERSION = '2026-10-27';
 
 const terms = [
-  ['Education and entertainment only', 'Zero to Shipped is provided strictly for educational and entertainment purposes. Nothing here is professional, legal, financial, tax, security, compliance or medical advice.'],
+  ['Education and entertainment only', 'TinyAppCode is provided strictly for educational and entertainment purposes. Nothing here is professional, legal, financial, tax, security, compliance or medical advice.'],
   ['No warranty', 'All content, prompts, commands and code are provided "as is", without warranties of any kind. They may be incomplete, out of date or wrong. Third-party services, prices and features change without notice.'],
   ['You are responsible', 'You alone are responsible for what you build, deploy, run, publish or charge for, and for your use of any third-party service (including their costs and terms). Always review AI-generated code before using it.'],
   ['No liability', 'To the fullest extent allowed by law, the creator of this course and anyone involved in it are not liable for any loss or damage of any kind, including lost data, lost money, security incidents, service charges, or business losses, arising from your use of this course.'],

@@ -58,4 +58,6 @@ label { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 6px;
 .pill-plain { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
 .logo { display: inline-flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
 .logo img { width: 32px; height: 32px; border-radius: 5px; }
+.logo.wordmark { font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+.logo.wordmark span { background: linear-gradient(120deg, #1A8CFF 0%, #4F63FF 50%, #7B4DFF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .logo img.brand { width: auto; height: 28px; border-radius: 0; }

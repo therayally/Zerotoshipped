@@ -42,7 +42,8 @@ export default function App() {
   const [drinkOpen, setDrinkOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
-  const [splash, setSplash] = useState(() => !session.get('splashSeen'));
+  // Splash paused until the TinyAppCode splash art is in /brand.
+  const [splash, setSplash] = useState(false);
   const [splashFade, setSplashFade] = useState(false);
 
   const [account, setAccount] = useState(() => getAccount());
@@ -81,7 +82,7 @@ export default function App() {
     store.set('last', currentId);
     const hash = view === 'home' ? '#/' : '#/' + currentId;
     if (window.location.hash !== hash) history.replaceState(null, '', hash);
-    document.title = view === 'home' ? 'Zero to Shipped' : `${lesson.title} · Zero to Shipped`;
+    document.title = view === 'home' ? 'TinyAppCode' : `${lesson.title} · TinyAppCode`;
   }, [currentId, lesson.title, view]);
 
   useEffect(() => {

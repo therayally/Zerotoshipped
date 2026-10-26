@@ -3,6 +3,7 @@ import { Box, Button, Dialog, IconButton, InputAdornment, TextField, Typography 
 import { useTheme } from '@mui/material/styles';
 import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
 import VisibilityOffRounded from '@mui/icons-material/VisibilityOffRounded';
+import { Logo } from './Panels';
 import { signup, resendSignup, confirmSignup, login, verifyLogin, forgotPassword, resetPassword } from '../account';
 
 const field = { '& .MuiOutlinedInput-root': { borderRadius: '3px' } };
@@ -66,13 +67,12 @@ export default function AccountGate({ open, onAccount, onOffline }) {
   );
 
   const [title, sub] = TITLES[view];
-  const logo = t.palette.mode === 'dark' ? '/brand/logo-on-dark.png' : '/brand/logo-on-light.png';
 
   return (
     <Dialog open={open} maxWidth="xs" fullWidth aria-labelledby="acct-title" slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } } }}>
       <Box sx={{ height: 6, background: t.t.grad }} />
       <Box component="form" onSubmit={submit} sx={{ p: { xs: 2.5, sm: 3.5 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box component="img" src={logo} alt="Zero to Shipped" sx={{ height: 26, width: 'auto', alignSelf: 'flex-start' }} />
+        <Box sx={{ alignSelf: 'flex-start' }}><Logo size={22} /></Box>
         <Box>
           <Typography id="acct-title" variant="h5">{title}</Typography>
           {(msg || sub) && <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>{msg || sub}</Typography>}

@@ -1,4 +1,4 @@
-// Talks to the Zero to Shipped server. The course is free; an account only links donations to a person,
+// Talks to the TinyAppCode server. The course is free; an account only links donations to a person,
 // so the donation window can stop showing once a real donation is recorded in the database.
 
 // The course and its server share one website, so production calls go to the same address.

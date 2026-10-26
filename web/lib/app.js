@@ -1,4 +1,4 @@
-// Zero to Shipped API: accounts (email codes), verified donations (Square webhook), and the super admin.
+// TinyAppCode API: accounts (email codes), verified donations (Square webhook), and the super admin.
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { q, one } from './db.js';
 
@@ -124,7 +124,7 @@ async function sendMail(settings, to, subject, text) {
     if (env('DEV_MODE') === '1') { console.log(`[dev] mail to ${to}: ${subject}\n${text}`); return; }
     throw new Error('Email is not set up yet. The owner needs to add a Resend API key.');
   }
-  const from = settings.mail_from || env('MAIL_FROM') || 'Zero to Shipped <onboarding@resend.dev>';
+  const from = settings.mail_from || env('MAIL_FROM') || 'TinyAppCode <onboarding@resend.dev>';
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
@@ -134,10 +134,10 @@ async function sendMail(settings, to, subject, text) {
 }
 
 const MAIL = {
-  signup: (code) => ['Confirm your Zero to Shipped account', `Welcome! Your confirmation code is ${code}\n\nIt works for 10 minutes. If you did not sign up, you can ignore this email.`],
-  login: (code) => ['Your Zero to Shipped sign-in code', `Someone (hopefully you) signed in on a new device. Your sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away: your password is known to someone else.`],
-  admin: (code) => ['Your Zero to Shipped admin sign-in code', `Your admin sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away.`],
-  reset: (code) => ['Reset your Zero to Shipped password', `Your password reset code is ${code}\n\nIt works for 10 minutes. If you did not ask for this, you can ignore this email; your password stays the same.`],
+  signup: (code) => ['Confirm your TinyAppCode account', `Welcome! Your confirmation code is ${code}\n\nIt works for 10 minutes. If you did not sign up, you can ignore this email.`],
+  login: (code) => ['Your TinyAppCode sign-in code', `Someone (hopefully you) signed in on a new device. Your sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away: your password is known to someone else.`],
+  admin: (code) => ['Your TinyAppCode admin sign-in code', `Your admin sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away.`],
+  reset: (code) => ['Reset your TinyAppCode password', `Your password reset code is ${code}\n\nIt works for 10 minutes. If you did not ask for this, you can ignore this email; your password stays the same.`],
 };
 
 // ───────────────────────── passwords (scrypt, salted)

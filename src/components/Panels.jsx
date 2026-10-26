@@ -23,10 +23,14 @@ const label = { fontSize: 12.5, fontWeight: 700, letterSpacing: '0.12em', textTr
 
 // ───────── logo
 
-export function Logo() {
-  const theme = useTheme();
-  const src = theme.palette.mode === 'dark' ? '/brand/logo-on-dark.png' : '/brand/logo-on-light.png';
-  return <Box component="img" src={src} alt="Zero to Shipped" sx={{ height: 28, width: 'auto', display: 'block' }} />;
+// Text wordmark until the TinyAppCode logo files are in /brand.
+export function Logo({ size = 22 }) {
+  const { t } = useTheme();
+  return (
+    <Box component="span" aria-label="TinyAppCode" sx={{ display: 'inline-block', fontWeight: 800, fontSize: size, letterSpacing: '-0.02em', lineHeight: 1, color: 'text.primary' }}>
+      tinyapp<Box component="span" sx={{ background: t.grad, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>code</Box>
+    </Box>
+  );
 }
 
 // ───────── search
