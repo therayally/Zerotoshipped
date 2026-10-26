@@ -83,6 +83,28 @@ export async function startDonation(amount) {
   return call('/api/donate', { body: { amount }, token: acct?.token });
 }
 
+// Progress and certificates: lesson progress is saved to the account so it follows you to any device.
+export async function fetchProgress() {
+  const acct = read('account');
+  if (!acct) return null;
+  try { return (await call('/api/progress', { method: 'GET', token: acct.token })).done; } catch { return null; }
+}
+export function pushProgress(lessons, done = true) {
+  const acct = read('account');
+  if (!acct || !lessons.length) return;
+  call('/api/progress', { body: { lessons, done }, token: acct.token }).catch(() => {});
+}
+export const issueCertificate = (track, name) => call('/api/certificate', { body: { track, name }, token: read('account')?.token });
+export async function myCertificates() {
+  const acct = read('account');
+  if (!acct) return [];
+  try { return (await call('/api/certificates', { method: 'GET', token: acct.token })).certificates; } catch { return []; }
+}
+export async function getCertificate(id) {
+  const res = await fetch(API_BASE + '/api/certificate/' + encodeURIComponent(id));
+  return res.ok ? res.json() : null;
+}
+
 // Asks the server whether this account has a recorded donation. The server's database is the only source of truth.
 export async function refreshAccount() {
   const acct = read('account');

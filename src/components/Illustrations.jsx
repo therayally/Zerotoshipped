@@ -1,3 +1,4 @@
+import { metaFor } from '../content/meta';
 // Subject illustrations for each module, drawn in a 300x300 box with one shared palette.
 // Keep the top-left (module number) and bottom-left (tool logos) corners clear.
 
@@ -402,6 +403,6 @@ const scenes = {
 };
 
 export function Scene({ moduleId }) {
-  const S = scenes[moduleId] || scenes.start;
+  const S = scenes[moduleId] || scenes[metaFor(moduleId).art] || scenes.start;
   return <S />;
 }

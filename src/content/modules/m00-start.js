@@ -15,6 +15,12 @@ export default {
         { t: 'p', text: 'Here is the big idea. For most of history, if you wanted software, you either learned to program for years or paid someone who had. Now there are AI tools that can write the code for you. You describe what you want in plain English, and the AI types out the program, runs it, reads the errors, and fixes them.' },
         { t: 'p', text: 'That sounds like magic, and in a way it is. But here is the part most people skip: the AI is only as good as the person steering it. If you do not know what a database is, you cannot tell when the AI built one badly. If you do not know what a secret key is, you will not notice when the AI accidentally shows yours to the whole internet. This course gives you just enough understanding to steer well.' },
         { t: 'analogy', text: 'Think of yourself as a general contractor building a house. You are not going to lay every brick yourself. You hire a very fast, very skilled crew (the AI). But you still need to know what a foundation is, where the pipes go, and what the building code says, or the crew will happily build you something that falls down.' },
+        { t: 'h', text: 'Two tracks' },
+        { t: 'table', head: ['Track', 'You finish with', 'Who it is for'], rows: [
+          ['**Track 1: Ship your first app**', 'One simple app, live on the internet, taking payments, used by a real customer', 'Everyone. Start here and finish it.'],
+          ['**Track 2: Build like a pro team**', 'Product thinking, Scrum, Claude Code power tools, testing AI, analytics, launching, admin panels, backups and AI agents', 'Anyone who wants to turn this into a business or a job'],
+        ] },
+        { t: 'p', text: 'Each track gives you a free certificate with your name on it when you finish every lesson, ready to share on LinkedIn or TikTok.' },
         { t: 'h', text: 'What you will build, piece by piece' },
         { t: 'p', text: 'The picture above shows every part of the app you will make and how they connect. Do not worry if it looks like a lot. You will add one piece at a time, and each piece gets its own lesson.' },
         { t: 'table', head: ['Tool', 'What it does for you', 'Why we picked it'], rows: [
@@ -22,7 +28,7 @@ export default {
           ['GitHub', 'Keeps a saved copy of every version of your code online', 'If anything breaks, you can rewind. It also triggers your updates.'],
           ['Vercel', 'Puts your app on the internet', 'Every time you save to GitHub, your live site updates by itself'],
           ['Neon', 'Stores your app\'s information (users, orders, posts)', 'Free to start, grows with you, and plugs straight into Vercel'],
-          ['Stripe', 'Takes card payments', 'Card details never touch your app, which keeps you out of trouble'],
+          ['Stripe or Square', 'Takes card payments', 'Card details never touch your app, which keeps you out of trouble'],
           ['Cloudflare', 'Your web address (like mycoolapp.com)', 'Sells domains at cost, with free protection from attacks'],
         ] },
         { t: 'p', text: 'Notice we use as **few** tools as possible. Every extra service is another password to protect, another bill, and another thing that can break at 2 a.m. Most of these sign in with your GitHub account, so one login carries you through most of the setup.' },

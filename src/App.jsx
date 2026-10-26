@@ -10,7 +10,9 @@ import Lesson from './components/Lesson';
 import { TermsGate, DonateDialog, DonateBody, TERMS_VERSION } from './components/Gates';
 import { Inline } from './components/Blocks';
 import { terms as termsDoc, privacy as privacyDoc, LEGAL_UPDATED } from './content/legal';
-import { getConfig } from './account';
+import { getConfig, fetchProgress, pushProgress, myCertificates } from './account';
+import { CertificatePage, ClaimCertificate } from './components/Certificate';
+import { TRACKS, lessonsInTrack } from './content/course';
 import AccountGate from './components/AccountGate';
 import { getAccount, refreshAccount, signOut } from './account';
 
@@ -130,12 +132,30 @@ export default function App() {
   const [splashFade, setSplashFade] = useState(false);
 
   const [account, setAccount] = useState(() => getAccount());
+  const [claimTrack, setClaimTrack] = useState(null);
+  const [certs, setCerts] = useState({});
   const [offline, setOffline] = useState(false);
   const theme = useMemo(() => makeTheme(colorMode), [colorMode]);
   const index = allLessons.findIndex((l) => l.id === currentId);
   const lesson = allLessons[index];
 
   useEffect(() => { refreshAccount().then(setAccount); }, []);
+
+  // Progress follows the account: merge what the server has with this browser, then upload anything only here.
+  useEffect(() => {
+    if (!account?.token) return;
+    fetchProgress().then((server) => {
+      if (!server) return;
+      setDone((local) => {
+        const merged = new Set([...local, ...server]);
+        const onlyLocal = [...local].filter((id) => !server.includes(id));
+        if (onlyLocal.length) pushProgress(onlyLocal, true);
+        store.set('done', [...merged]);
+        return merged;
+      });
+    });
+    myCertificates().then((list) => setCerts(Object.fromEntries(list.map((c) => [c.track, c.id]))));
+  }, [account?.token]);
 
   // Brand splash once per launch, then fade out.
   useEffect(() => {
@@ -166,7 +186,8 @@ export default function App() {
   useEffect(() => {
     store.set('last', currentId);
     store.set('view', view);
-    if (window.location.pathname !== '/' || window.location.hash) history.replaceState(null, '', '/' + window.location.search);
+    const ownPage = /^\/(donate|terms|privacy|certificate)(\/|$)/.test(window.location.pathname);
+    if (!ownPage && (window.location.pathname !== '/' || window.location.hash)) history.replaceState(null, '', '/' + window.location.search);
     document.title = view === 'home' ? 'TinyAppCode' : `${lesson.title} · TinyAppCode`;
   }, [currentId, lesson.title, view]);
 
@@ -183,17 +204,19 @@ export default function App() {
   };
   const toggleColor = () => { const m = colorMode === 'dark' ? 'light' : 'dark'; setColorMode(m); store.set('theme', m); };
   // Progress: mark a lesson done (button, reaching the end, or "Done, next") or undo it. Finishing a module's last lesson celebrates.
-  const setLessonDone = (id, on) => setDone((prev) => {
-    if (prev.has(id) === on) return prev;
-    const n = new Set(prev);
+  const setLessonDone = (id, on) => {
+    if (done.has(id) === on) return;
+    const n = new Set(done);
     if (on) n.add(id); else n.delete(id);
     store.set('done', [...n]);
-    if (on) {
-      const mod = modules.find((m) => m.lessons.some((l) => l.id === id));
-      if (mod && mod.lessons.every((l) => n.has(l.id))) setToast(`Module complete: ${mod.title}. Nice work!`);
-    }
-    return n;
-  });
+    setDone(n);
+    if (account) pushProgress([id], on);
+    if (!on) return;
+    const track = TRACKS.find((tr) => lessonsInTrack(tr.id).includes(id));
+    if (track && !certs[track.id] && lessonsInTrack(track.id).every((x) => n.has(x))) { setClaimTrack(track); return; }
+    const mod = modules.find((m) => m.lessons.some((l) => l.id === id));
+    if (mod && mod.lessons.every((l) => n.has(l.id))) setToast(`Module complete: ${mod.title}. Nice work!`);
+  };
   const markDone = (id) => setLessonDone(id, true);
 
   const onNext = () => {
@@ -210,6 +233,7 @@ export default function App() {
   const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
   const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} />;
   const page = window.location.pathname.replace(/\/$/, '');
+  if (page.startsWith('/certificate/')) return <ThemeProvider theme={theme}><CssBaseline /><CertificatePage id={page.slice('/certificate/'.length)} /></ThemeProvider>;
   if (page === '/terms') return <LegalPage doc={termsDoc} theme={theme} />;
   if (page === '/privacy') return <LegalPage doc={privacyDoc} theme={theme} />;
   if (page === '/donate') return <DonatePage account={account} onAccount={setAccount} theme={theme} />;
@@ -227,7 +251,7 @@ export default function App() {
         </Box>
         <Box component="main" sx={{ minWidth: 0 }}>
           {view === 'home' ? (
-            <Home currentId={currentId} done={done} go={go} openMenu={() => setMenuOpen(true)} openDrink={openDrink} />
+            <Home currentId={currentId} done={done} go={go} openMenu={() => setMenuOpen(true)} openDrink={openDrink} onClaim={setClaimTrack} certs={certs} />
           ) : (
             <Lesson lesson={lesson} index={index} onBack={onBack} onNext={onNext} onSkipModule={onSkipModule} complete={done.has(lesson.id)} setComplete={(on) => setLessonDone(lesson.id, on)} />
           )}
@@ -255,6 +279,7 @@ export default function App() {
       <AccountGate open={termsOk && !splash && !demo && !account && !offline} onAccount={(a) => { setAccount(a); setToast(`Welcome${a.name ? ', ' + a.name.split(' ')[0] : ''}!`); }} onOffline={() => setOffline(true)} />
       <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => setDrinkOpen(false)} account={account}
         onAccount={(a) => { setAccount(a); if (a?.donated) { setDrinkOpen(false); setToast('Cheers! Your drink arrived. Thank you.'); } }} />
+      <ClaimCertificate open={!!claimTrack} track={claimTrack} account={account} onClose={() => setClaimTrack(null)} />
       <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} message={toast} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
     </ThemeProvider>
   );

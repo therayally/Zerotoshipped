@@ -13,7 +13,8 @@ import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
 import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
 import GridViewRounded from '@mui/icons-material/GridViewRounded';
 import NorthEastRounded from '@mui/icons-material/NorthEastRounded';
-import { modules, allLessons } from '../content/course';
+import { modules, allLessons, TRACKS, lessonsInTrack } from '../content/course';
+import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded';
 import { metaFor } from '../content/meta';
 import { ModuleTile, ModuleCover, HeroBanner, LogoTile } from './Art';
 
@@ -149,7 +150,7 @@ export function SideNav({ view, currentId, done, go, goHome }) {
             <Box key={m.id}>
               {(mi === 0 || showAdv) && (
                 <Box sx={{ mx: 2.5, mt: mi ? 3 : 0.5, mb: 1, pb: 1, borderBottom: `1px solid ${t.border}` }}>
-                  <Typography sx={{ ...label, color: t.muted }}>{showAdv ? 'Bonus' : 'Build your app'}</Typography>
+                  <Typography sx={{ ...label, color: t.muted }}>{showAdv ? TRACKS[1].title : TRACKS[0].title}</Typography>
                 </Box>
               )}
               <Box component="button" onClick={() => setOpen(isOpen ? '' : m.id)} aria-expanded={isOpen} sx={row(isOpen)}>
@@ -264,7 +265,38 @@ export function ModuleCard({ m, mi, done, go }) {
   );
 }
 
-export function Home({ currentId, done, go, openMenu, openDrink }) {
+// Track title with a progress bar, and a certificate button once every lesson in the track is done.
+function TrackHeader({ track, done, onClaim, certId }) {
+  const { t } = useTheme();
+  const ids = lessonsInTrack(track.id);
+  const n = ids.filter((id) => done.has(id)).length;
+  const complete = n === ids.length;
+  return (
+    <Box sx={{ mt: 5, mb: 2.5, pb: 1.5, borderBottom: `1px solid ${t.border}` }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ flex: 1, minWidth: 220 }}>
+          <Typography sx={{ ...label, color: t.text }}>{track.title}</Typography>
+          <Typography sx={{ fontSize: 13.5, color: t.muted, mt: 0.5 }}>{track.blurb}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: 120 }}>
+            <LinearProgress variant="determinate" value={(n / ids.length) * 100} sx={{ height: 6, borderRadius: 3, background: t.surface2, '& .MuiLinearProgress-bar': { background: t.grad } }} />
+            <Typography sx={{ fontSize: 12, color: t.muted, mt: 0.5, textAlign: 'right' }}>{n} / {ids.length} lessons</Typography>
+          </Box>
+          {certId ? (
+            <Button size="small" variant="outlined" href={`/certificate/${certId}`} startIcon={<WorkspacePremiumRounded />}>Your certificate</Button>
+          ) : (
+            <Tooltip title={complete ? '' : 'Finish every lesson in this track to unlock your certificate'}>
+              <span><Button size="small" variant={complete ? 'contained' : 'outlined'} disabled={!complete} onClick={() => onClaim(track)} startIcon={<WorkspacePremiumRounded />}>Certificate</Button></span>
+            </Tooltip>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+export function Home({ currentId, done, go, openMenu, openDrink, onClaim, certs = {} }) {
   const { t } = useTheme();
   const current = allLessons.find((l) => l.id === currentId) || allLessons[0];
   const started = done.size > 0;
@@ -296,10 +328,10 @@ export function Home({ currentId, done, go, openMenu, openDrink }) {
         </Box>
       </HeroBanner>
 
-      {section('Build your app', core.length)}
+      <TrackHeader track={TRACKS[0]} done={done} onClaim={onClaim} certId={certs[1]} />
       <Box sx={grid}>{core.map(([m, mi]) => <ModuleCard key={m.id} m={m} mi={mi} done={done} go={go} />)}</Box>
 
-      {section('Bonus: level up after your app', adv.length)}
+      <TrackHeader track={TRACKS[1]} done={done} onClaim={onClaim} certId={certs[2]} />
       <Box sx={grid}>{adv.map(([m, mi]) => <ModuleCard key={m.id} m={m} mi={mi} done={done} go={go} />)}</Box>
 
       <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 25, justifyContent: 'space-around', alignItems: 'center', height: 64, background: t.surface, borderTop: `1px solid ${t.border}` }}>

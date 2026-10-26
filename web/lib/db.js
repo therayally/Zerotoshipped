@@ -69,6 +69,21 @@ const SCHEMA = [
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`,
   'CREATE INDEX IF NOT EXISTS trusted_devices_email ON trusted_devices(email)',
+  `CREATE TABLE IF NOT EXISTS progress (
+    email TEXT NOT NULL,
+    lesson_id TEXT NOT NULL,
+    done_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (email, lesson_id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS certificates (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    name TEXT NOT NULL,
+    track INTEGER NOT NULL,
+    lessons INTEGER NOT NULL,
+    issued_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (email, track)
+  )`,
   `CREATE TABLE IF NOT EXISTS rate_limits (
     key TEXT NOT NULL,
     window_start BIGINT NOT NULL,

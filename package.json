@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:web": "rm -rf web/public/app && vite build --outDir web/public --emptyOutDir false",
+    "build:web": "node scripts/gen-tracks.mjs && rm -rf web/public/app && vite build --outDir web/public --emptyOutDir false",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
 // TinyAppCode API: accounts (email codes), verified donations (Square webhook), and the super admin.
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { q, one } from './db.js';
+import TRACKS from './tracks.js';
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -386,6 +387,60 @@ async function signout(request) {
   return json({ ok: true });
 }
 
+// ───────────────────────── progress and certificates
+
+const ALL_LESSONS = new Set(Object.values(TRACKS).flatMap((t) => t.lessons));
+
+// Saves which lessons a signed-in person finished, so progress follows them to any device.
+async function progress(request, body) {
+  const sess = await sessionFrom(request);
+  if (!sess) return json({ error: 'Please sign in.' }, 401);
+  if (request.method === 'GET') {
+    const rows = await q('SELECT lesson_id FROM progress WHERE email = $1', [sess.email]);
+    return json({ done: rows.map((r) => r.lesson_id) });
+  }
+  if (await overLimit(`progress:${sess.email}`, 600, 3600)) return slowDown();
+  const ids = (Array.isArray(body.lessons) ? body.lessons : [body.lesson]).filter((id) => ALL_LESSONS.has(id)).slice(0, 200);
+  if (!ids.length) return json({ error: 'Unknown lesson.' }, 400);
+  if (body.done === false) await q('DELETE FROM progress WHERE email = $1 AND lesson_id = ANY($2)', [sess.email, ids]);
+  else await q('INSERT INTO progress (email, lesson_id) SELECT $1, unnest($2::text[]) ON CONFLICT DO NOTHING', [sess.email, ids]);
+  return json({ ok: true });
+}
+
+// Issues (or re-issues with a new name) a track certificate, only if every lesson in the track is done.
+async function issueCertificate(request, body) {
+  const sess = await sessionFrom(request);
+  if (!sess) return json({ error: 'Please sign in.' }, 401);
+  const track = TRACKS[String(parseInt(body.track, 10))];
+  if (!track) return json({ error: 'Unknown track.' }, 400);
+  const rows = await q('SELECT lesson_id FROM progress WHERE email = $1', [sess.email]);
+  const done = new Set(rows.map((r) => r.lesson_id));
+  const missing = track.lessons.filter((id) => !done.has(id));
+  if (missing.length) return json({ error: `Finish all lessons first. ${missing.length} to go.`, missing: missing.length }, 400);
+  const user = await one('SELECT name FROM users WHERE email = $1', [sess.email]);
+  const name = clean(body.name, 80) || user?.name || 'TinyAppCode student';
+  const id = b64url(crypto.getRandomValues(new Uint8Array(9)));
+  const row = await one(`INSERT INTO certificates (id, email, name, track, lessons) VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (email, track) DO UPDATE SET name = EXCLUDED.name RETURNING id`, [id, sess.email, name, parseInt(body.track, 10), track.lessons.length]);
+  await audit(sess.email, 'certificate', `track ${body.track}`);
+  return json({ ok: true, id: row.id });
+}
+
+async function myCertificates(request) {
+  const sess = await sessionFrom(request);
+  if (!sess) return json({ error: 'Please sign in.' }, 401);
+  const rows = await q('SELECT id, track FROM certificates WHERE email = $1', [sess.email]);
+  return json({ certificates: rows });
+}
+
+// Public: anyone with the link can verify a certificate. Shows only the name, track and date.
+async function publicCertificate(id) {
+  if (!/^[A-Za-z0-9_-]{8,20}$/.test(id)) return json({ error: 'Not found.' }, 404);
+  const row = await one('SELECT id, name, track, lessons, issued_at FROM certificates WHERE id = $1', [id]);
+  if (!row) return json({ error: 'Not found.' }, 404);
+  return json({ id: row.id, name: row.name, track: row.track, track_title: TRACKS[String(row.track)]?.title || '', lessons: row.lessons, issued_at: row.issued_at }, 200, { 'cache-control': 'public, max-age=60' });
+}
+
 // ───────────────────────── Square: any-amount donations
 
 const SQUARE_API = 'https://connect.squareup.com/v2';
@@ -657,6 +712,9 @@ async function route(request, path) {
   if (path === '/api/health') return json({ ok: true });
   if (path === '/api/square/webhook' && method === 'POST') return squareWebhook(request);
   if (path === '/api/me' && method === 'GET') return me(request);
+  if (path === '/api/progress' && method === 'GET') return progress(request, {});
+  if (path === '/api/certificates' && method === 'GET') return myCertificates(request);
+  if (path.startsWith('/api/certificate/') && method === 'GET') return publicCertificate(path.slice('/api/certificate/'.length));
 
   if (method === 'POST') {
     const body = await request.clone().json().catch(() => ({}));
@@ -672,6 +730,8 @@ async function route(request, path) {
     if (path === '/api/auth/login') return login(body, request);
     if (path === '/api/auth/login/verify') return verifyLogin(body);
     if (path === '/api/donate') return donate(request, body);
+    if (path === '/api/progress') return progress(request, body);
+    if (path === '/api/certificate') return issueCertificate(request, body);
     if (path === '/api/auth/forgot') return forgot(body);
     if (path === '/api/auth/reset') return reset(body);
     if (path === '/api/auth/signout') return signout(request);

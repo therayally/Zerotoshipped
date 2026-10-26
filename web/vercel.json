@@ -3,6 +3,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/certificate/:id",
+      "destination": "/"
+    },
+    {
       "source": "/learn/:id",
       "destination": "/"
     },

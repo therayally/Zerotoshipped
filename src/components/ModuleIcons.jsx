@@ -1,3 +1,4 @@
+import { metaFor } from '../content/meta';
 // Duotone line icons for each module (24x24). Strokes use currentColor; soft fills are currentColor at low opacity.
 
 const F = { fill: 'currentColor', fillOpacity: 0.28, stroke: 'none' };
@@ -102,7 +103,7 @@ const icons = {
 export default function ModuleIcon({ moduleId, size = 20, color = '#fff', strokeWidth = 1.8 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color, display: 'block' }}>
-      {icons[moduleId] || icons.start}
+      {icons[moduleId] || icons[metaFor(moduleId).art] || icons.start}
     </svg>
   );
 }

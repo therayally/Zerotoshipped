@@ -18,6 +18,7 @@ import FlagRounded from '@mui/icons-material/FlagRounded';
 import { FONT_MONO } from '../theme';
 import { Snapshot, Mock, TerminalShot } from './Art';
 import { logo } from '../content/logos';
+import Figure from './Figures';
 
 // ───────── motion: everything fades up as it scrolls into view; reduced-motion users see it still.
 
@@ -63,6 +64,7 @@ const BRANDS = {
   Drizzle: 'drizzle', 'Drizzle ORM': 'drizzle', MCP: 'mcp', Rust: 'rust', Tauri: 'tauri', Electron: 'electron', Python: 'python',
   SQLite: 'sqlite', Dependabot: 'dependabot', OWASP: 'owasp', Blender: 'blender', Krita: 'krita', ElevenLabs: 'elevenlabs', Figma: 'figma',
   'Node.js': 'node', Node: 'node', 'Google Fonts': 'googlefonts', Mermaid: 'mermaid',
+  Cursor: 'cursor', 'GitHub Copilot': 'githubcopilot', PostHog: 'posthog', TikTok: 'tiktok', 'Product Hunt': 'producthunt',
 };
 
 function BrandMark({ k }) {
@@ -400,6 +402,7 @@ function block(b, i) {
       case 'table': return <Table key={i} head={b.head} rows={b.rows} />;
       case 'links': return <Links key={i} items={b.items} />;
       case 'partner': return <Partner key={i} {...b} />;
+      case 'figure': return <Figure key={i} name={b.name} />;
       case 'snap': return <Snapshot key={i} src={b.src} url={b.url} caption={b.caption} marks={b.marks} />;
       case 'mock': return <Mock key={i} name={b.name} />;
       case 'term': return <TerminalShot key={i} title={b.title} lines={b.lines} caption={b.caption} />;
