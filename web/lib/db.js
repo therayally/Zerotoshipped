@@ -60,6 +60,15 @@ const SCHEMA = [
     created_at BIGINT NOT NULL
   )`,
   'CREATE INDEX IF NOT EXISTS codes_email ON codes(email, purpose)',
+  `CREATE TABLE IF NOT EXISTS trusted_devices (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    device_name TEXT,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  )`,
+  'CREATE INDEX IF NOT EXISTS trusted_devices_email ON trusted_devices(email)',
   `CREATE TABLE IF NOT EXISTS admins (
     email TEXT PRIMARY KEY,
     role TEXT NOT NULL DEFAULT 'admin',

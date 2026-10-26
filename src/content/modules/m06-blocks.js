@@ -51,14 +51,14 @@ Put the decision in ARCHITECTURE.md.` },
       title: 'Desktop apps: Rust vs Electron vs Java',
       minutes: 10,
       body: [
-        { t: 'why', text: 'Some products work best as an app people download, like this course. If you ever build one, the choice you make on day one decides whether your download is 5 MB or 150 MB, whether it eats your users\' memory, and how easy it is to attack.' },
+        { t: 'why', text: 'Some products work best as an app people download, like Slack, Discord or VS Code. If you ever build one, the choice you make on day one decides whether your download is 5 MB or 150 MB, whether it eats your users\' memory, and how easy it is to attack.' },
         { t: 'p', text: 'Here is the trick most desktop apps use today: they are really **web apps inside a window**. You build the screens with the same web tools you already know, and a "wrapper" turns them into an app with an icon people can double-click.' },
         { t: 'table', head: ['Wrapper', 'Download size', 'Our take'], rows: [
           ['Tauri (Rust)', 'Small, about 5 to 15 MB', '**Our pick.** Fast, light and secure by default.'],
           ['Electron (Node.js)', 'Big, 100 MB or more', 'Easy and proven (Slack, VS Code), but heavy.'],
           ['Java (JavaFX)', 'Big, needs Java inside', 'Old-school. Skip it for new apps.'],
         ] },
-        { t: 'p', text: 'This course you are reading is a Tauri app, which is why the download is only a few megabytes.' },
+        { t: 'p', text: 'Tauri apps are tiny: a few megabytes to download, compared with 100+ for most Electron apps.' },
         { t: 'analogy', text: 'Electron is like moving house and bringing your own entire kitchen with you, appliances and all. Tauri is like moving into a place that already has a kitchen and just bringing your recipes. Same meals, much lighter truck.' },
         { t: 'prompt', label: 'Turn your web app into a desktop app', text: `Turn this web app into a desktop app with Tauri 2.
 - Keep the web code the same; Tauri wraps it.

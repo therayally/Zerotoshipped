@@ -1,7 +1,8 @@
 // Talks to the Zero to Shipped server. The course is free; an account only links donations to a person,
 // so the donation window can stop showing once a real donation is recorded in the database.
 
-export const API_BASE = import.meta.env.VITE_API_BASE || 'https://zerotoshipped-ruddy.vercel.app';
+// The course and its server share one website, so production calls go to the same address.
+export const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const read = (k) => { try { return JSON.parse(localStorage.getItem('zts.' + k)); } catch { return null; } };
 const write = (k, v) => { try { v == null ? localStorage.removeItem('zts.' + k) : localStorage.setItem('zts.' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } };
@@ -52,7 +53,9 @@ export async function getConfig() {
 
 const device = () => ({ device_id: deviceId(), device_name: deviceName() });
 
+// Two-factor: after a sign-in code, the server hands this browser a trust token so it can skip the code for 30 days.
 function saveSession(r) {
+  if (r.trust) write('trust', r.trust);
   const acct = { token: r.token, email: r.email, name: r.name || '', donated: !!r.donated };
   write('account', acct);
   return acct;
@@ -63,7 +66,12 @@ export const signup = (name, email, password) => call('/api/auth/signup', { body
 export const resendSignup = (email) => call('/api/auth/resend', { body: { email } });
 export const confirmSignup = async (email, code) => saveSession(await call('/api/auth/confirm', { body: { email, code, ...device() } }));
 
-export const login = async (email, password) => saveSession(await call('/api/auth/login', { body: { email, password, ...device() } }));
+// Sign in: password first. A new device then needs the 6-digit code we email (returns { needs_code }).
+export async function login(email, password) {
+  const r = await call('/api/auth/login', { body: { email, password, trust: read('trust'), ...device() } });
+  return r.needs_code ? r : saveSession(r);
+}
+export const verifyLogin = async (email, code) => saveSession(await call('/api/auth/login/verify', { body: { email, code, ...device() } }));
 
 // Forgot password: a 6-digit code by email, then a new password.
 export const forgotPassword = (email) => call('/api/auth/forgot', { body: { email } });

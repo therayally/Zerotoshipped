@@ -24,6 +24,11 @@
         <button class="btn btn-primary" type="submit">Sign in</button>
         <button class="btn btn-outline" type="button" id="forgot-link">Forgot password?</button>
       </form>
+      <form id="code-form" class="stack" hidden>
+        <div><label for="l-code">6-digit code from your email</label><input id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required /></div>
+        <button class="btn btn-primary" type="submit">Verify and sign in</button>
+        <button class="btn btn-outline" type="button" data-back>Back to sign in</button>
+      </form>
       <form id="forgot-form" class="stack" hidden>
         <div><label for="f-email">Email</label><input id="f-email" type="email" autocomplete="email" required /></div>
         <button class="btn btn-primary" type="submit">Email me a code</button>

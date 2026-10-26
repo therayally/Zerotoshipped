@@ -3,7 +3,7 @@ import { Box, Button, Dialog, IconButton, InputAdornment, TextField, Typography 
 import { useTheme } from '@mui/material/styles';
 import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
 import VisibilityOffRounded from '@mui/icons-material/VisibilityOffRounded';
-import { signup, resendSignup, confirmSignup, login, forgotPassword, resetPassword } from '../account';
+import { signup, resendSignup, confirmSignup, login, verifyLogin, forgotPassword, resetPassword } from '../account';
 
 const field = { '& .MuiOutlinedInput-root': { borderRadius: '3px' } };
 
@@ -11,6 +11,7 @@ const TITLES = {
   signup: ['Create your free account', 'So we can save your spot and recognize your donations.'],
   confirm: ['Check your email', ''],
   login: ['Welcome back', 'Sign in to continue.'],
+  verify: ['Confirm it is you', 'Two-step sign-in keeps your account yours. This device will be remembered for 30 days.'],
   forgot: ['Reset your password', 'We will email you a 6-digit code.'],
   reset: ['Choose a new password', ''],
 };
@@ -44,7 +45,8 @@ export default function AccountGate({ open, onAccount, onOffline }) {
     e.preventDefault();
     if (view === 'signup') run(async () => { const r = await signup(name.trim(), email.trim(), password); go('confirm'); setMsg(r.message); });
     if (view === 'confirm') run(async () => onAccount(await confirmSignup(email.trim(), code.trim())));
-    if (view === 'login') run(async () => onAccount(await login(email.trim(), password)));
+    if (view === 'login') run(async () => { const r = await login(email.trim(), password); if (r.needs_code) { go('verify'); setMsg(r.message); } else onAccount(r); });
+    if (view === 'verify') run(async () => onAccount(await verifyLogin(email.trim(), code.trim())));
     if (view === 'forgot') run(async () => { const r = await forgotPassword(email.trim()); go('reset'); setMsg(r.message); });
     if (view === 'reset') run(async () => onAccount(await resetPassword(email.trim(), code.trim(), password)));
   };
@@ -81,7 +83,7 @@ export default function AccountGate({ open, onAccount, onOffline }) {
           <TextField label="Email" type="email" required fullWidth value={email} onChange={(e) => setEmail(e.target.value)} sx={field} slotProps={{ htmlInput: { autoComplete: 'email' } }} />
           {pw('Password', 'new-password')}
         </>)}
-        {view === 'confirm' && codeField}
+        {(view === 'confirm' || view === 'verify') && codeField}
         {view === 'login' && (<>
           <TextField label="Email" type="email" required fullWidth value={email} onChange={(e) => setEmail(e.target.value)} sx={field} slotProps={{ htmlInput: { autoComplete: 'email' } }} />
           {pw('Password', 'current-password')}
@@ -92,7 +94,7 @@ export default function AccountGate({ open, onAccount, onOffline }) {
         {err && <Typography variant="body2" role="alert" sx={{ color: t.t.warn, fontWeight: 600 }}>{err}</Typography>}
 
         <Button type="submit" variant="contained" size="large" disabled={busy}>
-          {{ signup: 'Create account', confirm: 'Confirm email', login: 'Sign in', forgot: 'Email me a code', reset: 'Save new password' }[view]}
+          {{ signup: 'Create account', confirm: 'Confirm email', login: 'Sign in', verify: 'Verify and sign in', forgot: 'Email me a code', reset: 'Save new password' }[view]}
         </Button>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'space-between' }}>
@@ -100,7 +102,8 @@ export default function AccountGate({ open, onAccount, onOffline }) {
           {view === 'login' && <Button size="small" onClick={() => go('signup')}>Create an account</Button>}
           {view === 'login' && <Button size="small" onClick={() => go('forgot')}>Forgot password?</Button>}
           {view === 'confirm' && <Button size="small" disabled={busy} onClick={() => run(async () => { const r = await resendSignup(email.trim()); setMsg(r.message); })}>Send a new code</Button>}
-          {(view === 'confirm' || view === 'forgot' || view === 'reset') && <Button size="small" onClick={() => go('login')}>Back to sign in</Button>}
+          {view === 'verify' && <Button size="small" disabled={busy} onClick={() => run(async () => { const r = await login(email.trim(), password); setMsg(r.message || ''); })}>Send a new code</Button>}
+          {(view === 'confirm' || view === 'verify' || view === 'forgot' || view === 'reset') && <Button size="small" onClick={() => go('login')}>Back to sign in</Button>}
         </Box>
 
         {offline && (

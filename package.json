@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:web": "rm -rf web/public/app && vite build --outDir web/public --emptyOutDir false",
     "preview": "vite preview",
     "tauri": "tauri"
   },

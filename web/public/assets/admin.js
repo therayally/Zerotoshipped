@@ -9,7 +9,7 @@ async function api(path, { method = 'GET', body } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401 && path.startsWith('/api/admin/') && path !== '/api/admin/login') { showLogin(); throw new Error('Please sign in.'); }
+  if (res.status === 401 && path.startsWith('/api/admin/') && !path.startsWith('/api/admin/login')) { showLogin(); throw new Error('Please sign in.'); }
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
   return data;
 }
@@ -54,7 +54,7 @@ function fillRows(tbody, rows, cols, emptyText) {
 // ───────── sign in
 
 function showForm(id) {
-  for (const f of ['login-form', 'forgot-form', 'reset-form']) $(f).hidden = f !== id;
+  for (const f of ['login-form', 'code-form', 'forgot-form', 'reset-form']) $(f).hidden = f !== id;
 }
 
 function showLogin() {
@@ -66,9 +66,22 @@ $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   setMsg($('login-msg'), 'Signing in…');
   try {
-    await api('/api/admin/login', { method: 'POST', body: { email: $('email').value.trim(), password: $('password').value } });
+    const r = await api('/api/admin/login', { method: 'POST', body: { email: $('email').value.trim(), password: $('password').value } });
     $('password').value = '';
+    setMsg($('login-msg'), r.message, 'ok');
+    showForm('code-form');
+    $('l-code').focus();
+  } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
+});
+
+$('code-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  setMsg($('login-msg'), 'Checking…');
+  try {
+    await api('/api/admin/login/verify', { method: 'POST', body: { email: $('email').value.trim(), code: $('l-code').value.trim() } });
+    $('l-code').value = '';
     setMsg($('login-msg'), '');
+    showForm('login-form');
     start();
   } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
 });

@@ -9,6 +9,7 @@ const CODE_TTL_MS = 10 * 60 * 1000;
 const CODE_MAX_ATTEMPTS = 5;
 const CODE_MAX_SENDS = 3; // per email and purpose, per 15 minutes
 const ADMIN_SESSION_S = 12 * 60 * 60;
+const TRUST_DAYS = 30; // a device that passed the email code skips it for this long
 
 // Settings the admin panel may change. Secret ones are encrypted at rest and never sent back.
 const SETTINGS = {
@@ -134,6 +135,8 @@ async function sendMail(settings, to, subject, text) {
 
 const MAIL = {
   signup: (code) => ['Confirm your Zero to Shipped account', `Welcome! Your confirmation code is ${code}\n\nIt works for 10 minutes. If you did not sign up, you can ignore this email.`],
+  login: (code) => ['Your Zero to Shipped sign-in code', `Someone (hopefully you) signed in on a new device. Your sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away: your password is known to someone else.`],
+  admin: (code) => ['Your Zero to Shipped admin sign-in code', `Your admin sign-in code is ${code}\n\nIt works for 10 minutes. If this was not you, reset your password right away.`],
   reset: (code) => ['Reset your Zero to Shipped password', `Your password reset code is ${code}\n\nIt works for 10 minutes. If you did not ask for this, you can ignore this email; your password stays the same.`],
 };
 
@@ -213,6 +216,23 @@ async function newSession(email, body) {
   return { ok: true, email, name: u?.name || '', token, donated: !!(await donatedAt(email)) };
 }
 
+// Two-factor: after a correct password, a device needs an emailed code unless it holds a trust token from an earlier code.
+async function trustDevice(email, body) {
+  const token = b64url(crypto.getRandomValues(new Uint8Array(32)));
+  await q(`INSERT INTO trusted_devices (email, token_hash, device_name, expires_at) VALUES ($1, $2, $3, now() + ($4 || ' days')::interval)`,
+    [email, await sha256(token), clean(body.device_name, 80) || 'Computer', String(TRUST_DAYS)]);
+  return token;
+}
+
+async function isTrusted(email, token) {
+  if (typeof token !== 'string' || token.length < 20 || token.length > 100) return false;
+  return !!(await one('SELECT 1 FROM trusted_devices WHERE email = $1 AND token_hash = $2 AND expires_at > now()', [email, await sha256(token)]));
+}
+
+async function sessionAndTrust(email, body) {
+  return { ...(await newSession(email, body)), trust: await trustDevice(email, body) };
+}
+
 const SENT = { ok: true, message: 'We sent a 6-digit code to your email. Check your inbox and spam folder.' };
 
 async function signup(body) {
@@ -235,7 +255,7 @@ async function confirmSignup(body) {
   if (email instanceof Response) return email;
   await q('UPDATE users SET email_verified = TRUE WHERE email = $1', [email]);
   await audit(email, 'account_created');
-  return json(await newSession(email, body));
+  return json(await sessionAndTrust(email, body));
 }
 
 async function resendSignup(body) {
@@ -274,7 +294,16 @@ async function checkLogin(body) {
 async function login(body) {
   const email = await checkLogin(body);
   if (email instanceof Response) return email;
-  return json(await newSession(email, body));
+  if (await isTrusted(email, body.trust)) return json(await newSession(email, body));
+  const err = await sendCode(email, 'login');
+  return err || json({ needs_code: true, message: 'New device. We emailed you a 6-digit sign-in code.' });
+}
+
+async function verifyLogin(body) {
+  const email = await checkCode(body, 'login');
+  if (email instanceof Response) return email;
+  await audit(email, 'login_new_device', clean(body.device_name, 80));
+  return json(await sessionAndTrust(email, body));
 }
 
 async function forgot(body) {
@@ -293,8 +322,9 @@ async function reset(body) {
   if (email instanceof Response) return email;
   await q('UPDATE users SET password_hash = $2, failed_logins = 0, locked_until = NULL WHERE email = $1', [email, hashPassword(body.password)]);
   await q('DELETE FROM sessions WHERE email = $1', [email]); // sign out everywhere after a reset
+  await q('DELETE FROM trusted_devices WHERE email = $1', [email]);
   await audit(email, 'password_reset');
-  return json(await newSession(email, body));
+  return json(await sessionAndTrust(email, body));
 }
 
 async function sessionFrom(request) {
@@ -527,11 +557,19 @@ async function route(request, path) {
     if (path === '/api/auth/confirm') return confirmSignup(body);
     if (path === '/api/auth/resend') return resendSignup(body);
     if (path === '/api/auth/login') return login(body);
+    if (path === '/api/auth/login/verify') return verifyLogin(body);
     if (path === '/api/auth/forgot') return forgot(body);
     if (path === '/api/auth/reset') return reset(body);
     if (path === '/api/auth/signout') return signout(request);
     if (path === '/api/admin/login') {
       const email = await checkLogin(body);
+      if (email instanceof Response) return email;
+      if (!(await isAdmin(email))) return json({ error: 'Not an admin.' }, 403);
+      const err = await sendCode(email, 'admin'); // the admin panel always asks for an emailed code
+      return err || json({ needs_code: true, message: 'We emailed you a 6-digit sign-in code.' });
+    }
+    if (path === '/api/admin/login/verify') {
+      const email = await checkCode(body, 'admin');
       if (email instanceof Response) return email;
       if (!(await isAdmin(email))) return json({ error: 'Not an admin.' }, 403);
       const now = Math.floor(Date.now() / 1000);
