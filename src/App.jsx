@@ -51,8 +51,7 @@ export default function App() {
   const [drinkOpen, setDrinkOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
-  // Splash paused until the TinyAppCode splash art is in /brand.
-  const [splash, setSplash] = useState(false);
+  const [splash, setSplash] = useState(() => !session.get('splashSeen'));
   const [splashFade, setSplashFade] = useState(false);
 
   const [account, setAccount] = useState(() => getAccount());
@@ -155,8 +154,8 @@ export default function App() {
       </Drawer>
 
       {splash && (
-        <Box aria-hidden="true" sx={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'grid', placeItems: 'center', background: colorMode === 'dark' ? '#04060E' : '#FEFEFE', opacity: splashFade ? 0 : 1, transition: 'opacity .5s ease' }}>
-          <Box component="img" src={colorMode === 'dark' ? '/brand/splash-dark.jpg' : '/brand/splash-light.jpg'} alt="" sx={{ width: 'min(520px, 80vw)', height: 'auto', display: 'block' }} />
+        <Box aria-hidden="true" sx={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'grid', placeItems: 'center', background: colorMode === 'dark' ? '#0B0E18' : '#FFFFFF', opacity: splashFade ? 0 : 1, transition: 'opacity .5s ease' }}>
+          <Box component="img" src={colorMode === 'dark' ? '/brand/logo-full-dark.png' : '/brand/logo-full.png'} alt="" sx={{ width: 'min(520px, 80vw)', height: 'auto', display: 'block' }} />
         </Box>
       )}
       <TermsGate open={!termsOk && !splash} onAccept={() => { store.set('terms', TERMS_VERSION); setTermsOk(true); }} />

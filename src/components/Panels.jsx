@@ -23,14 +23,18 @@ const label = { fontSize: 12.5, fontWeight: 700, letterSpacing: '0.12em', textTr
 
 // ───────── logo
 
-// Text wordmark until the TinyAppCode logo files are in /brand.
+// The TinyAppCode wordmark, with a white-text version for dark mode.
 export function Logo({ size = 22 }) {
-  const { t } = useTheme();
-  return (
-    <Box component="span" aria-label="TinyAppCode" sx={{ display: 'inline-block', fontWeight: 800, fontSize: size, letterSpacing: '-0.02em', lineHeight: 1, color: 'text.primary' }}>
-      tinyapp<Box component="span" sx={{ background: t.grad, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>code</Box>
-    </Box>
-  );
+  const theme = useTheme();
+  const src = theme.palette.mode === 'dark' ? '/brand/wordmark-dark.png' : '/brand/wordmark.png';
+  return <Box component="img" src={src} alt="TinyAppCode" sx={{ height: Math.round(size * 1.25), width: 'auto', display: 'block' }} />;
+}
+
+// The full lockup: mascot above the wordmark.
+export function LogoFull({ height = 140 }) {
+  const theme = useTheme();
+  const src = theme.palette.mode === 'dark' ? '/brand/logo-full-dark.png' : '/brand/logo-full.png';
+  return <Box component="img" src={src} alt="TinyAppCode" sx={{ height, width: 'auto', display: 'block' }} />;
 }
 
 // ───────── search
