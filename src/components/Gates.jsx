@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Typography } from '@mui/material';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, InputAdornment, TextField, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import LocalBarRounded from '@mui/icons-material/LocalBarRounded';
 import GavelRounded from '@mui/icons-material/GavelRounded';
@@ -11,7 +11,8 @@ import AutoStoriesRounded from '@mui/icons-material/AutoStoriesRounded';
 import LockOpenRounded from '@mui/icons-material/LockOpenRounded';
 import BlockRounded from '@mui/icons-material/BlockRounded';
 import { FONT_MONO } from '../theme';
-import { getConfig, refreshAccount } from '../account';
+import { getConfig, refreshAccount, startDonation } from '../account';
+import { logo } from '../content/logos';
 
 export const TERMS_VERSION = '2026-10-27';
 
@@ -102,6 +103,20 @@ function DrinkArt() {
   );
 }
 
+// Card brands shown under the donate button, each in its own small tile.
+const CARDS = ['visa', 'mastercard', 'amex', 'discover', 'applepay', 'googlepay', 'cashapp'];
+
+function CardMark({ k }) {
+  const { t } = useTheme();
+  const icon = logo(k);
+  if (!icon) return null;
+  return (
+    <Box title={icon.title} sx={{ width: 46, height: 30, borderRadius: '4px', background: '#fff', border: `1px solid ${t.border}`, display: 'grid', placeItems: 'center' }}>
+      <svg viewBox="0 0 24 24" width="30" height="20" aria-hidden="true"><path d={icon.path} fill={`#${icon.hex}`} /></svg>
+    </Box>
+  );
+}
+
 const PERKS = [
   [AutoStoriesRounded, 'New lessons', 'as the tools change'],
   [LockOpenRounded, 'Free for everyone', 'no paywall, ever'],
@@ -115,6 +130,26 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
   const [config, setConfig] = useState({});
   const [waiting, setWaiting] = useState(false);
   const [other, setOther] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  // Open the tab right away (so pop-up blockers allow it), then send it to the Square link the server makes.
+  const give = async (e) => {
+    e.preventDefault();
+    setErr(''); setBusy(true);
+    const tab = window.open('', '_blank');
+    try {
+      const { url } = await startDonation(Number(amount));
+      if (tab) tab.location.href = url; else window.location.href = url;
+      setWaiting(true);
+    } catch (ex) {
+      tab?.close();
+      setErr(ex.message);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   useEffect(() => { if (open) getConfig().then(setConfig); }, [open]);
 
@@ -155,22 +190,31 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
           ))}
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Button variant="contained" size="large" href={account && config.donate_square ? config.donate_square : undefined} target="_blank" rel="noopener noreferrer"
-            disabled={!account || !config.donate_square} onClick={() => setWaiting(true)} startIcon={<LocalBarRounded />}
-            sx={{ py: 1.4, fontSize: 16 }}>
-            Buy me a drink
-          </Button>
+        <Box component="form" onSubmit={give} sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Any amount" aria-label="Donation amount in dollars"
+              disabled={!account || !config.donate_card} inputMode="decimal"
+              slotProps={{ input: { startAdornment: <InputAdornment position="start">$</InputAdornment>, sx: { borderRadius: '3px', fontSize: 18, fontWeight: 600 } }, htmlInput: { inputMode: 'decimal', maxLength: 7 } }}
+              sx={{ width: 150, flexShrink: 0 }} />
+            <Button type="submit" variant="contained" size="large" disabled={!account || !config.donate_card || busy || !(Number(amount) > 0)} startIcon={<LocalBarRounded />} sx={{ flex: 1, fontSize: 16 }}>
+              {busy ? 'Opening…' : 'Buy me a drink'}
+            </Button>
+          </Box>
           {waiting && account ? (
             <Box role="status" sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: '4px', background: t.tealSoft }}>
               <CircularProgress size={16} sx={{ color: t.teal }} />
-              <Typography variant="body2">Waiting for your donation. This window closes by itself when it arrives.</Typography>
+              <Typography variant="body2">Finish on Square's page. This window closes by itself when your drink arrives.</Typography>
             </Box>
+          ) : err ? (
+            <Typography variant="body2" role="alert" sx={{ color: t.warn, fontWeight: 600, textAlign: 'center' }}>{err}</Typography>
           ) : (
             <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-              {account ? <>Secure checkout by Square. Use <b>{account.email}</b> so it is matched to you.</> : 'Sign in first so we can match your donation to you.'}
+              {!account ? 'Sign in first so we can thank you.' : config.donate_card ? 'Any amount helps. Secure checkout by Square.' : 'Card donations are almost ready. PayPal and crypto work below.'}
             </Typography>
           )}
+          <Box aria-label="Accepted: Visa, Mastercard, American Express, Discover, Apple Pay, Google Pay, Cash App Pay" sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+            {CARDS.map((k) => <CardMark key={k} k={k} />)}
+          </Box>
         </Box>
 
         <Box sx={{ borderTop: `1px solid ${t.border}`, pt: 1.5 }}>

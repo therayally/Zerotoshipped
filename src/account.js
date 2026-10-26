@@ -77,6 +77,12 @@ export const verifyLogin = async (email, code) => saveSession(await call('/api/a
 export const forgotPassword = (email) => call('/api/auth/forgot', { body: { email } });
 export const resetPassword = async (email, code, password) => saveSession(await call('/api/auth/reset', { body: { email, code, password, ...device() } }));
 
+// Card donations: the server makes a one-off Square checkout link for any amount, tagged with this account.
+export async function startDonation(amount) {
+  const acct = read('account');
+  return call('/api/donate', { body: { amount }, token: acct?.token });
+}
+
 // Asks the server whether this account has a recorded donation. The server's database is the only source of truth.
 export async function refreshAccount() {
   const acct = read('account');

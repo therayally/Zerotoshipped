@@ -204,7 +204,7 @@ $('manual').addEventListener('submit', async (e) => {
 
 // ───────── settings
 
-const SECRET_KEYS = ['square_webhook_key', 'resend_api_key'];
+const SECRET_KEYS = ['square_webhook_key', 'square_access_token', 'resend_api_key'];
 
 loaders.settings = async () => {
   const s = await api('/api/admin/settings');

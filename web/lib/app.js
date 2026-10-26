@@ -24,6 +24,7 @@ const SETTINGS = {
   square_webhook_url: { public: false },
   mail_from: { public: false },
   square_webhook_key: { secret: true },
+  square_access_token: { secret: true },
   resend_api_key: { secret: true },
 };
 
@@ -348,14 +349,64 @@ async function signout(request) {
   return json({ ok: true });
 }
 
+// ───────────────────────── Square: any-amount donations
+
+const SQUARE_API = 'https://connect.squareup.com/v2';
+const SQUARE_VERSION = '2025-01-23';
+
+// Credentials come from the admin panel, or from Vercel env vars as a fallback.
+function squareCreds(s) {
+  return {
+    token: s.square_access_token || env('SQUARE_ACCESS_TOKEN') || '',
+    location: s.square_location_id || env('SQUARE_LOCATION_ID') || '',
+    webhookKey: s.square_webhook_key || env('SQUARE_WEBHOOK_SIGNATURE_KEY') || '',
+  };
+}
+
+// Makes a one-off Square checkout link for the amount the person typed, tagged with their account
+// so the webhook can match the payment even if they use a different email at checkout.
+async function donate(request, body) {
+  const sess = await sessionFrom(request);
+  if (!sess) return json({ error: 'Please sign in first.' }, 401);
+  const s = await loadSettings();
+  const sq = squareCreds(s);
+  if (!sq.token || !sq.location) return json({ error: 'Card donations are not set up yet. PayPal and crypto work below.' }, 503);
+  const cents = Math.round(Number(body.amount) * 100);
+  const min = parseInt(s.min_donation_cents, 10) || 100;
+  if (!Number.isFinite(cents) || cents < min || cents > 100000) return json({ error: `Enter an amount between $${(min / 100).toFixed(2)} and $1,000.` }, 400);
+  const recent = await one("SELECT count(*)::int AS n FROM audit_log WHERE actor = $1 AND action = 'donate_link' AND created_at > now() - interval '1 hour'", [sess.email]);
+  if (recent.n >= 10) return json({ error: 'Too many tries. Please wait a bit and try again.' }, 429);
+  const user = await one('SELECT id FROM users WHERE email = $1', [sess.email]);
+  const res = await fetch(`${SQUARE_API}/online-checkout/payment-links`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${sq.token}`, 'content-type': 'application/json', 'square-version': SQUARE_VERSION },
+    body: JSON.stringify({
+      idempotency_key: b64url(crypto.getRandomValues(new Uint8Array(18))),
+      quick_pay: { name: 'TinyAppCode donation', price_money: { amount: cents, currency: 'USD' }, location_id: sq.location },
+      checkout_options: { ask_for_shipping_address: false, redirect_url: new URL(request.url).origin + '/',
+        accepted_payment_methods: { apple_pay: true, google_pay: true, cash_app_pay: true, afterpay_clearpay: false } },
+      pre_populated_data: { buyer_email: sess.email },
+      payment_note: `TinyAppCode donation acct:${user?.id ?? ''}`,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.payment_link?.url) {
+    console.error('square payment link failed', res.status, JSON.stringify(data.errors || []).slice(0, 300));
+    return json({ error: 'Square is not answering right now. Try again in a minute.' }, 502);
+  }
+  await audit(sess.email, 'donate_link', `${cents}c`);
+  return json({ ok: true, url: data.payment_link.url });
+}
+
 // ───────────────────────── Square webhook: the only automatic way a donation is recorded
 
 async function squareWebhook(request) {
   const raw = await request.text();
   const settings = await loadSettings();
-  if (!settings.square_webhook_key) return json({ error: 'not configured' }, 503);
+  const { webhookKey } = squareCreds(settings);
+  if (!webhookKey) return json({ error: 'not configured' }, 503);
   const url = settings.square_webhook_url || new URL(request.url).origin + '/api/square/webhook';
-  const expected = await hmac(settings.square_webhook_key, url + raw, 'base64');
+  const expected = await hmac(webhookKey, url + raw, 'base64');
   if (!safeEqual(request.headers.get('x-square-hmacsha256-signature') || '', expected)) return json({ error: 'bad signature' }, 401);
 
   let event;
@@ -364,10 +415,14 @@ async function squareWebhook(request) {
 
   if (event.type === 'payment.created' || event.type === 'payment.updated') {
     const pay = obj.payment || {};
-    const email = normEmail(pay.buyer_email_address);
+    // Prefer the account tag from our own checkout link; fall back to the email typed at checkout.
+    const acct = /acct:(\d+)/.exec(pay.note || '')?.[1];
+    const tagged = acct ? await one('SELECT email FROM users WHERE id = $1', [Number(acct)]) : null;
+    const email = tagged?.email || normEmail(pay.buyer_email_address);
     const amount = pay.amount_money?.amount || 0;
     const min = parseInt(settings.min_donation_cents, 10) || 100;
-    const rightLocation = !settings.square_location_id || pay.location_id === settings.square_location_id;
+    const loc = squareCreds(settings).location;
+    const rightLocation = !loc || pay.location_id === loc;
     if (pay.status === 'COMPLETED' && email && amount >= min && rightLocation) {
       const rows = await q("INSERT INTO donations (email, source, external_id, amount_cents) VALUES ($1, 'square', $2, $3) ON CONFLICT (external_id) DO NOTHING RETURNING id",
         [email, clean(pay.id, 100), amount]);
@@ -545,6 +600,8 @@ async function route(request, path) {
     const s = await loadSettings();
     const pub = {};
     for (const [k, def] of Object.entries(SETTINGS)) if (def.public) pub[k] = s[k];
+    const sq = squareCreds(s);
+    pub.donate_card = !!(sq.token && sq.location);
     return json(pub, 200, { 'cache-control': 'public, max-age=60' });
   }
   if (path === '/api/health') return json({ ok: true });
@@ -558,6 +615,7 @@ async function route(request, path) {
     if (path === '/api/auth/resend') return resendSignup(body);
     if (path === '/api/auth/login') return login(body);
     if (path === '/api/auth/login/verify') return verifyLogin(body);
+    if (path === '/api/donate') return donate(request, body);
     if (path === '/api/auth/forgot') return forgot(body);
     if (path === '/api/auth/reset') return reset(body);
     if (path === '/api/auth/signout') return signout(request);
