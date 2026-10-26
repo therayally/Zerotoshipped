@@ -66,8 +66,14 @@ export const FONT_DISPLAY = '"Outfit", system-ui, -apple-system, "Segoe UI", san
 export const FONT_BODY = FONT_DISPLAY;
 export const FONT_MONO = '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace';
 
-export function makeTheme(mode) {
-  const t = tokens[mode];
+// High contrast (an accessibility setting people can turn on): darker grays and colors, stronger borders.
+const HIGH_CONTRAST = {
+  light: { muted: '#3A4058', text2: '#161A2E', border: '#9AA0B4', teal: '#0A6B60', sky: '#1559A3', coral: '#A93A26', accentText: '#1F3FBF' },
+  dark: { muted: '#D2D6E4', text2: '#F1F3F9', border: '#5C6380', teal: '#6FE3D3', sky: '#9AD1FF', coral: '#FFB3A6', accentText: '#B8C6FF' },
+};
+
+export function makeTheme(mode, a11y = {}) {
+  const t = a11y.contrast ? { ...tokens[mode], ...HIGH_CONTRAST[mode] } : tokens[mode];
   return createTheme({
     palette: {
       mode,

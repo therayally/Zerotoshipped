@@ -15,6 +15,8 @@ import GridViewRounded from '@mui/icons-material/GridViewRounded';
 import NorthEastRounded from '@mui/icons-material/NorthEastRounded';
 import { modules, allLessons, TRACKS, lessonsInTrack } from '../content/course';
 import WorkspacePremiumRounded from '@mui/icons-material/WorkspacePremiumRounded';
+import { A11yButton } from './Accessibility';
+import ContentPasteRounded from '@mui/icons-material/ContentPasteRounded';
 import { metaFor } from '../content/meta';
 import { ModuleTile, ModuleCover, HeroBanner, LogoTile } from './Art';
 
@@ -77,7 +79,7 @@ function Search({ go }) {
 
 // ───────── top bar
 
-export function TopBar({ section, colorMode, toggleColor, openMenu, go, account, onSignOut, openDrink }) {
+export function TopBar({ section, colorMode, toggleColor, openMenu, go, account, onSignOut, openDrink, openA11y }) {
   const { t } = useTheme();
   const divider = `1px solid ${t.border}`;
   return (
@@ -89,6 +91,7 @@ export function TopBar({ section, colorMode, toggleColor, openMenu, go, account,
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: { xs: 1, md: 3 }, minWidth: 0 }}>
         <Typography sx={{ ...label, fontSize: 13, color: t.text, display: { xs: 'none', md: 'block' }, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{section}</Typography>
         <Box sx={{ flex: 1 }} />
+        <A11yButton onClick={openA11y} />
         <Tooltip title={colorMode === 'dark' ? 'Light mode' : 'Dark mode'}>
           <IconButton onClick={toggleColor} aria-label="Toggle light and dark mode" sx={{ border: divider }}>
             {colorMode === 'dark' ? <LightModeRounded fontSize="small" /> : <DarkModeRounded fontSize="small" />}
@@ -124,7 +127,7 @@ function StatusDot({ state }) {
   return <Box sx={{ width: 16, height: 16, borderRadius: '3px', border: `2px solid ${state === 'current' ? t.accent : t.border}`, flexShrink: 0 }} />;
 }
 
-export function SideNav({ view, currentId, done, go, goHome }) {
+export function SideNav({ view, currentId, done, go, goHome, openPrompts }) {
   const { t } = useTheme();
   const current = allLessons.find((l) => l.id === currentId);
   const pct = Math.round((done.size / allLessons.length) * 100);
@@ -139,6 +142,10 @@ export function SideNav({ view, currentId, done, go, goHome }) {
         <Box component="button" onClick={goHome} sx={{ ...row(view === 'home'), mb: 1.5 }}>
           <HomeRounded sx={{ fontSize: 20, color: view === 'home' ? t.accent : t.muted }} />
           <Typography sx={{ fontSize: 14.5, fontWeight: 600 }}>All modules</Typography>
+        </Box>
+        <Box component="button" onClick={openPrompts} sx={{ ...row(view === 'prompts'), mt: -1, mb: 1.5 }}>
+          <ContentPasteRounded sx={{ fontSize: 20, color: view === 'prompts' ? t.accent : t.muted }} />
+          <Typography sx={{ fontSize: 14.5, fontWeight: 600 }}>Prompt library</Typography>
         </Box>
         {modules.map((m, mi) => {
           const ids = m.lessons.map((l) => l.id);
@@ -182,7 +189,7 @@ export function SideNav({ view, currentId, done, go, goHome }) {
           <Typography sx={{ fontSize: 13, fontWeight: 600, color: t.text2 }}>Your progress</Typography>
           <Typography sx={{ fontSize: 13, fontWeight: 700, color: t.accentText }}>{pct}%</Typography>
         </Box>
-        <LinearProgress variant="determinate" value={pct} sx={{ height: 4, borderRadius: 0, background: t.border, '& .MuiLinearProgress-bar': { background: t.grad } }} />
+        <LinearProgress aria-label="Your course progress" variant="determinate" value={pct} sx={{ height: 4, borderRadius: 0, background: t.border, '& .MuiLinearProgress-bar': { background: t.grad } }} />
       </Box>
     </Box>
   );
@@ -280,7 +287,7 @@ function TrackHeader({ track, done, onClaim, certId }) {
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{ width: 120 }}>
-            <LinearProgress variant="determinate" value={(n / ids.length) * 100} sx={{ height: 6, borderRadius: 3, background: t.surface2, '& .MuiLinearProgress-bar': { background: t.grad } }} />
+            <LinearProgress aria-label={`${track.short} progress`} variant="determinate" value={(n / ids.length) * 100} sx={{ height: 6, borderRadius: 3, background: t.surface2, '& .MuiLinearProgress-bar': { background: t.grad } }} />
             <Typography sx={{ fontSize: 12, color: t.muted, mt: 0.5, textAlign: 'right' }}>{n} / {ids.length} lessons</Typography>
           </Box>
           {certId ? (
@@ -296,7 +303,7 @@ function TrackHeader({ track, done, onClaim, certId }) {
   );
 }
 
-export function Home({ currentId, done, go, openMenu, openDrink, onClaim, certs = {} }) {
+export function Home({ currentId, done, go, openMenu, openDrink, onClaim, certs = {}, openPrompts }) {
   const { t } = useTheme();
   const current = allLessons.find((l) => l.id === currentId) || allLessons[0];
   const started = done.size > 0;
@@ -335,8 +342,8 @@ export function Home({ currentId, done, go, openMenu, openDrink, onClaim, certs 
       <Box sx={grid}>{adv.map(([m, mi]) => <ModuleCard key={m.id} m={m} mi={mi} done={done} go={go} />)}</Box>
 
       <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 25, justifyContent: 'space-around', alignItems: 'center', height: 64, background: t.surface, borderTop: `1px solid ${t.border}` }}>
-        {[[HomeRounded, 'Home', () => window.scrollTo({ top: 0, behavior: 'smooth' }), true], [GridViewRounded, 'Modules', openMenu], [PlayArrowRounded, 'Continue', () => go(current.id)], [LocalBarRounded, 'Drink', openDrink]].map(([Icon, text, fn, on]) => (
-          <Box key={text} component="button" onClick={fn} sx={{ all: 'unset', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, color: on ? t.accentText : t.muted, fontSize: 11.5, fontWeight: 600, px: 1.5 }}>
+        {[[HomeRounded, 'Home', () => window.scrollTo({ top: 0, behavior: 'smooth' }), true], [GridViewRounded, 'Modules', openMenu], [PlayArrowRounded, 'Continue', () => go(current.id)], [ContentPasteRounded, 'Prompts', openPrompts], [LocalBarRounded, 'Drink', openDrink]].map(([Icon, text, fn, on]) => (
+          <Box key={text} component="button" onClick={fn} sx={{ all: 'unset', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, color: on ? t.accentText : t.muted, fontSize: 11.5, fontWeight: 600, px: 0.75, minWidth: 56 }}>
             <Icon sx={{ fontSize: 24 }} />{text}
           </Box>
         ))}

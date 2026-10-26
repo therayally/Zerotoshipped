@@ -40,7 +40,7 @@ export function TermsGate({ open, onAccept }) {
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>Terms of use and release of liability</Typography>
         </Box>
       </Box>
-      <Box sx={{ px: { xs: 2.5, sm: 3.5 }, overflowY: 'auto', maxHeight: { xs: '48vh', sm: '42vh' }, borderTop: `1px solid ${t.border}`, borderBottom: `1px solid ${t.border}`, background: t.surface2 }}>
+      <Box tabIndex={0} role="region" aria-label="Terms of use" sx={{ px: { xs: 2.5, sm: 3.5 }, overflowY: 'auto', maxHeight: { xs: '48vh', sm: '42vh' }, borderTop: `1px solid ${t.border}`, borderBottom: `1px solid ${t.border}`, background: t.surface2 }}>
         {terms.map(([h, p], i) => (
           <Box key={h} sx={{ py: 1.75, borderTop: i ? `1px solid ${t.border}` : 'none' }}>
             <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>{i + 1}. {h}</Typography>

@@ -60,7 +60,7 @@ export function CertificatePage({ id }) {
   const share = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
   const copy = async () => { try { await navigator.clipboard.writeText(url); } catch { /* blocked */ } setCopied(true); setTimeout(() => setCopied(false), 1500); };
   return (
-    <Box sx={{ minHeight: '100vh', background: t.bg, py: { xs: 3, sm: 6 }, px: 2, '@media print': { background: '#fff', p: 0 } }}>
+    <Box component="main" sx={{ minHeight: '100vh', background: t.bg, py: { xs: 3, sm: 6 }, px: 2, '@media print': { background: '#fff', p: 0 } }}>
       <Box sx={{ maxWidth: 900, mx: 'auto' }}>
         <Box sx={{ position: 'relative', aspectRatio: { sm: '1.414 / 1' }, background: '#fff', color: '#16161D', borderRadius: '6px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', overflow: 'hidden', '@media print': { boxShadow: 'none', borderRadius: 0 } }}>
           <Box sx={{ position: 'absolute', inset: 14, border: '2px solid #E3E6EF', borderRadius: '4px' }} />

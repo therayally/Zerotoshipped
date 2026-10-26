@@ -97,3 +97,28 @@ export const privacy = {
     ]],
   ],
 };
+
+export const accessibility = {
+  title: 'Accessibility Statement',
+  intro: 'TinyAppCode is for everyone, including people who use screen readers, keyboards, magnifiers, captions or other assistive technology. We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.1 at level AA, and we keep improving.',
+  sections: [
+    ['What we have done', [
+      'Every page works with a keyboard alone, with a visible focus outline so you can see where you are.',
+      'Pages use proper headings and landmarks, so screen readers can jump straight to what you need. Images, logos and diagrams have text descriptions.',
+      'Forms have labels, clear error messages and support for password managers.',
+      'Animations follow your device\'s "reduce motion" setting.',
+      'We test the site with automated accessibility checks (axe-core) and fix what they find.',
+    ]],
+    ['Settings you can change', [
+      'Click the **Accessibility** button (the person icon in the top bar, or the round button in the corner) to turn on: **larger text**, **high contrast**, **reduce motion**, **underlined links**, and **easier reading spacing**. Your choices are saved on your device.',
+      'Your browser and device settings (zoom, dark mode, screen readers) also work with the site.',
+    ]],
+    ['Known limitations', [
+      'Some screenshots of other companies\' websites in the lessons are images. Each one has a caption describing what it shows, and the steps around it explain the same thing in text.',
+      'Pages on other services we link to (such as payment pages) are run by those companies and follow their own accessibility policies.',
+    ]],
+    ['Feedback and help', [
+      'If anything on TinyAppCode is hard to use with your setup, please tell us what page and what happened. We will reply, help you get the information another way, and work on a fix.',
+    ]],
+  ],
+};

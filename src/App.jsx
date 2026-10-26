@@ -9,9 +9,11 @@ import { metaFor } from './content/meta';
 import Lesson from './components/Lesson';
 import { TermsGate, DonateDialog, DonateBody, TERMS_VERSION } from './components/Gates';
 import { Inline } from './components/Blocks';
-import { terms as termsDoc, privacy as privacyDoc, LEGAL_UPDATED } from './content/legal';
+import { terms as termsDoc, privacy as privacyDoc, accessibility as accessibilityDoc, LEGAL_UPDATED } from './content/legal';
 import { getConfig, fetchProgress, pushProgress, myCertificates } from './account';
 import { CertificatePage, ClaimCertificate } from './components/Certificate';
+import { A11yButton, A11yDialog, A11yStyles, loadA11y } from './components/Accessibility';
+import PromptLibrary from './components/PromptLibrary';
 import { TRACKS, lessonsInTrack } from './content/course';
 import AccountGate from './components/AccountGate';
 import { getAccount, refreshAccount, signOut } from './account';
@@ -53,7 +55,7 @@ function DonatePage({ account, onAccount, theme }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <GateBackdrop />
-      <Box sx={{ position: 'relative', minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2 }}>
+      <Box component="main" sx={{ position: 'relative', minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2 }}>
         <Box sx={{ width: '100%', maxWidth: 460, borderRadius: '6px', overflow: 'hidden', background: t.surface, boxShadow: '0 30px 80px rgba(0,0,0,0.45)' }}>
           <Box sx={{ background: theme.palette.mode === 'dark' ? '#0B0E18' : '#fff', pt: 3, pb: 1.5, display: 'grid', placeItems: 'center', borderBottom: `1px solid ${t.border}` }}>
             <LogoFull height={150} />
@@ -81,7 +83,7 @@ function LegalPage({ doc, theme }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ maxWidth: 760, mx: 'auto', px: 2, py: { xs: 3, sm: 6 } }}>
+      <Box component="main" sx={{ maxWidth: 760, mx: 'auto', px: 2, py: { xs: 3, sm: 6 } }}>
         <Box component="a" href="/" sx={{ display: 'inline-block', mb: 4 }}><Logo size={22} /></Box>
         <Typography variant="h3" component="h1" sx={{ fontWeight: 800 }}>{doc.title}</Typography>
         <Typography sx={{ color: 'text.secondary', mt: 1 }}>Last updated {LEGAL_UPDATED}</Typography>
@@ -100,6 +102,7 @@ function LegalPage({ doc, theme }) {
           <Box component="a" href="/" sx={{ color: t.accentText }}>Back to TinyAppCode</Box>
           <Box component="a" href="/terms" sx={{ color: t.accentText }}>Terms of Service</Box>
           <Box component="a" href="/privacy" sx={{ color: t.accentText }}>Privacy Policy</Box>
+          <Box component="a" href="/accessibility" sx={{ color: t.accentText }}>Accessibility</Box>
           <Box component="a" href="/donate" sx={{ color: t.accentText }}>Donate</Box>
         </Box>
       </Box>
@@ -112,7 +115,7 @@ export function LegalLinks({ color }) {
   const sx = { color: color || 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 };
   return (
     <Typography variant="body2" sx={{ color: color || 'text.secondary', textAlign: 'center' }}>
-      <Box component="a" href="/terms" target="_blank" sx={sx}>Terms</Box>{' · '}<Box component="a" href="/privacy" target="_blank" sx={sx}>Privacy</Box>
+      <Box component="a" href="/terms" target="_blank" sx={sx}>Terms</Box>{' · '}<Box component="a" href="/privacy" target="_blank" sx={sx}>Privacy</Box>{' · '}<Box component="a" href="/accessibility" target="_blank" sx={sx}>Accessibility</Box>
     </Typography>
   );
 }
@@ -133,9 +136,11 @@ export default function App() {
 
   const [account, setAccount] = useState(() => getAccount());
   const [claimTrack, setClaimTrack] = useState(null);
+  const [a11y, setA11y] = useState(loadA11y);
+  const [a11yOpen, setA11yOpen] = useState(false);
   const [certs, setCerts] = useState({});
   const [offline, setOffline] = useState(false);
-  const theme = useMemo(() => makeTheme(colorMode), [colorMode]);
+  const theme = useMemo(() => makeTheme(colorMode, a11y), [colorMode, a11y]);
   const index = allLessons.findIndex((l) => l.id === currentId);
   const lesson = allLessons[index];
 
@@ -186,9 +191,9 @@ export default function App() {
   useEffect(() => {
     store.set('last', currentId);
     store.set('view', view);
-    const ownPage = /^\/(donate|terms|privacy|certificate)(\/|$)/.test(window.location.pathname);
+    const ownPage = /^\/(donate|terms|privacy|accessibility|certificate)(\/|$)/.test(window.location.pathname);
     if (!ownPage && (window.location.pathname !== '/' || window.location.hash)) history.replaceState(null, '', '/' + window.location.search);
-    document.title = view === 'home' ? 'TinyAppCode' : `${lesson.title} · TinyAppCode`;
+    document.title = view === 'home' ? 'TinyAppCode' : view === 'prompts' ? 'Prompt library · TinyAppCode' : `${lesson.title} · TinyAppCode`;
   }, [currentId, lesson.title, view]);
 
   useEffect(() => {
@@ -231,12 +236,23 @@ export default function App() {
   const goHome = () => { setView('home'); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); };
   const openDrink = () => setDrinkOpen(true);
   const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
-  const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} />;
+  const openPrompts = () => { setView('prompts'); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} openPrompts={openPrompts} />;
   const page = window.location.pathname.replace(/\/$/, '');
-  if (page.startsWith('/certificate/')) return <ThemeProvider theme={theme}><CssBaseline /><CertificatePage id={page.slice('/certificate/'.length)} /></ThemeProvider>;
-  if (page === '/terms') return <LegalPage doc={termsDoc} theme={theme} />;
-  if (page === '/privacy') return <LegalPage doc={privacyDoc} theme={theme} />;
-  if (page === '/donate') return <DonatePage account={account} onAccount={setAccount} theme={theme} />;
+  // Accessibility settings: available on every page (floating button where there is no top bar).
+  const a11yLayer = (floating) => (
+    <>
+      <A11yStyles prefs={a11y} />
+      <A11yDialog open={a11yOpen} onClose={() => setA11yOpen(false)} prefs={a11y} setPrefs={setA11y} />
+      {floating && <A11yButton floating onClick={() => setA11yOpen(true)} />}
+    </>
+  );
+  const standalone = (el) => <ThemeProvider theme={theme}><CssBaseline />{el}{a11yLayer(true)}</ThemeProvider>;
+  if (page.startsWith('/certificate/')) return standalone(<CertificatePage id={page.slice('/certificate/'.length)} />);
+  if (page === '/terms') return standalone(<LegalPage doc={termsDoc} theme={theme} />);
+  if (page === '/privacy') return standalone(<LegalPage doc={privacyDoc} theme={theme} />);
+  if (page === '/accessibility') return standalone(<LegalPage doc={accessibilityDoc} theme={theme} />);
+  if (page === '/donate') return standalone(<DonatePage account={account} onAccount={setAccount} theme={theme} />);
   // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
   const gated = !demo && (!termsOk || (!account && !offline));
 
@@ -244,23 +260,25 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {gated ? <GateBackdrop /> : (<>
-      <TopBar section={view === 'home' ? 'All modules' : lesson.moduleTitle} colorMode={colorMode} toggleColor={toggleColor} openMenu={() => setMenuOpen(true)} go={go} account={account} onSignOut={onSignOut} openDrink={openDrink} />
+      <TopBar section={view === 'home' ? 'All modules' : view === 'prompts' ? 'Prompt library' : lesson.moduleTitle} colorMode={colorMode} toggleColor={toggleColor} openMenu={() => setMenuOpen(true)} go={go} account={account} onSignOut={onSignOut} openDrink={openDrink} openA11y={() => setA11yOpen(true)} />
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', md: `${SIDEBAR}px minmax(0,1fr)`, xl: `${SIDEBAR}px minmax(0,1fr) ${RAIL}px` }, minHeight: 'calc(100vh - 64px)' }}>
         <Box component="nav" aria-label="Course" sx={{ display: { xs: 'none', md: 'block' }, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', background: theme.t.surface, borderRight: `1px solid ${theme.t.border}` }}>
           {nav}
         </Box>
         <Box component="main" sx={{ minWidth: 0 }}>
           {view === 'home' ? (
-            <Home currentId={currentId} done={done} go={go} openMenu={() => setMenuOpen(true)} openDrink={openDrink} onClaim={setClaimTrack} certs={certs} />
+            <Home currentId={currentId} done={done} go={go} openMenu={() => setMenuOpen(true)} openDrink={openDrink} onClaim={setClaimTrack} certs={certs} openPrompts={openPrompts} />
+          ) : view === 'prompts' ? (
+            <PromptLibrary go={go} />
           ) : (
             <Lesson lesson={lesson} index={index} onBack={onBack} onNext={onNext} onSkipModule={onSkipModule} complete={done.has(lesson.id)} setComplete={(on) => setLessonDone(lesson.id, on)} />
           )}
         </Box>
         <Box component="aside" sx={{ display: { xs: 'none', xl: 'block' }, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', overflowY: 'auto', background: theme.t.surface, borderLeft: `1px solid ${theme.t.border}`, scrollbarWidth: 'thin' }}>
           <RightRail go={go} openDrink={openDrink} account={account} onSignOut={onSignOut}
-            title={view === 'home' ? 'Up next' : 'In this module'}
-            items={view === 'home' ? allLessons.filter((l) => !done.has(l.id)).slice(0, 6) : modules[lesson.moduleIndex].lessons.map((l) => allLessons.find((x) => x.id === l.id))}
-            tools={view === 'home' ? [...new Map(modules.flatMap((m) => metaFor(m.id).tools).filter((i) => !i.text).map((i) => [i.title, i])).values()].slice(0, 20) : metaFor(lesson.moduleId).tools} />
+            title={view === 'lesson' ? 'In this module' : 'Up next'}
+            items={view !== 'lesson' ? allLessons.filter((l) => !done.has(l.id)).slice(0, 6) : modules[lesson.moduleIndex].lessons.map((l) => allLessons.find((x) => x.id === l.id))}
+            tools={view !== 'lesson' ? [...new Map(modules.flatMap((m) => metaFor(m.id).tools).filter((i) => !i.text).map((i) => [i.title, i])).values()].slice(0, 20) : metaFor(lesson.moduleId).tools} />
         </Box>
       </Box>
 
@@ -279,6 +297,7 @@ export default function App() {
       <AccountGate open={termsOk && !splash && !demo && !account && !offline} onAccount={(a) => { setAccount(a); setToast(`Welcome${a.name ? ', ' + a.name.split(' ')[0] : ''}!`); }} onOffline={() => setOffline(true)} />
       <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => setDrinkOpen(false)} account={account}
         onAccount={(a) => { setAccount(a); if (a?.donated) { setDrinkOpen(false); setToast('Cheers! Your drink arrived. Thank you.'); } }} />
+      {a11yLayer(gated)}
       <ClaimCertificate open={!!claimTrack} track={claimTrack} account={account} onClose={() => setClaimTrack(null)} />
       <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} message={toast} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
     </ThemeProvider>

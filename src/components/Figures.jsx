@@ -108,7 +108,7 @@ function Frame({ h, children, caption }) {
   const [ref, seen] = useInView();
   return (
     <Box ref={ref} className={seen ? 'in' : ''} sx={{ my: 3, p: { xs: 1.5, sm: 2.5 }, borderRadius: '3px', background: t.surface2, border: `1px solid ${t.border}`, ...motion }}>
-      <Box sx={{ overflowX: 'auto', mx: { xs: -1.5, sm: 0 }, px: { xs: 1.5, sm: 0 } }}>
+      <Box tabIndex={-1} sx={{ overflowX: 'auto', mx: { xs: -1.5, sm: 0 }, px: { xs: 1.5, sm: 0 } }}>
         <svg viewBox={`0 0 640 ${h}`} width="100%" role="img" aria-label={caption} style={{ display: 'block', minWidth: 540 }}>
           <defs>
             <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">

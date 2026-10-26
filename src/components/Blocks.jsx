@@ -120,7 +120,7 @@ function CopyButton({ text, dark }) {
   );
 }
 
-function PromptBox({ label, text }) {
+export function PromptBox({ label, text }) {
   const { t } = useTheme();
   return (
     <Box sx={{ my: 3, borderRadius: '3px', background: t.surface, boxShadow: t.shadow, overflow: 'hidden' }}>
@@ -133,7 +133,7 @@ function PromptBox({ label, text }) {
         </Box>
         <CopyButton text={text} />
       </Box>
-      <Box component="pre" sx={{ m: 0, mx: 1.25, mb: 1.25, p: 2, borderRadius: '3px', fontFamily: FONT_MONO, fontSize: 13.5, lineHeight: 1.65, whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: t.text2, background: t.surface2, maxHeight: 340, overflow: 'auto' }}>
+      <Box component="pre" tabIndex={0} aria-label={`${label || 'Prompt'} text`} sx={{ m: 0, mx: 1.25, mb: 1.25, p: 2, borderRadius: '3px', fontFamily: FONT_MONO, fontSize: 13.5, lineHeight: 1.65, whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: t.text2, background: t.surface2, maxHeight: 340, overflow: 'auto' }}>
         {text}
       </Box>
     </Box>
@@ -313,7 +313,7 @@ function Recap({ items }) {
 function Table({ head, rows }) {
   const { t } = useTheme();
   return (
-    <Box sx={{ my: 3, borderRadius: '3px', background: t.surface, boxShadow: t.shadow, overflowX: 'auto' }}>
+    <Box tabIndex={0} role="region" aria-label={`Table: ${head.join(', ').replace(/\*/g, '').slice(0, 80)}`} sx={{ my: 3, borderRadius: '3px', background: t.surface, boxShadow: t.shadow, overflowX: 'auto', '&:focus-visible': { outline: `2px solid ${t.accent}` } }}>
       <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: 15, minWidth: head.length > 3 ? 560 : 0 }}>
         <thead>
           <tr>{head.map((h, i) => (
@@ -394,7 +394,7 @@ function block(b, i) {
   {
     switch (b.t) {
       case 'p': return <Typography key={i} sx={{ my: 1.75, color: 'text.primary' }}><Inline text={b.text} /></Typography>;
-      case 'h': return <Typography key={i} variant="h5" component="h3" sx={{ mt: 5, mb: 1.25 }}>{b.text}</Typography>;
+      case 'h': return <Typography key={i} variant="h5" component="h2" sx={{ mt: 5, mb: 1.25 }}>{b.text}</Typography>;
       case 'steps': return <Steps key={i} items={b.items} />;
       case 'prompt': return <PromptBox key={i} label={b.label} text={b.text} />;
       case 'cmd': return <CmdBox key={i} label={b.label} text={b.text} />;
