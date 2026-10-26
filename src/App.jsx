@@ -41,6 +41,8 @@ export default function App() {
   const [drinkOpen, setDrinkOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
+  const [splash, setSplash] = useState(() => !session.get('splashSeen'));
+  const [splashFade, setSplashFade] = useState(false);
 
   const [account, setAccount] = useState(() => getAccount());
   const theme = useMemo(() => makeTheme(colorMode), [colorMode]);
@@ -49,14 +51,23 @@ export default function App() {
 
   useEffect(() => { refreshAccount().then(setAccount); }, []);
 
+  // Brand splash once per launch, then fade out.
+  useEffect(() => {
+    if (!splash) return undefined;
+    session.set('splashSeen');
+    const fade = setTimeout(() => setSplashFade(true), 1300);
+    const done = setTimeout(() => setSplash(false), 1800);
+    return () => { clearTimeout(fade); clearTimeout(done); };
+  }, [splash]);
+
   // Show the donation window once per launch until the server has a donation recorded for this account.
   useEffect(() => {
-    if (termsOk && !demo && !account?.donated && !session.get('drinkSeen')) {
+    if (termsOk && !splash && !demo && !account?.donated && !session.get('drinkSeen')) {
       session.set('drinkSeen');
       const id = setTimeout(() => setDrinkOpen(true), 400);
       return () => clearTimeout(id);
     }
-  }, [termsOk, demo, account?.donated]);
+  }, [termsOk, splash, demo, account?.donated]);
 
   useEffect(() => {
     const onHash = () => { const id = idFromHash(); if (id) { setCurrentId(id); setView('lesson'); } else setView('home'); };
@@ -126,7 +137,12 @@ export default function App() {
         {nav}
       </Drawer>
 
-      <TermsGate open={!termsOk} onAccept={() => { store.set('terms', TERMS_VERSION); setTermsOk(true); }} />
+      {splash && (
+        <Box aria-hidden="true" sx={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'grid', placeItems: 'center', background: colorMode === 'dark' ? '#04060E' : '#FEFEFE', opacity: splashFade ? 0 : 1, transition: 'opacity .5s ease' }}>
+          <Box component="img" src={colorMode === 'dark' ? '/brand/splash-dark.jpg' : '/brand/splash-light.jpg'} alt="" sx={{ width: 'min(520px, 80vw)', height: 'auto', display: 'block' }} />
+        </Box>
+      )}
+      <TermsGate open={!termsOk && !splash} onAccept={() => { store.set('terms', TERMS_VERSION); setTermsOk(true); }} />
       <DonateDialog open={termsOk && drinkOpen && !account?.donated} onClose={() => setDrinkOpen(false)} account={account}
         onAccount={(a) => { setAccount(a); if (a?.donated) { setDrinkOpen(false); setToast('Cheers! Your drink arrived. Thank you.'); } }} />
       <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} message={toast} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />

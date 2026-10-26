@@ -24,17 +24,9 @@ const label = { fontSize: 12.5, fontWeight: 700, letterSpacing: '0.12em', textTr
 // ───────── logo
 
 export function Logo() {
-  const { t } = useTheme();
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
-      <Box sx={{ width: 32, height: 32, borderRadius: '3px', background: t.grad, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M5 6h12L7 18h12" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </Box>
-      <Typography sx={{ fontWeight: 600, fontSize: 17, whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>Zero to Shipped</Typography>
-    </Box>
-  );
+  const theme = useTheme();
+  const src = theme.palette.mode === 'dark' ? '/brand/logo-on-dark.png' : '/brand/logo-on-light.png';
+  return <Box component="img" src={src} alt="Zero to Shipped" sx={{ height: 28, width: 'auto', display: 'block' }} />;
 }
 
 // ───────── search

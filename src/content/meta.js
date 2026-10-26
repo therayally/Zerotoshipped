@@ -2,11 +2,11 @@
 import { logo } from './logos';
 
 const G = {
-  indigo: ['#4C55C9', '#7F8EF9'],
-  blue: ['#3366D1', '#5DB4F5'],
-  lavender: ['#5A50CC', '#A497F8'],
-  teal: ['#23818F', '#6F7FF2'],
-  rose: ['#4F5BD5', '#DD7BA5'],
+  indigo: ['#2445D8', '#7B4DFF'],
+  blue: ['#1474E8', '#4F7BFF'],
+  lavender: ['#4B44D6', '#9C7BFF'],
+  teal: ['#16819A', '#4F6BFF'],
+  rose: ['#4A5BEA', '#C46CE6'],
 };
 const L = (...keys) => keys.map(logo);
 
