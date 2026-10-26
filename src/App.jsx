@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, CssBaseline, Drawer, Snackbar } from '@mui/material';
+import { Box, Button, CssBaseline, Drawer, Snackbar, Typography } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { makeTheme } from './theme';
 import { allLessons } from './content/course';
-import { TopBar, SideNav, Home, RightRail, SIDEBAR, RAIL } from './components/Panels';
+import { TopBar, SideNav, Home, RightRail, LogoFull, SIDEBAR, RAIL } from './components/Panels';
 import { modules } from './content/course';
 import { metaFor } from './content/meta';
 import Lesson from './components/Lesson';
-import { TermsGate, DonateDialog, TERMS_VERSION } from './components/Gates';
+import { TermsGate, DonateDialog, DonateBody, TERMS_VERSION } from './components/Gates';
 import AccountGate from './components/AccountGate';
 import { getAccount, refreshAccount, signOut } from './account';
 
@@ -37,6 +37,32 @@ function GateBackdrop() {
     <Box aria-hidden="true" sx={{ position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #0B1033 0%, #1B2A8F 45%, #4B2BB5 100%)', overflow: 'hidden',
       '&::before': { content: '""', position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px', maskImage: 'radial-gradient(ellipse at center, #000 30%, transparent 75%)' },
       '&::after': { content: '""', position: 'absolute', width: 640, height: 640, right: -160, top: -200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,77,255,0.45), transparent 65%)' } }} />
+  );
+}
+
+// tinyappcode.com/donate: a shareable, branded donation page (no sign-in needed to view it).
+function DonatePage({ account, onAccount, theme }) {
+  const { t } = theme;
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GateBackdrop />
+      <Box sx={{ position: 'relative', minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2 }}>
+        <Box sx={{ width: '100%', maxWidth: 460, borderRadius: '6px', overflow: 'hidden', background: t.surface, boxShadow: '0 30px 80px rgba(0,0,0,0.45)' }}>
+          <Box sx={{ background: theme.palette.mode === 'dark' ? '#0B0E18' : '#fff', pt: 3, pb: 1.5, display: 'grid', placeItems: 'center', borderBottom: `1px solid ${t.border}` }}>
+            <LogoFull height={150} />
+          </Box>
+          <Box sx={{ px: { xs: 2.5, sm: 3 }, pt: 2.5, textAlign: 'center' }}>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 800 }}>Buy me a drink</Typography>
+            <Typography sx={{ color: 'text.secondary', mt: 0.75 }}>TinyAppCode teaches anyone to build and launch real apps with AI, for free. If it helped you, a drink keeps it going.</Typography>
+          </Box>
+          <DonateBody account={account} onAccount={onAccount} />
+          <Box sx={{ textAlign: 'center', pb: 2.5 }}>
+            <Button href="/" sx={{ color: t.accentText }}>Start the free course →</Button>
+          </Box>
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 }
 
@@ -120,6 +146,7 @@ export default function App() {
   const openDrink = () => setDrinkOpen(true);
   const onSignOut = async () => { await signOut(); setAccount(null); setToast('Signed out on this computer.'); };
   const nav = <SideNav view={view} currentId={currentId} done={done} go={go} goHome={goHome} />;
+  if (window.location.pathname.replace(/\/$/, '') === '/donate') return <DonatePage account={account} onAccount={setAccount} theme={theme} />;
   // Until terms are accepted and the person is signed in, the course stays hidden behind a branded backdrop.
   const gated = !demo && (!termsOk || (!account && !offline));
 

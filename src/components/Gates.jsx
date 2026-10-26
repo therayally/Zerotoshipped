@@ -125,7 +125,9 @@ const PERKS = [
 
 // Shows at every launch until the server has a donation recorded for this person's account.
 // There is deliberately no "I already donated" button: only a recorded donation closes it for good.
-export function DonateDialog({ open, onClose, account, onAccount }) {
+// Everything under the header: perks, the give button, card logos, PayPal and crypto, and "Not now".
+// Shared by the pop-up and the /donate page so they always match.
+export function DonateBody({ active = true, onClose, account, onAccount }) {
   const { t } = useTheme();
   const [config, setConfig] = useState({});
   const [waiting, setWaiting] = useState(false);
@@ -151,18 +153,91 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
     }
   };
 
-  useEffect(() => { if (open) getConfig().then(setConfig); }, [open]);
+  useEffect(() => { if (active) getConfig().then(setConfig); }, [active]);
 
   // After they open the donate link, check the account every 5 seconds; the window closes itself when it lands.
   useEffect(() => {
-    if (!open || !waiting || !account) return undefined;
+    if (!active || !waiting || !account) return undefined;
     const id = setInterval(async () => {
       const next = await refreshAccount();
       if (next) onAccount(next);
     }, 5000);
     return () => clearInterval(id);
-  }, [open, waiting, account, onAccount]);
+  }, [active, waiting, account, onAccount]);
 
+  return (
+    <Box sx={{ p: { xs: 2.5, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2.25 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
+        {PERKS.map(([Icon, title, sub]) => (
+          <Box key={title} sx={{ p: 1.25, borderRadius: '4px', background: t.surface2, textAlign: 'center' }}>
+            <Icon sx={{ color: t.accent, fontSize: 22 }} />
+            <Typography sx={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.25, mt: 0.5 }}>{title}</Typography>
+            <Typography sx={{ fontSize: 11.5, color: 'text.secondary', lineHeight: 1.3 }}>{sub}</Typography>
+          </Box>
+        ))}
+      </Box>
+
+      <Box component="form" onSubmit={give} sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+      {config.donate_card && account ? (
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <TextField value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Any amount" aria-label="Donation amount in dollars"
+            slotProps={{ input: { startAdornment: <InputAdornment position="start">$</InputAdornment>, sx: { borderRadius: '3px', fontSize: 18, fontWeight: 600 } }, htmlInput: { inputMode: 'decimal', maxLength: 7 } }}
+            sx={{ width: 150, flexShrink: 0 }} />
+          <Button type="submit" variant="contained" size="large" disabled={busy || !(Number(amount) > 0)} startIcon={<LocalBarRounded />} sx={{ flex: 1, fontSize: 16 }}>
+            {busy ? 'Opening…' : 'Buy me a drink'}
+          </Button>
+        </Box>
+      ) : (
+        <Button variant="contained" size="large" href={config.donate_square || undefined} target="_blank" rel="noopener noreferrer"
+          disabled={!config.donate_square} onClick={() => setWaiting(true)} startIcon={<LocalBarRounded />} sx={{ py: 1.4, fontSize: 16 }}>
+          Buy me a drink
+        </Button>
+      )}
+      {waiting && account ? (
+          <Box role="status" sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: '4px', background: t.tealSoft }}>
+            <CircularProgress size={16} sx={{ color: t.teal }} />
+            <Typography variant="body2">Finish on Square's page. This window closes by itself when your drink arrives.</Typography>
+          </Box>
+        ) : err ? (
+          <Typography variant="body2" role="alert" sx={{ color: t.warn, fontWeight: 600, textAlign: 'center' }}>{err}</Typography>
+        ) : (
+          <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
+            {config.donate_card || config.donate_square ? `Any amount helps. Secure checkout by Square${account ? `, use ${account.email} so we can thank you` : ''}.` : 'Card donations are almost ready. PayPal and crypto work below.'}
+          </Typography>
+        )}
+        <Box aria-label="Accepted: Visa, Mastercard, American Express, Discover, Apple Pay, Google Pay, Cash App Pay" sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+          {CARDS.map((k) => <CardMark key={k} k={k} />)}
+        </Box>
+      </Box>
+
+      <Box sx={{ borderTop: `1px solid ${t.border}`, pt: 1.5 }}>
+        <Button size="small" fullWidth onClick={() => setOther(!other)} endIcon={<ExpandMoreRounded sx={{ transition: 'transform .2s', transform: other ? 'rotate(180deg)' : 'none' }} />}
+          sx={{ color: 'text.secondary' }}>
+          PayPal or crypto
+        </Button>
+        {other && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, borderRadius: '4px', background: t.surface2 }}>
+              <Box component="img" src="/paypal-qr.png" alt="PayPal QR code" width={80} height={80} sx={{ borderRadius: '2px', background: '#fff', p: 0.5, flexShrink: 0 }} />
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>PayPal</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Scan with your phone, or</Typography>
+                <Button size="small" variant="outlined" href={config.donate_paypal || PAYPAL_URL} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewRounded fontSize="small" />} sx={{ mt: 0.75 }}>Open PayPal</Button>
+              </Box>
+            </Box>
+            {wallets.map(([l, a]) => <WalletRow key={l} label={l} addr={(l === 'ETH' ? config.donate_eth : config.donate_btc) || a} />)}
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>PayPal and crypto are confirmed by hand, so this window may keep showing for a day or two.</Typography>
+          </Box>
+        )}
+      </Box>
+
+      {onClose && <Button onClick={onClose} sx={{ color: 'text.secondary', alignSelf: 'center' }}>Not now</Button>}
+    </Box>
+  );
+}
+
+export function DonateDialog({ open, onClose, account, onAccount }) {
+  const { t } = useTheme();
   const first = account?.name?.split(' ')[0];
 
   return (
@@ -179,67 +254,7 @@ export function DonateDialog({ open, onClose, account, onAccount }) {
         <DrinkArt />
       </Box>
 
-      <Box sx={{ p: { xs: 2.5, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2.25 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
-          {PERKS.map(([Icon, title, sub]) => (
-            <Box key={title} sx={{ p: 1.25, borderRadius: '4px', background: t.surface2, textAlign: 'center' }}>
-              <Icon sx={{ color: t.accent, fontSize: 22 }} />
-              <Typography sx={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.25, mt: 0.5 }}>{title}</Typography>
-              <Typography sx={{ fontSize: 11.5, color: 'text.secondary', lineHeight: 1.3 }}>{sub}</Typography>
-            </Box>
-          ))}
-        </Box>
-
-        <Box component="form" onSubmit={give} sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <TextField value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Any amount" aria-label="Donation amount in dollars"
-              disabled={!account || !config.donate_card} inputMode="decimal"
-              slotProps={{ input: { startAdornment: <InputAdornment position="start">$</InputAdornment>, sx: { borderRadius: '3px', fontSize: 18, fontWeight: 600 } }, htmlInput: { inputMode: 'decimal', maxLength: 7 } }}
-              sx={{ width: 150, flexShrink: 0 }} />
-            <Button type="submit" variant="contained" size="large" disabled={!account || !config.donate_card || busy || !(Number(amount) > 0)} startIcon={<LocalBarRounded />} sx={{ flex: 1, fontSize: 16 }}>
-              {busy ? 'Opening…' : 'Buy me a drink'}
-            </Button>
-          </Box>
-          {waiting && account ? (
-            <Box role="status" sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: '4px', background: t.tealSoft }}>
-              <CircularProgress size={16} sx={{ color: t.teal }} />
-              <Typography variant="body2">Finish on Square's page. This window closes by itself when your drink arrives.</Typography>
-            </Box>
-          ) : err ? (
-            <Typography variant="body2" role="alert" sx={{ color: t.warn, fontWeight: 600, textAlign: 'center' }}>{err}</Typography>
-          ) : (
-            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-              {!account ? 'Sign in first so we can thank you.' : config.donate_card ? 'Any amount helps. Secure checkout by Square.' : 'Card donations are almost ready. PayPal and crypto work below.'}
-            </Typography>
-          )}
-          <Box aria-label="Accepted: Visa, Mastercard, American Express, Discover, Apple Pay, Google Pay, Cash App Pay" sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-            {CARDS.map((k) => <CardMark key={k} k={k} />)}
-          </Box>
-        </Box>
-
-        <Box sx={{ borderTop: `1px solid ${t.border}`, pt: 1.5 }}>
-          <Button size="small" fullWidth onClick={() => setOther(!other)} endIcon={<ExpandMoreRounded sx={{ transition: 'transform .2s', transform: other ? 'rotate(180deg)' : 'none' }} />}
-            sx={{ color: 'text.secondary' }}>
-            PayPal or crypto
-          </Button>
-          {other && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, borderRadius: '4px', background: t.surface2 }}>
-                <Box component="img" src="/paypal-qr.png" alt="PayPal QR code" width={80} height={80} sx={{ borderRadius: '2px', background: '#fff', p: 0.5, flexShrink: 0 }} />
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>PayPal</Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Scan with your phone, or</Typography>
-                  <Button size="small" variant="outlined" href={config.donate_paypal || PAYPAL_URL} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewRounded fontSize="small" />} sx={{ mt: 0.75 }}>Open PayPal</Button>
-                </Box>
-              </Box>
-              {wallets.map(([l, a]) => <WalletRow key={l} label={l} addr={(l === 'ETH' ? config.donate_eth : config.donate_btc) || a} />)}
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>PayPal and crypto are confirmed by hand, so this window may keep showing for a day or two.</Typography>
-            </Box>
-          )}
-        </Box>
-
-        <Button onClick={onClose} sx={{ color: 'text.secondary', alignSelf: 'center' }}>Not now</Button>
-      </Box>
+      <DonateBody active={open} onClose={onClose} account={account} onAccount={onAccount} />
     </Dialog>
   );
 }
