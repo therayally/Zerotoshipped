@@ -24,8 +24,9 @@ const session = {
   set(k) { try { sessionStorage.setItem('zts.' + k, '1'); } catch { /* storage unavailable */ } },
 };
 
-function idFromHash() {
-  const id = window.location.hash.replace(/^#\/?/, '');
+// Lessons live at clean addresses like /learn/practice-run. Old #/lesson links still work and get tidied up.
+function idFromUrl() {
+  const id = window.location.hash.replace(/^#\/?/, '') || (window.location.pathname.match(/^\/learn\/([\w-]+)\/?$/) || [])[1] || '';
   return allLessons.some((l) => l.id === id) ? id : null;
 }
 
@@ -117,8 +118,8 @@ export function LegalLinks({ color }) {
 export default function App() {
   const [colorMode, setColorMode] = useState(() => store.get('theme', systemDark() ? 'dark' : 'light'));
   const [done, setDone] = useState(() => new Set(store.get('done', [])));
-  const [currentId, setCurrentId] = useState(() => idFromHash() || store.get('last', allLessons[0].id));
-  const [view, setView] = useState(() => (idFromHash() ? 'lesson' : 'home'));
+  const [currentId, setCurrentId] = useState(() => idFromUrl() || store.get('last', allLessons[0].id));
+  const [view, setView] = useState(() => (idFromUrl() ? 'lesson' : store.get('view', 'home')));
   // Dev only: ?demo skips the terms and drink pop-ups (used for marketing screenshots).
   const demo = import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo');
   const [termsOk, setTermsOk] = useState(() => demo || store.get('terms', null) === TERMS_VERSION);
@@ -155,15 +156,17 @@ export default function App() {
   }, [termsOk, splash, demo, account, offline]);
 
   useEffect(() => {
-    const onHash = () => { const id = idFromHash(); if (id) { setCurrentId(id); setView('lesson'); } else setView('home'); };
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
+    const onNav = () => { const id = idFromUrl(); if (id) { setCurrentId(id); setView('lesson'); } else setView('home'); };
+    window.addEventListener('popstate', onNav);
+    window.addEventListener('hashchange', onNav);
+    return () => { window.removeEventListener('popstate', onNav); window.removeEventListener('hashchange', onNav); };
   }, []);
 
+  // The address bar always shows just tinyappcode.com; the current lesson is remembered in the browser instead.
   useEffect(() => {
     store.set('last', currentId);
-    const hash = view === 'home' ? '#/' : '#/' + currentId;
-    if (window.location.hash !== hash) history.replaceState(null, '', hash);
+    store.set('view', view);
+    if (window.location.pathname !== '/' || window.location.hash) history.replaceState(null, '', '/' + window.location.search);
     document.title = view === 'home' ? 'TinyAppCode' : `${lesson.title} · TinyAppCode`;
   }, [currentId, lesson.title, view]);
 
