@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin · Zero to Shipped</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/base.css" />
+  <link rel="stylesheet" href="/assets/admin.css" />
+</head>
+<body>
+  <main id="login" class="login" hidden>
+    <div class="card login-card">
+      <a class="logo" href="/"><img src="/assets/icon.png" alt="" />Zero to Shipped</a>
+      <h1>Admin sign in</h1>
+      <p class="muted">We email you a 6-digit code. No passwords.</p>
+      <form id="login-email" class="stack">
+        <div><label for="email">Email</label><input id="email" type="email" autocomplete="email" required /></div>
+        <button class="btn btn-primary" type="submit">Send my code</button>
+      </form>
+      <form id="login-code" class="stack" hidden>
+        <div><label for="code">6-digit code</label><input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required /></div>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <button class="btn btn-outline" type="button" id="login-back">Use a different email</button>
+      </form>
+      <p id="login-msg" class="msg" role="status"></p>
+    </div>
+  </main>
+
+  <div id="app" class="layout" hidden>
+    <aside class="side">
+      <a class="logo" href="/"><img src="/assets/icon.png" alt="" />Zero to Shipped</a>
+      <nav class="nav" aria-label="Admin">
+        <button data-tab="overview" class="active">Overview</button>
+        <button data-tab="people">People</button>
+        <button data-tab="donations">Donations</button>
+        <button data-tab="settings">Settings</button>
+        <button data-tab="admins" id="nav-admins">Admins</button>
+        <button data-tab="activity">Activity</button>
+      </nav>
+      <div class="me">
+        <div><div class="me-email" id="me-email"></div><span class="pill pill-info" id="me-role"></span></div>
+        <button class="btn btn-outline btn-sm" id="logout">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section data-panel="overview">
+        <h2>Overview</h2>
+        <div class="stats">
+          <div class="stat card"><div class="stat-n" id="st-people">0</div><div class="muted">People signed up</div></div>
+          <div class="stat card"><div class="stat-n" id="st-donors">0</div><div class="muted">Supporters</div></div>
+          <div class="stat card"><div class="stat-n" id="st-total">$0</div><div class="muted">Donated (total)</div></div>
+          <div class="stat card"><div class="stat-n" id="st-week">0</div><div class="muted">Donations this week</div></div>
+        </div>
+        <div class="card pad">
+          <h3>Latest donations</h3>
+          <div class="table-wrap"><table><thead><tr><th>Email</th><th>How</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="recent"></tbody></table></div>
+        </div>
+      </section>
+
+      <section data-panel="people" hidden>
+        <h2>People</h2>
+        <div class="card pad">
+          <div class="inline"><div class="grow"><label for="search">Search by email</label><input id="search" type="search" placeholder="Type part of an email" /></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Email</th><th>Donated</th><th>Devices</th><th>Joined</th><th>Last seen</th><th></th></tr></thead><tbody id="people"></tbody></table></div>
+        </div>
+        <div class="card pad" id="sessions-card" hidden>
+          <h3 id="sessions-title">Devices</h3>
+          <div class="table-wrap"><table><thead><tr><th>Device</th><th>Signed in</th><th>Last seen</th><th></th></tr></thead><tbody id="sessions"></tbody></table></div>
+        </div>
+      </section>
+
+      <section data-panel="donations" hidden>
+        <h2>Donations</h2>
+        <div class="card pad">
+          <h3>Record a PayPal or crypto donation</h3>
+          <p class="hint">Card donations through Square are recorded automatically. Use this for anything Square cannot see.</p>
+          <form id="manual" class="grid2">
+            <div><label for="m-email">Their account email</label><input id="m-email" type="email" required /></div>
+            <div><label for="m-source">How they gave</label><select id="m-source"><option value="paypal">PayPal</option><option value="crypto">Crypto</option><option value="cash">Cash</option><option value="other">Other</option></select></div>
+            <div><label for="m-amount">Amount (USD)</label><input id="m-amount" inputmode="decimal" placeholder="5" /></div>
+            <div><label for="m-note">Note (optional)</label><input id="m-note" placeholder="PayPal transaction ID" /></div>
+            <div class="span2"><button class="btn btn-primary" type="submit">Record donation</button></div>
+          </form>
+        </div>
+        <div class="card pad">
+          <div class="table-wrap"><table><thead><tr><th>Email</th><th>How</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="donations"></tbody></table></div>
+        </div>
+      </section>
+
+      <section data-panel="settings" hidden>
+        <h2>Settings</h2>
+        <form id="settings" class="stack">
+          <div class="card pad stack">
+            <h3>Square (card donations, verified automatically)</h3>
+            <ol class="howto">
+              <li>In your Square Dashboard, make a <b>payment link</b> for donations (Online → Payment links). Let the buyer choose the amount, and turn on "collect email".</li>
+              <li>Paste the link below.</li>
+              <li>In the Square Developer Dashboard, open your app → <b>Webhooks</b> → add a subscription to the URL below with <code>payment.updated</code> and <code>refund.updated</code>.</li>
+              <li>Copy that webhook's <b>signature key</b> and paste it below.</li>
+            </ol>
+            <div><label>Webhook URL (copy into Square)</label><div class="copyrow"><input id="webhook-url" readonly /><button type="button" class="btn btn-outline" data-copy="webhook-url">Copy</button></div></div>
+            <div class="grid2">
+              <div><label for="s-donate_square">Square donation link</label><input id="s-donate_square" name="donate_square" placeholder="https://square.link/u/..." /></div>
+              <div><label for="s-min_donation_cents">Smallest donation that counts (cents)</label><input id="s-min_donation_cents" name="min_donation_cents" inputmode="numeric" placeholder="100" /></div>
+              <div><label for="s-square_location_id">Only count this Square location (optional)</label><input id="s-square_location_id" name="square_location_id" placeholder="Location ID" /></div>
+              <div><label for="s-square_webhook_key">Webhook signature key</label><input id="s-square_webhook_key" name="square_webhook_key" type="password" autocomplete="off" /><div class="hint" id="h-square_webhook_key"></div></div>
+            </div>
+          </div>
+          <div class="card pad stack">
+            <h3>Email codes (Resend)</h3>
+            <p class="muted">Make a free account at resend.com, verify your domain, then create a sending-only API key.</p>
+            <div class="grid2">
+              <div><label for="s-resend_api_key">Resend API key</label><input id="s-resend_api_key" name="resend_api_key" type="password" autocomplete="off" /><div class="hint" id="h-resend_api_key"></div></div>
+              <div><label for="s-mail_from">Send from</label><input id="s-mail_from" name="mail_from" placeholder="Zero to Shipped &lt;codes@yourdomain.com&gt;" /></div>
+            </div>
+          </div>
+          <div class="card pad stack">
+            <h3>Other ways to give (confirmed by hand)</h3>
+            <div class="grid2">
+              <div><label for="s-donate_paypal">PayPal link</label><input id="s-donate_paypal" name="donate_paypal" placeholder="https://www.paypal.com/..." /></div>
+              <div></div>
+              <div><label for="s-donate_eth">ETH address</label><input id="s-donate_eth" name="donate_eth" class="mono" /></div>
+              <div><label for="s-donate_btc">BTC address</label><input id="s-donate_btc" name="donate_btc" class="mono" /></div>
+            </div>
+          </div>
+          <div class="card pad stack">
+            <h3>Downloads</h3>
+            <div class="grid2">
+              <div><label for="s-download_mac">Mac download link</label><input id="s-download_mac" name="download_mac" placeholder="https://github.com/.../releases/latest" /></div>
+              <div><label for="s-download_windows">Windows download link</label><input id="s-download_windows" name="download_windows" placeholder="https://github.com/.../releases/latest" /></div>
+            </div>
+          </div>
+          <div class="savebar"><span id="settings-msg" class="msg" role="status"></span><button class="btn btn-primary" type="submit">Save settings</button></div>
+        </form>
+      </section>
+
+      <section data-panel="admins" hidden>
+        <h2>Admins</h2>
+        <div class="card pad">
+          <form id="add-admin" class="inline">
+            <div class="grow"><label for="admin-email">Add an admin</label><input id="admin-email" type="email" placeholder="helper@example.com" required /></div>
+            <button class="btn btn-primary" type="submit">Add admin</button>
+          </form>
+          <p class="hint">Admins can see people and donations and change settings. Only you (super admin) can add or remove admins.</p>
+          <div class="table-wrap"><table><thead><tr><th>Email</th><th>Role</th><th>Added</th><th></th></tr></thead><tbody id="admins"></tbody></table></div>
+        </div>
+      </section>
+
+      <section data-panel="activity" hidden>
+        <h2>Activity</h2>
+        <div class="card pad"><div class="table-wrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead><tbody id="audit"></tbody></table></div></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/assets/admin.js" defer></script>
+</body>
+</html>

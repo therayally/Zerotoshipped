@@ -1,0 +1,60 @@
+:root {
+  --bg: #F4F4F7; --surface: #FFFFFF; --surface2: #F4F4F7; --border: #E4E4EB;
+  --text: #1D2433; --text2: #3B4456; --muted: #7A8294;
+  --accent: #7C3AED; --accent-text: #6D28D9; --accent-soft: #F1EAFE; --grad: linear-gradient(135deg, #7C3AED, #D946EF);
+  --good: #2E9E6A; --good-soft: #E6F5EC; --info: #4A63E8; --info-soft: #ECEFFE;
+  --bad: #D4473F; --bad-soft: #FDEDEC; --code: #1D2433;
+  --shadow: 0 1px 2px rgba(29,36,51,.04), 0 8px 24px rgba(29,36,51,.06);
+  --display: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E0E14; --surface: #16161F; --surface2: #1C1C27; --border: #272734;
+    --text: #EEF1F6; --text2: #C3C9D4; --muted: #8790A0;
+    --accent: #9B6BFF; --accent-text: #B794FF; --accent-soft: rgba(155,107,255,.15); --grad: linear-gradient(135deg, #8B5CF6, #D946EF);
+    --good: #4CC38A; --good-soft: rgba(76,195,138,.13); --info: #8496F7; --info-soft: rgba(132,150,247,.14);
+    --bad: #F07B73; --bad-soft: rgba(240,123,115,.13); --code: #0A0D12;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+    --bg: #0E0E14; --surface: #16161F; --surface2: #1C1C27; --border: #272734;
+    --text: #EEF1F6; --text2: #C3C9D4; --muted: #8790A0;
+    --accent: #9B6BFF; --accent-text: #B794FF; --accent-soft: rgba(155,107,255,.15); --grad: linear-gradient(135deg, #8B5CF6, #D946EF);
+    --good: #4CC38A; --good-soft: rgba(76,195,138,.13); --info: #8496F7; --info-soft: rgba(132,150,247,.14);
+    --bad: #F07B73; --bad-soft: rgba(240,123,115,.13); --code: #0A0D12;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+a { color: var(--accent-text); }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
+code, .mono { font-family: var(--mono); }
+.card { background: var(--surface); border-radius: 6px; border: 1px solid var(--border); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 18px; border-radius: 6px;
+  font: 600 15px/1 var(--body); text-decoration: none; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: background .15s, border-color .15s; }
+.btn-primary { background: var(--grad); color: #fff; box-shadow: 0 6px 16px rgba(124,58,237,.3); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-outline { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-outline:hover { border-color: var(--muted); background: var(--surface2); }
+.btn-sm { height: 32px; padding: 0 12px; font-size: 13.5px; border-radius: 5px; }
+.btn[disabled] { opacity: .5; cursor: default; }
+.btn:focus-visible, input:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input, select { font: 15px var(--body); color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; height: 42px; padding: 0 14px; width: 100%; }
+input::placeholder { color: var(--muted); }
+label { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 6px; }
+.hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.muted { color: var(--muted); }
+.pill { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; font-size: 12.5px; font-weight: 600; }
+.pill-good { background: var(--good-soft); color: var(--good); }
+.pill-bad { background: var(--bad-soft); color: var(--bad); }
+.pill-info { background: var(--info-soft); color: var(--info); }
+.pill-plain { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.logo { display: inline-flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+.logo img { width: 32px; height: 32px; border-radius: 5px; }

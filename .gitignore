@@ -1,0 +1,8 @@
+node_modules
+dist
+.env*.local
+.DS_Store
+.vercel
+src-tauri/target
+src-tauri/gen
+web/node_modules

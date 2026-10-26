@@ -1,0 +1,94 @@
+export default {
+  id: 'start',
+  title: 'Start here',
+  lessons: [
+    {
+      id: 'welcome',
+      title: 'Welcome. Here is the plan.',
+      minutes: 6,
+      figure: 'stack',
+      body: [
+        { t: 'why', text: [
+          'By the end of this course you will have a real app on the internet. Not a practice project that lives on your laptop. A real one, with its own web address, that people can sign up for and even pay you through.',
+          'You do not need to know how to code. You need to know **what to ask for**, **how to check the answer**, and **how to keep it safe**. That is what this course teaches.',
+        ] },
+        { t: 'p', text: 'Here is the big idea. For most of history, if you wanted software, you either learned to program for years or paid someone who had. Now there are AI tools that can write the code for you. You describe what you want in plain English, and the AI types out the program, runs it, reads the errors, and fixes them.' },
+        { t: 'p', text: 'That sounds like magic, and in a way it is. But here is the part most people skip: the AI is only as good as the person steering it. If you do not know what a database is, you cannot tell when the AI built one badly. If you do not know what a secret key is, you will not notice when the AI accidentally shows yours to the whole internet. This course gives you just enough understanding to steer well.' },
+        { t: 'analogy', text: 'Think of yourself as a general contractor building a house. You are not going to lay every brick yourself. You hire a very fast, very skilled crew (the AI). But you still need to know what a foundation is, where the pipes go, and what the building code says, or the crew will happily build you something that falls down.' },
+        { t: 'h', text: 'What you will build, piece by piece' },
+        { t: 'p', text: 'The picture above shows every part of the app you will make and how they connect. Do not worry if it looks like a lot. You will add one piece at a time, and each piece gets its own lesson.' },
+        { t: 'table', head: ['Tool', 'What it does for you', 'Why we picked it'], rows: [
+          ['Claude Code', 'The AI that writes and fixes your code', 'It works right inside your project and can run what it builds'],
+          ['GitHub', 'Keeps a saved copy of every version of your code online', 'If anything breaks, you can rewind. It also triggers your updates.'],
+          ['Vercel', 'Puts your app on the internet', 'Every time you save to GitHub, your live site updates by itself'],
+          ['Neon', 'Stores your app\'s information (users, orders, posts)', 'Free to start, grows with you, and plugs straight into Vercel'],
+          ['Stripe', 'Takes card payments', 'Card details never touch your app, which keeps you out of trouble'],
+          ['Cloudflare', 'Your web address (like mycoolapp.com)', 'Sells domains at cost, with free protection from attacks'],
+        ] },
+        { t: 'p', text: 'Notice we use as **few** tools as possible. Every extra service is another password to protect, another bill, and another thing that can break at 2 a.m. Most of these sign in with your GitHub account, so one login carries you through most of the setup.' },
+        { t: 'h', text: 'How each lesson works' },
+        { t: 'steps', items: [
+          { do: 'Read the **Why this matters** box first.', why: 'If you know why a step exists, you will remember it and you will notice when something is off.' },
+          { do: 'Follow the numbered steps and copy the prompts into Claude Code.', why: 'Every prompt that builds something already has safety rules built in, so good habits happen automatically.' },
+          { do: 'Open a **Go deeper** box when you are curious.', why: 'These hold the technical detail. You can skip them the first time and come back later.' },
+          { do: 'Answer the **Check yourself** question, then click **Done, next**.', why: 'A quick check is the fastest way to find out if something did not stick yet.' },
+        ] },
+        { t: 'tip', tone: 'info', text: 'Getting stuck is part of building software, even for experts. When something breaks, copy the error message and paste it to Claude with: "I got this error. Explain what it means in simple words, then fix it." You will be surprised how often that is all it takes.' },
+        { t: 'check', q: 'Why does this course keep the number of tools small?', options: [
+          'Because the free versions only allow a few tools',
+          'Because every extra service is another password, bill and thing that can break',
+          'Because AI cannot work with more than six tools',
+        ], answer: 1, explain: 'Fewer moving parts means fewer things to secure, pay for and fix. That matters a lot when you are the whole team.' },
+        { t: 'recap', items: [
+          'You will build a real, live app, one small piece per lesson.',
+          'The AI writes the code; your job is to steer, check and keep it safe.',
+          'Six tools cover everything: Claude Code, GitHub, Vercel, Neon, Stripe and Cloudflare.',
+        ] },
+      ],
+    },
+    {
+      id: 'what-is-vibe-coding',
+      title: 'What vibe coding really is',
+      minutes: 7,
+      body: [
+        { t: 'why', text: 'Everyone on TikTok is "vibe coding" right now. Some of them are building real businesses. Many are building apps that leak their customers\' data on day one. The difference is not talent. It is a handful of habits you will learn in this lesson.' },
+        { t: 'p', text: '**Vibe coding** means building software mostly by describing what you want to an AI, instead of typing the code yourself. You say "make me a sign-up page with email and password," and the AI writes it. If it looks right and works, you move on. You steer by the results, not by reading every line.' },
+        { t: 'p', text: 'The term was made popular in early 2025 by Andrej Karpathy, a well-known AI researcher, and it caught on because it is genuinely how a lot of software is now being made. For a quick prototype, it is amazing. You can build in an afternoon what used to take a team a month.' },
+        { t: 'h', text: 'Where it goes wrong' },
+        { t: 'p', text: 'The AI learned to code by reading huge amounts of code from the internet. A lot of that code is old, rushed or insecure. So the AI will sometimes produce something that **looks** perfect and **works** when you click around, but has a hidden hole. Common ones:' },
+        { t: 'steps', items: [
+          { do: 'Anyone can see anyone else\'s data by changing a number in the web address.', why: 'This is called broken access control, and it is the #1 security problem on the web.' },
+          { do: 'A secret key gets saved where the whole internet can read it.', why: 'Bots scan public code for keys within minutes. People have woken up to huge bills this way.' },
+          { do: 'A new feature quietly breaks an old one.', why: 'Without tests or saved versions, you may not notice until a customer does.' },
+        ] },
+        { t: 'analogy', text: 'The AI is like a brilliant new employee who started this morning. Incredibly fast, knows every programming language, never gets tired. But it does not know your business, it will not ask "are you sure?" unless you tell it to, and it will cheerfully do exactly what you said even if what you said was a bad idea.' },
+        { t: 'h', text: 'The three habits of good vibe coders' },
+        { t: 'steps', items: [
+          { do: '**Be clear.** Say what you want, who it is for, and what "done" looks like.', why: '"Make a login" gets you a guess. "Make a login with email codes, no passwords, that locks after 5 wrong tries" gets you what you actually need.' },
+          { do: '**Go small.** Ask for one thing, check that it works, then ask for the next.', why: 'If you ask for ten things at once and something breaks, you will not know which of the ten caused it.' },
+          { do: '**Save often.** Every time something works, have the AI save a version to GitHub.', why: 'Saved versions are your undo button. If tomorrow\'s change breaks everything, you can go back to today.' },
+        ] },
+        { t: 'p', text: 'Later in the course you will add a fourth habit: **check for safety** at the end of every week of work, using free tools and a prompt that reviews your app like a security expert would.' },
+        { t: 'deeper', title: 'How pros vibe code without making a mess', blocks: [
+          { t: 'p', text: 'Professional teams that build with AI agents keep the speed but add structure around it:' },
+          { t: 'steps', items: [
+            '**Write a short plan before code.** A list of what users need, how data is stored and how the parts connect. The AI follows a written plan far better than a long chat.',
+            '**Keep permanent rules in a file.** Claude Code reads a file called `CLAUDE.md` at the start of every session, so rules like "never put secrets in front-end code" only need to be written once.',
+            '**Small changes, frequent saves.** Each working state is a checkpoint you can return to with `git`.',
+            '**Verify everything.** Run it, test it, scan it. Trust is earned one change at a time.',
+          ] },
+        ] },
+        { t: 'check', q: 'You ask the AI for ten features at once and the app breaks. What is the main problem?', options: [
+          'The AI cannot build ten features',
+          'You cannot easily tell which change caused the break',
+          'Ten features is too many for a free plan',
+        ], answer: 1, explain: 'Small steps make problems easy to find. When one small change breaks something, you know exactly where to look.' },
+        { t: 'recap', items: [
+          'Vibe coding is building by describing what you want to an AI.',
+          'The AI can produce code that looks fine but has hidden holes.',
+          'Be clear, go small, and save often. Later: check for safety every week.',
+        ] },
+      ],
+    },
+  ],
+};

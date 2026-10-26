@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zero to Shipped · Build a real app with AI</title>
+  <meta name="description" content="A desktop course that takes you from zero to a live, paid, secured app built with AI. Plain-English lessons that explain the why, with copy-ready prompts." />
+  <meta property="og:title" content="Zero to Shipped" />
+  <meta property="og:description" content="Build a real app with AI. Plain-English lessons that explain the why." />
+  <meta property="og:image" content="/assets/app-shot.jpg" />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/base.css" />
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="card topbar">
+      <a class="logo" href="/"><img src="/assets/icon.png" alt="" /><span>Zero to Shipped</span></a>
+      <nav class="links" aria-label="Page">
+        <a href="#learn">What you learn</a>
+        <a href="#download">Download</a>
+        <a href="#drink">Buy me a drink</a>
+      </nav>
+      <a class="btn btn-primary btn-sm" href="#download">Get the app</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <p class="eyebrow mono">Vibe coding, start to finish</p>
+      <h1>Build a real app with AI.<br />Even if you know nothing.</h1>
+      <p class="lead">A step-by-step desktop course. Every lesson explains <b>why</b> before how, then gives you copy-ready prompts with security built in. Ship an app that is live, takes payments and is locked down.</p>
+      <div class="cta">
+        <a class="btn btn-primary" id="dl-mac-hero" href="#download">Download for Mac</a>
+        <a class="btn btn-outline" id="dl-win-hero" href="#download">Download for Windows</a>
+      </div>
+      <p class="muted small">Free. No account needed to learn. If it helps you, buy me a drink.</p>
+      <figure class="shot card">
+        <img src="/assets/app-shot.jpg" alt="The Zero to Shipped app showing a lesson with a copy-ready prompt" width="1440" height="900" />
+      </figure>
+    </section>
+
+    <section class="wrap features">
+      <div class="card feature">
+        <span class="pill pill-good">Why first</span>
+        <h3>Explained like a teacher would</h3>
+        <p>Every lesson starts with why it matters, uses everyday comparisons, and says why each step exists.</p>
+      </div>
+      <div class="card feature">
+        <span class="pill pill-info">Go deeper</span>
+        <h3>The technical detail, when you want it</h3>
+        <p>Open a Go deeper panel for the nerdy explanation. Skip it the first time and come back later.</p>
+      </div>
+      <div class="card feature">
+        <span class="pill pill-plain">Check yourself</span>
+        <h3>Quick quizzes and recaps</h3>
+        <p>A one-question check and a recap end every lesson. Skip any module you already know.</p>
+      </div>
+    </section>
+
+    <section id="learn" class="wrap">
+      <h2>What you learn</h2>
+      <div class="modules" id="modules"></div>
+    </section>
+
+    <section id="download" class="wrap">
+      <div class="card download">
+        <div>
+          <h2>Get the app</h2>
+          <p class="muted">About 5 MB. Free forever. Works offline.</p>
+        </div>
+        <div class="dl-buttons">
+          <a class="btn btn-primary" id="dl-mac" href="#">Download for Mac</a>
+          <a class="btn btn-outline" id="dl-win" href="#">Download for Windows</a>
+        </div>
+        <details class="note">
+          <summary>"Can't be opened" or "Windows protected your PC"?</summary>
+          <p><b>Mac:</b> open System Settings → Privacy &amp; Security, scroll down and click <b>Open Anyway</b>.<br />
+          <b>Windows:</b> click <b>More info</b>, then <b>Run anyway</b>.<br />
+          This shows up because the app is new and not yet signed. It is safe to open.</p>
+        </details>
+      </div>
+    </section>
+
+    <section id="drink" class="wrap">
+      <div class="card drink">
+        <div class="drink-head">
+          <div class="drink-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14l-7 9z"/><path d="M12 12v8"/><path d="M8 21h8"/></svg>
+          </div>
+          <div>
+            <h2>Buy me a drink?</h2>
+            <p class="muted">The course is free. If it helped, a drink keeps it free and up to date.</p>
+          </div>
+        </div>
+        <div class="drink-grid">
+          <div class="qr-box">
+            <img src="/assets/paypal-qr.png" alt="PayPal QR code" width="120" height="120" />
+            <div>
+              <b>PayPal</b>
+              <p class="muted small">Scan with your phone, or tap below.</p>
+              <a class="btn btn-outline btn-sm" id="pay-paypal" href="https://www.paypal.com/qrcodes/p2pqrc/59HTXVCYVB55J" target="_blank" rel="noopener">Open PayPal</a>
+              <a class="btn btn-outline btn-sm" id="pay-square" href="#" target="_blank" rel="noopener" hidden>Pay with Square</a>
+            </div>
+          </div>
+          <div class="wallets">
+            <div class="wallet"><span class="wallet-label">ETH</span><code id="eth">0x2b93C53f9F02f530f91Feab56e2cCc04D79e9E48</code><button class="btn btn-outline btn-sm" data-copy="eth">Copy</button></div>
+            <div class="wallet"><span class="wallet-label">BTC</span><code id="btc">39cmCz1mrYamZpQdHNRABxeY5XZvqMhoGt</code><button class="btn btn-outline btn-sm" data-copy="btc">Copy</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <div>
+      <p><b>For education and entertainment only.</b> Nothing here is legal, financial, tax, security or compliance advice. Everything is provided as is, without warranty. You are responsible for what you build and for any service you sign up for. The creator is not liable for any loss or damage from using this course or its content. Security lessons do not make a product secure or compliant; only a licensed CPA firm can issue a SOC 2 report.</p>
+      <p>Privacy: this site uses no trackers or ads. If you sign in to donate, we store your email and donation records only to recognize you. We never sell your data.</p>
+    </div>
+    <p class="muted small">© <span id="year">2026</span> The Ray Ally</p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/assets/site.js" defer></script>
+</body>
+</html>
