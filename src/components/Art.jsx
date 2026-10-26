@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { keyframes } from '@emotion/react';
 import { useTheme } from '@mui/material/styles';
 import { metaFor } from '../content/meta';
 import { Scene } from './Illustrations';
@@ -86,6 +87,10 @@ export function ModuleCover({ moduleId, index, logos = true }) {
   );
 }
 
+const float = keyframes`0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); }`;
+const enter = keyframes`from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; }`;
+const calm = { '@media (prefers-reduced-motion: reduce)': { animation: 'none' } };
+
 // Wide banner: gradient across, illustration on the right, text on the left.
 export function HeroBanner({ moduleId, eyebrow, title, children, height = 220 }) {
   const id = `h-${moduleId}`;
@@ -94,10 +99,10 @@ export function HeroBanner({ moduleId, eyebrow, title, children, height = 220 })
       <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 300 300" aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
         <Backdrop moduleId={moduleId} id={id} />
       </svg>
-      <Box sx={{ position: 'absolute', right: { xs: -40, sm: 24 }, top: 0, bottom: 0, aspectRatio: '1 / 1', opacity: { xs: 0.35, sm: 1 } }}>
+      <Box sx={{ position: 'absolute', right: { xs: -40, sm: 24 }, top: 0, bottom: 0, aspectRatio: '1 / 1', opacity: { xs: 0.35, sm: 1 }, animation: `${float} 6s ease-in-out infinite`, ...calm }}>
         <svg width="100%" height="100%" viewBox="0 0 300 300" aria-hidden="true" style={{ display: 'block' }}><Scene moduleId={moduleId} /></svg>
       </Box>
-      <Box sx={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', p: { xs: 2.5, sm: 4 }, pr: { sm: `${height + 40}px` }, color: '#fff' }}>
+      <Box key={title} sx={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', p: { xs: 2.5, sm: 4 }, pr: { sm: `${height + 40}px` }, color: '#fff', animation: `${enter} .6s cubic-bezier(.2,.7,.2,1)`, ...calm }}>
         {eyebrow && <Typography sx={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.85 }}>{eyebrow}</Typography>}
         <Typography component="h1" sx={{ fontSize: { xs: 28, sm: 38 }, fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.025em', mt: 0.5 }}>{title}</Typography>
         {children}

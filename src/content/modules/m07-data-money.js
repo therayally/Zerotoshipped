@@ -110,5 +110,58 @@ Tell me how to test it with the Stripe CLI.` + SAFE },
         ] },
       ],
     },
+    {
+      id: 'square',
+      title: 'Square: payments for real-world businesses',
+      minutes: 13,
+      body: [
+        { t: 'why', text: 'Stripe is perfect for apps that sell online. But if you build for a coffee shop, a barber, a food truck or your own side business, they probably need to take cards **in person** too: tap to pay, a card reader, a register. That is where Square shines, and it has a developer side that works a lot like Stripe.' },
+        { t: 'h', text: 'Stripe or Square?' },
+        { t: 'table', head: ['', 'Stripe', 'Square'], rows: [
+          ['Best for', 'Online apps, subscriptions, software', 'Shops, restaurants, services, anything in person'],
+          ['In person', 'Possible, but mostly online', 'Built for it: readers, registers, tap to pay on a phone'],
+          ['Extras', 'Billing, tax tools, developer tools', 'Point of sale, inventory, staff, appointments, invoices'],
+          ['No-code option', 'Payment Links', 'Payment Links and a free online store'],
+          ['Developer tools', 'Excellent', 'Very good: Checkout API, Web Payments SDK, webhooks'],
+        ] },
+        { t: 'p', text: 'Many real businesses use **both**: Square at the counter and on their own website, Stripe for an online membership. Your job as the builder is to pick what fits how they actually sell.' },
+        { t: 'h', text: 'How Square payments work in your app' },
+        { t: 'p', text: 'It is the same safe pattern you learned with Stripe: the customer pays on **Square\'s** checkout page, and Square sends your server a signed **webhook** saying "this was paid." Your app never touches a card number.' },
+        { t: 'steps', items: [
+          { do: 'Make a free developer account at **developer.squareup.com** and create an application.', why: 'This gives you a **Sandbox** (fake money for testing) and your access tokens.' },
+          { do: 'Start in **Sandbox**. Use Square\'s test card numbers until everything works.' },
+          { do: 'Store the access token in Vercel as a Sensitive variable, never in code.', why: 'A Square production token can see and refund real sales.' },
+          { do: 'Add a webhook subscription for payment events, and verify its signature on your server.' },
+        ] },
+        { t: 'prompt', label: 'Add Square checkout', text: `Add Square payments to my app using Square's Checkout API (a Square-hosted payment page).
+- The access token is SQUARE_ACCESS_TOKEN and the location is SQUARE_LOCATION_ID, server-side only. Start in Sandbox.
+- Create the checkout link on the server with the price from my own records, never from the browser.
+- Put my order ID in the payment's reference so I can match it later.
+- Add a webhook route that verifies Square's signature (SQUARE_WEBHOOK_SIGNATURE_KEY) before marking anything paid, and handles the same event twice safely.
+Explain how to test it with Square's sandbox test cards.` },
+        { t: 'tip', tone: 'info', text: 'Square also has an official connector for Claude. Turn it on in Settings → Connectors, and Claude can look up sales, create payment links or check inventory for you, always showing you a preview and waiting for your OK before changing anything.' },
+        { t: 'h', text: 'Starting your own business?' },
+        { t: 'p', text: 'If what you build turns into a real business, or you build apps for local businesses, the payment rate matters. A fraction of a percent on every sale adds up to real money every month.' },
+        { t: 'partner', eyebrow: 'Authorized Square Reseller · Course partner', title: 'Get a better rate on Square', text: 'Ray, who made this course, is an Authorized Square Reseller through **Deposyt**. Sign up through the partner page to get set up with Square at a better rate, with a real person helping you choose the right setup.',
+          perks: [['2.6% or lower', 'in person on Square, per the partner page'], ['$0 monthly fee', 'no contract'], ['0% option', 'through a cash discount or service charge program']],
+          ctas: [{ label: 'See the Square partner offer', url: 'https://deposyt.partners/ray-ally' }],
+          note: 'Disclosure: this is a partner link and the course creator may earn a commission. Rates and terms are set by Deposyt and Square and can change; check the page for current details. You never need to use this link to take the course.' },
+        { t: 'deeper', title: 'Fees, surcharges and the fine print', blocks: [
+          { t: 'p', text: '**Processing fees** are the cut a payment company takes from each card sale, usually a percentage plus a few cents. Online and in-person rates often differ.' },
+          { t: 'p', text: '**Cash discount** and **surcharge** programs pass the card fee on to the customer. They can bring your cost close to zero, but the rules vary by state and card brand: some states restrict surcharges, and they usually do not apply to debit cards. Make sure the setup you choose is compliant where you sell.' },
+          { t: 'p', text: 'Square webhooks are signed with HMAC-SHA256 over your exact webhook URL plus the raw request body, sent in the `x-square-hmacsha256-signature` header. Verify with a constant-time comparison before trusting any event.' },
+        ] },
+        { t: 'check', q: 'A food truck owner asks you for an app to take orders at the window and online. Which payment system fits best?', options: [
+          'Stripe only',
+          'Square, because it handles in-person and online together',
+          'Neither, cash only',
+        ], answer: 1, explain: 'Square was built for in-person businesses and also does online checkout, so one system covers both.' },
+        { t: 'recap', items: [
+          'Stripe for online-first apps; Square for real-world businesses.',
+          'Same safe pattern: hosted checkout plus a signed webhook.',
+          'Start in Sandbox; keep tokens Sensitive in Vercel.',
+        ] },
+      ],
+    },
   ],
 };

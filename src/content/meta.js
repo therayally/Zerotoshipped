@@ -18,7 +18,7 @@ export const moduleMeta = {
   build: { short: 'Build', g: G.teal, tools: L('nextjs', 'react', 'typescript') },
   ui: { short: 'Beautiful UI', g: G.rose, tools: L('googlefonts', 'mui', 'tailwind', 'dribbble') },
   blocks: { short: 'Building blocks', g: G.lavender, tools: L('typescript', 'rust', 'tauri', 'sqlite', 'mcp') },
-  'data-money': { short: 'Data & money', g: G.blue, tools: L('postgres', 'neon', 'stripe') },
+  'data-money': { short: 'Data & money', g: G.blue, tools: L('postgres', 'neon', 'stripe', 'square') },
   live: { short: 'Go live', g: G.teal, tools: L('vercel', 'cloudflare', 'resend') },
   secure: { short: 'Security', g: G.indigo, tools: L('owasp', 'dependabot', 'docker') },
   'grown-up': { short: 'Grown-up stuff', g: G.lavender, tools: L('git', 'github') },

@@ -1,6 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { keyframes } from '@emotion/react';
 import { FONT_BODY, FONT_MONO } from '../theme';
+import { useInView } from './Blocks';
 import { logo } from '../content/logos';
 
 // Diagram kit: 640-wide viewBox, crisp corners, official logos, labels with their own background.
@@ -53,7 +55,7 @@ function Node({ x, y, w = 140, h = 58, title, sub, k, g, tone = 'accent', mono }
   const tx = hasIcon ? x + 46 : x + w / 2;
   const anchor = hasIcon ? 'start' : 'middle';
   return (
-    <g>
+    <g className="fig-node" style={{ transitionDelay: `${Math.round(x * 1.3 + y * 0.6)}ms` }}>
       <rect x={x} y={y} width={w} height={h} rx="3" fill={t.surface} stroke={t.border} />
       <rect x={x} y={y} width="4" height={h} fill={bar} />
       {k && <Logo k={k} x={x + 12} y={y + (h - 26) / 2} />}
@@ -66,7 +68,7 @@ function Node({ x, y, w = 140, h = 58, title, sub, k, g, tone = 'accent', mono }
 
 function Arrow({ d, dashed }) {
   const { t } = useTheme();
-  return <path d={d} fill="none" stroke={t.muted} strokeWidth="1.6" strokeDasharray={dashed ? '5 5' : undefined} markerEnd="url(#arr)" />;
+  return <path className={dashed ? 'fig-flow' : 'fig-arrow'} pathLength={dashed ? undefined : 1} d={d} fill="none" stroke={t.muted} strokeWidth="1.6" strokeDasharray={dashed ? '5 5' : undefined} markerEnd="url(#arr)" />;
 }
 
 // A label with its own background so lines never run through the text.
@@ -74,17 +76,38 @@ function Label({ x, y, text }) {
   const { t } = useTheme();
   const w = text.length * 6.1 + 12;
   return (
-    <g>
+    <g className="fig-label">
       <rect x={x - w / 2} y={y - 11} width={w} height="17" rx="2" fill={t.surface2} />
       <text x={x} y={y + 1.5} textAnchor="middle" fontSize="11" fontWeight="600" fill={t.text2} fontFamily={FONT_BODY}>{text}</text>
     </g>
   );
 }
 
+const flow = keyframes`to { stroke-dashoffset: -20; }`;
+const pulse = keyframes`0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: 0.35; }`;
+
+// Diagrams build themselves when scrolled into view: boxes fade up left to right, then arrows draw, then labels.
+const motion = {
+  '& .fig-node': { opacity: 0, transform: 'translateY(10px)', transition: 'opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1)' },
+  '& .fig-arrow': { strokeDasharray: 1, strokeDashoffset: 1, transition: 'stroke-dashoffset .7s ease .75s' },
+  '& .fig-label, & .fig-flow': { opacity: 0, transition: 'opacity .4s ease 1.2s' },
+  '& .fig-pulse': { animation: `${pulse} 1.8s ease-in-out infinite` },
+  '&.in .fig-node': { opacity: 1, transform: 'none' },
+  '&.in .fig-arrow': { strokeDashoffset: 0 },
+  '&.in .fig-label, &.in .fig-flow': { opacity: 1 },
+  '&.in .fig-flow': { animation: `${flow} 1s linear infinite` },
+  '@media (prefers-reduced-motion: reduce)': {
+    '& .fig-node, & .fig-label, & .fig-flow': { opacity: 1, transform: 'none', transition: 'none' },
+    '& .fig-arrow': { strokeDashoffset: 0, transition: 'none' },
+    '& .fig-pulse, &.in .fig-flow': { animation: 'none' },
+  },
+};
+
 function Frame({ h, children, caption }) {
   const { t } = useTheme();
+  const [ref, seen] = useInView();
   return (
-    <Box sx={{ my: 3, p: { xs: 1.5, sm: 2.5 }, borderRadius: '3px', background: t.surface2, border: `1px solid ${t.border}` }}>
+    <Box ref={ref} className={seen ? 'in' : ''} sx={{ my: 3, p: { xs: 1.5, sm: 2.5 }, borderRadius: '3px', background: t.surface2, border: `1px solid ${t.border}`, ...motion }}>
       <Box sx={{ overflowX: 'auto', mx: { xs: -1.5, sm: 0 }, px: { xs: 1.5, sm: 0 } }}>
         <svg viewBox={`0 0 640 ${h}`} width="100%" role="img" aria-label={caption} style={{ display: 'block', minWidth: 540 }}>
           <defs>
@@ -290,7 +313,7 @@ function BigPicture({ hl }) {
       {Object.entries(PIECES).map(([k, p]) => (
         <g key={k} opacity={dim(k)}>
           <Node {...p} />
-          {hl === k && <rect x={p.x - 3} y={p.y - 3} width={p.w + 6} height={64} rx="4" fill="none" stroke={t.accent} strokeWidth="2.5" />}
+          {hl === k && <rect className="fig-pulse" x={p.x - 3} y={p.y - 3} width={p.w + 6} height={64} rx="4" fill="none" stroke={t.accent} strokeWidth="2.5" />}
         </g>
       ))}
       <Arrow d="M140 159 L166 159" />
@@ -311,11 +334,11 @@ function BigPicture({ hl }) {
 // Git branches: main stays safe while a feature is built on its own line, previewed, then merged.
 function Branches() {
   const { t } = useTheme();
-  const dot = (x, y, c) => <circle cx={x} cy={y} r="9" fill={c} stroke={t.surface} strokeWidth="3" />;
+  const dot = (x, y, c) => <g className="fig-node" style={{ transitionDelay: `${x * 1.6}ms` }}><circle cx={x} cy={y} r="9" fill={c} stroke={t.surface} strokeWidth="3" /></g>;
   return (
     <Frame h={210} caption="Build on a branch, preview it, then merge it into main">
-      <path d="M30 150 H610" stroke={t.accent} strokeWidth="4" fill="none" />
-      <path d="M170 150 C210 150 210 70 250 70 H440 C480 70 480 150 520 150" stroke={t.teal} strokeWidth="4" fill="none" />
+      <path className="fig-arrow" pathLength={1} d="M30 150 H610" stroke={t.accent} strokeWidth="4" fill="none" />
+      <path className="fig-arrow" pathLength={1} d="M170 150 C210 150 210 70 250 70 H440 C480 70 480 150 520 150" stroke={t.teal} strokeWidth="4" fill="none" />
       {[70, 170, 520, 600].map((x) => <g key={x}>{dot(x, 150, t.accent)}</g>)}
       {[290, 360, 430].map((x) => <g key={x}>{dot(x, 70, t.teal)}</g>)}
       <text x="30" y="185" fontSize="13" fontWeight="700" fill={t.accent} fontFamily={FONT_BODY}>main: the live app</text>

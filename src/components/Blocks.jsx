@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { keyframes } from '@emotion/react';
 import { Box, Button, Typography, Link } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded';
@@ -16,13 +17,78 @@ import TaskAltRounded from '@mui/icons-material/TaskAltRounded';
 import FlagRounded from '@mui/icons-material/FlagRounded';
 import { FONT_MONO } from '../theme';
 import { Snapshot, Mock, TerminalShot } from './Art';
+import { logo } from '../content/logos';
+
+// ───────── motion: everything fades up as it scrolls into view; reduced-motion users see it still.
+
+const still = { '@media (prefers-reduced-motion: reduce)': { opacity: 1, transform: 'none', transition: 'none', animation: 'none' } };
+const pop = keyframes`0% { transform: scale(1); } 40% { transform: scale(1.025); } 100% { transform: scale(1); }`;
+const shake = keyframes`0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); }`;
+
+export function useInView() {
+  const ref = useRef(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    // Never leave content invisible: no observer, a hidden tab, or printing all show it straight away.
+    if (!el || typeof IntersectionObserver === 'undefined' || document.visibilityState !== 'visible') { setSeen(true); return undefined; }
+    const show = () => { setSeen(true); io.disconnect(); };
+    // Anything already scrolled past (above the screen) counts as seen too.
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting || e.boundingClientRect.top < 0) show(); }, { rootMargin: '0px 0px -6% 0px' });
+    io.observe(el);
+    const onHide = () => { if (document.visibilityState !== 'visible') show(); };
+    document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('beforeprint', show);
+    return () => { io.disconnect(); document.removeEventListener('visibilitychange', onHide); window.removeEventListener('beforeprint', show); };
+  }, []);
+  return [ref, seen];
+}
+
+function Reveal({ children, delay = 0 }) {
+  const [ref, seen] = useInView();
+  return (
+    <Box ref={ref} sx={{ opacity: seen ? 1 : 0, transform: seen ? 'none' : 'translateY(14px)', transition: 'opacity .55s ease, transform .55s cubic-bezier(.2,.7,.2,1)', transitionDelay: `${delay}ms`, ...still }}>
+      {children}
+    </Box>
+  );
+}
+
+// ───────── real logos next to tool names written in **bold**
+
+const BRANDS = {
+  GitHub: 'github', 'GitHub Actions': 'githubactions', Git: 'git', Vercel: 'vercel', Neon: 'neon', Stripe: 'stripe', Square: 'square',
+  Resend: 'resend', Cloudflare: 'cloudflare', Claude: 'claude', 'Claude Code': 'claude', Anthropic: 'anthropic', Ollama: 'ollama',
+  'LM Studio': 'lmstudio', 'Hugging Face': 'huggingface', Qwen: 'qwen', Docker: 'docker', 'Next.js': 'nextjs', React: 'react',
+  TypeScript: 'typescript', Tailwind: 'tailwind', 'Tailwind CSS': 'tailwind', Telegram: 'telegram', Postgres: 'postgres', PostgreSQL: 'postgres',
+  Drizzle: 'drizzle', 'Drizzle ORM': 'drizzle', MCP: 'mcp', Rust: 'rust', Tauri: 'tauri', Electron: 'electron', Python: 'python',
+  SQLite: 'sqlite', Dependabot: 'dependabot', OWASP: 'owasp', Blender: 'blender', Krita: 'krita', ElevenLabs: 'elevenlabs', Figma: 'figma',
+  'Node.js': 'node', Node: 'node', 'Google Fonts': 'googlefonts', Mermaid: 'mermaid',
+};
+
+function BrandMark({ k }) {
+  const { t } = useTheme();
+  const icon = logo(k);
+  if (!icon || icon.text) return null;
+  const n = parseInt(icon.hex, 16);
+  const lum = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+  // Near-black and near-white logos follow the text color so they show in both themes.
+  const fill = lum < 40 || lum > 225 ? t.text : `#${icon.hex}`;
+  return (
+    <svg viewBox="0 0 24 24" width="0.95em" height="0.95em" aria-hidden="true" style={{ display: 'inline-block', verticalAlign: '-0.12em', marginRight: '0.3em' }}>
+      <path d={icon.path} fill={fill} />
+    </svg>
+  );
+}
 
 // Renders **bold**, *italic* and `code` inside a string.
 export function Inline({ text }) {
   const { t } = useTheme();
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g).filter(Boolean);
   return parts.map((p, i) => {
-    if (p.startsWith('**')) return <strong key={i} style={{ fontWeight: 700, color: t.text }}>{p.slice(2, -2)}</strong>;
+    if (p.startsWith('**')) {
+      const word = p.slice(2, -2);
+      return <strong key={i} style={{ fontWeight: 700, color: t.text, whiteSpace: BRANDS[word] ? 'nowrap' : undefined }}>{BRANDS[word] && <BrandMark k={BRANDS[word]} />}{word}</strong>;
+    }
     if (p.startsWith('`')) return (
       <code key={i} style={{ fontFamily: FONT_MONO, fontSize: '0.86em', background: t.accentSoft, color: t.accentText, borderRadius: 6, padding: '2px 6px', wordBreak: 'break-word' }}>{p.slice(1, -1)}</code>
     );
@@ -119,12 +185,17 @@ function Steps({ items }) {
         const main = typeof it === 'string' ? it : it.do;
         const why = typeof it === 'string' ? null : it.why;
         return (
-          <Box component="li" key={i} sx={{ display: 'flex', gap: 1.75, alignItems: 'flex-start' }}>
-            <Box sx={{ width: 30, height: 30, borderRadius: '2px', flexShrink: 0, display: 'grid', placeItems: 'center', background: t.accentSoft, color: t.accentText, fontSize: 14, fontWeight: 700 }}>{i + 1}</Box>
-            <Box sx={{ minWidth: 0, pt: '2px' }}>
-              <Typography><Inline text={main} /></Typography>
-              {why && <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}><Inline text={why} /></Typography>}
-            </Box>
+          <Box component="li" key={i}>
+            <Reveal delay={i * 90}>
+              <Box sx={{ display: 'flex', gap: 1.75, alignItems: 'flex-start', position: 'relative' }}>
+                {i < items.length - 1 && <Box sx={{ position: 'absolute', left: 14.5, top: 34, bottom: -16, width: '1.5px', background: t.border }} />}
+                <Box sx={{ width: 30, height: 30, borderRadius: '2px', flexShrink: 0, display: 'grid', placeItems: 'center', background: t.grad, color: '#fff', fontSize: 14, fontWeight: 700, boxShadow: `0 4px 10px ${t.accent}33`, position: 'relative' }}>{i + 1}</Box>
+                <Box sx={{ minWidth: 0, pt: '2px' }}>
+                  <Typography><Inline text={main} /></Typography>
+                  {why && <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}><Inline text={why} /></Typography>}
+                </Box>
+              </Box>
+            </Reveal>
           </Box>
         );
       })}
@@ -202,8 +273,8 @@ function Check({ q, options, answer, explain }) {
           const color = { idle: t.border, right: t.easy, wrong: t.warn }[state];
           return (
             <Box key={i} component="button" disabled={done} onClick={() => setPicked(i)}
-              sx={{ all: 'unset', cursor: done ? 'default' : 'pointer', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 1.5, px: 1.75, py: 1.25, borderRadius: '3px', border: `1.5px solid ${color}`, background: state === 'right' ? t.easySoft : state === 'wrong' ? t.warnSoft : 'transparent', '&:hover': done ? {} : { borderColor: t.accent }, '&:focus-visible': { outline: `2px solid ${t.accent}` } }}>
-              <Box sx={{ width: 24, height: 24, borderRadius: '2px', border: `1.5px solid ${color}`, display: 'grid', placeItems: 'center', fontSize: 12.5, fontWeight: 700, color: t.muted, flexShrink: 0 }}>{String.fromCharCode(65 + i)}</Box>
+              sx={{ all: 'unset', cursor: done ? 'default' : 'pointer', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 1.5, px: 1.75, py: 1.25, borderRadius: '3px', border: `1.5px solid ${color}`, transition: 'border-color .2s, background .2s, transform .15s', animation: state === 'right' ? `${pop} .45s ease` : state === 'wrong' ? `${shake} .4s ease` : 'none', ...still, '&:active': done ? {} : { transform: 'scale(.99)' }, background: state === 'right' ? t.easySoft : state === 'wrong' ? t.warnSoft : 'transparent', '&:hover': done ? {} : { borderColor: t.accent }, '&:focus-visible': { outline: `2px solid ${t.accent}` } }}>
+              <Box sx={{ width: 24, height: 24, borderRadius: '2px', border: `1.5px solid ${color}`, display: 'grid', placeItems: 'center', fontSize: 12.5, fontWeight: 700, color: state === 'idle' ? t.muted : '#fff', background: state === 'right' ? t.easy : state === 'wrong' ? t.warn : 'transparent', flexShrink: 0, transition: 'all .2s' }}>{state === 'right' ? '✓' : state === 'wrong' ? '✕' : String.fromCharCode(65 + i)}</Box>
               <Typography sx={{ fontSize: 15.5 }}><Inline text={o} /></Typography>
             </Box>
           );
@@ -225,10 +296,12 @@ function Recap({ items }) {
       <Typography sx={{ fontWeight: 700, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.9, mb: 1.25 }}>What you learned</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {items.map((it, i) => (
-          <Box key={i} sx={{ display: 'flex', gap: 1.25, alignItems: 'flex-start' }}>
-            <TaskAltRounded sx={{ fontSize: 20, mt: '3px', flexShrink: 0 }} />
-            <Typography sx={{ '& strong': { color: '#fff !important' } }}><Inline text={it} /></Typography>
-          </Box>
+          <Reveal key={i} delay={150 + i * 120}>
+            <Box sx={{ display: 'flex', gap: 1.25, alignItems: 'flex-start' }}>
+              <TaskAltRounded sx={{ fontSize: 20, mt: '3px', flexShrink: 0 }} />
+              <Typography sx={{ '& strong': { color: '#fff !important' }, '& svg path': { fill: '#fff' } }}><Inline text={it} /></Typography>
+            </Box>
+          </Reveal>
         ))}
       </Box>
     </Box>
@@ -278,9 +351,45 @@ function Links({ items }) {
   );
 }
 
+// A sponsor-style offer card: brand logos, headline, perks, call-to-action buttons and a disclosure line.
+function Partner({ eyebrow, title, text, perks = [], ctas = [], note }) {
+  const { t } = useTheme();
+  return (
+    <Box sx={{ my: 3.5, borderRadius: '4px', overflow: 'hidden', background: 'linear-gradient(135deg, #0B1033 0%, #23238F 55%, #5B2BC0 100%)', color: '#fff', position: 'relative', '& strong': { color: '#fff !important' }, '& strong svg path': { fill: '#fff' } }}>
+      <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '32px 32px', maskImage: 'linear-gradient(90deg, transparent, #000 60%)' }} />
+      <Box sx={{ position: 'relative', p: { xs: 2.5, sm: 3.5 } }}>
+        <Typography sx={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#B9C2FF' }}>{eyebrow}</Typography>
+        <Typography sx={{ fontSize: { xs: 24, sm: 30 }, fontWeight: 800, lineHeight: 1.15, mt: 1, letterSpacing: '-0.01em' }}>{title}</Typography>
+        <Typography sx={{ mt: 1.25, color: 'rgba(255,255,255,0.85)', maxWidth: 560 }}><Inline text={text} /></Typography>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: `repeat(${Math.min(perks.length, 3)}, 1fr)` }, gap: 1.25, mt: 2.5 }}>
+          {perks.map(([big, small]) => (
+            <Box key={big} sx={{ p: 1.75, borderRadius: '3px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)' }}>
+              <Typography sx={{ fontSize: 20, fontWeight: 800 }}>{big}</Typography>
+              <Typography sx={{ fontSize: 13.5, color: 'rgba(255,255,255,0.78)', lineHeight: 1.4 }}>{small}</Typography>
+            </Box>
+          ))}
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1.25, mt: 2.75, flexWrap: 'wrap' }}>
+          {ctas.map((c, i) => (
+            <Button key={c.label} href={c.url} target="_blank" rel="noopener noreferrer sponsored" endIcon={<NorthEastRounded />}
+              sx={i === 0 ? { background: '#fff', color: '#16161D', fontWeight: 700, '&:hover': { background: '#fff', filter: 'brightness(0.94)' } } : { color: '#fff', border: '1px solid rgba(255,255,255,0.4)', '&:hover': { background: 'rgba(255,255,255,0.08)' } }}>
+              {c.label}
+            </Button>
+          ))}
+        </Box>
+        {note && <Typography sx={{ mt: 2, fontSize: 12.5, color: 'rgba(255,255,255,0.6)' }}><Inline text={note} /></Typography>}
+      </Box>
+    </Box>
+  );
+}
+
 export default function Blocks({ blocks }) {
   if (!blocks) return null;
-  return blocks.map((b, i) => {
+  return blocks.map((b, i) => <Reveal key={i}>{block(b, i)}</Reveal>);
+}
+
+function block(b, i) {
+  {
     switch (b.t) {
       case 'p': return <Typography key={i} sx={{ my: 1.75, color: 'text.primary' }}><Inline text={b.text} /></Typography>;
       case 'h': return <Typography key={i} variant="h5" component="h3" sx={{ mt: 5, mb: 1.25 }}>{b.text}</Typography>;
@@ -290,6 +399,7 @@ export default function Blocks({ blocks }) {
       case 'tip': return <Tip key={i} tone={b.tone} text={b.text} />;
       case 'table': return <Table key={i} head={b.head} rows={b.rows} />;
       case 'links': return <Links key={i} items={b.items} />;
+      case 'partner': return <Partner key={i} {...b} />;
       case 'snap': return <Snapshot key={i} src={b.src} url={b.url} caption={b.caption} />;
       case 'mock': return <Mock key={i} name={b.name} />;
       case 'term': return <TerminalShot key={i} title={b.title} lines={b.lines} caption={b.caption} />;
@@ -300,5 +410,5 @@ export default function Blocks({ blocks }) {
       case 'recap': return <Recap key={i} items={b.items} />;
       default: return null;
     }
-  });
+  }
 }

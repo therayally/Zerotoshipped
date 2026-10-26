@@ -4,7 +4,7 @@ import {
   siTypescript, siPython, siRust, siTauri, siElectron, siNodedotjs, siSqlite, siPostgresql, siDrizzle,
   siModelcontextprotocol, siGooglefonts, siMui, siTailwindcss, siShadcnui, siDribbble, siFigma, siOwasp, siDependabot,
   siDocker, siOllama, siQwen, siBlender, siKrita, siTelegram, siElevenlabs, siMermaid,
-  siHuggingface, siGithubactions, siLmstudio,
+  siHuggingface, siGithubactions, siLmstudio, siSquare,
 } from 'simple-icons';
 
 const text = (title, hex) => ({ title, hex, text: true });
@@ -16,7 +16,7 @@ export const LOGOS = {
   tauri: siTauri, electron: siElectron, node: siNodedotjs, sqlite: siSqlite, postgres: siPostgresql, drizzle: siDrizzle,
   mcp: siModelcontextprotocol, googlefonts: siGooglefonts, mui: siMui, tailwind: siTailwindcss, shadcn: siShadcnui,
   dribbble: siDribbble, figma: siFigma, owasp: siOwasp, dependabot: siDependabot, docker: siDocker, ollama: siOllama,
-  qwen: siQwen, blender: siBlender, krita: siKrita, telegram: siTelegram, elevenlabs: siElevenlabs, mermaid: siMermaid, huggingface: siHuggingface, githubactions: siGithubactions, lmstudio: siLmstudio,
+  qwen: siQwen, blender: siBlender, krita: siKrita, telegram: siTelegram, elevenlabs: siElevenlabs, mermaid: siMermaid, huggingface: siHuggingface, githubactions: siGithubactions, lmstudio: siLmstudio, square: siSquare,
 };
 
 export const logo = (key) => LOGOS[key];
