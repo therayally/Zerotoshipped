@@ -5,11 +5,69 @@ export default {
   title: 'Build your app',
   lessons: [
     {
+      id: 'practice-run',
+      title: 'Practice run: build a test app',
+      minutes: 15,
+      body: [
+        { t: 'why', text: 'Before you build the app you actually care about, do one practice lap on something that does not matter. You will go through the whole loop (ask, check, fix, save) with nothing at stake. If it breaks, good: breaking things here is the point.' },
+        { t: 'p', text: 'Your test app is a **Decision Spinner**. You type a few choices (like "tacos, pizza, sushi"), press Spin, and it picks one for you. It is small, but it has everything a real app has: a page, buttons, data that gets saved, and something that can go wrong.' },
+        { t: 'h', text: 'Step 1: give it its own folder' },
+        { t: 'steps', items: [
+          { do: 'In the Claude app\'s **Code** tab, start a new session and choose **New folder**. Name it **practice-app**.', why: 'Keeping practice separate means you can delete it later without touching anything important.' },
+          { do: 'Paste your **house rules** prompt first, like you always will.' },
+        ] },
+        { t: 'h', text: 'Step 2: ask for the app' },
+        { t: 'prompt', label: 'Build the Decision Spinner', text: `Build a small practice web app called Decision Spinner in this folder.
+- One page. A box where I type choices, one per line, and a big Spin button.
+- When I press Spin, it picks one choice at random and shows it big in the middle.
+- Save my choices in the browser so they are still there after I refresh.
+- Keep it simple: plain HTML, CSS and JavaScript, no sign-in, no database.
+Then open it for me or tell me exactly how to open it.` + SAFE },
+        { t: 'h', text: 'Step 3: change something' },
+        { t: 'p', text: 'Ask for one change at a time and look at the result after each one. Try these:' },
+        { t: 'steps', items: [
+          { do: '"Make the Spin button blue and a bit bigger."' },
+          { do: '"Show the last 5 results under the button."' },
+          { do: '"Add a Clear button that empties the list, and ask me to confirm first."' },
+        ] },
+        { t: 'h', text: 'Step 4: break it on purpose' },
+        { t: 'p', text: 'Delete every choice and press Spin. Does it crash, show "undefined", or do nothing? Whatever happens, describe it to Claude in plain words:' },
+        { t: 'prompt', label: 'Fix a bug like a pro', text: `When the list is empty and I press Spin, this happens: [WHAT YOU SAW].
+I expected it to show a friendly message like "Add a few choices first."
+Find the cause, explain it in one sentence, then fix it.` },
+        { t: 'p', text: 'This is the most important skill in the course: say **what you did**, **what you saw**, and **what you expected**. That is how real developers report bugs, and it gets you a fix on the first try much more often.' },
+        { t: 'h', text: 'Step 5: save your work' },
+        { t: 'prompt', label: 'Save it', text: 'Commit this with a clear message, make a private GitHub repo called practice-app, and push it.' },
+        { t: 'h', text: 'You pass when...' },
+        { t: 'steps', items: [
+          'The Spinner opens and picks a random choice.',
+          'Your choices are still there after you refresh the page.',
+          'An empty list shows a friendly message instead of breaking.',
+          'The code is saved in a private GitHub repo.',
+        ] },
+        { t: 'tip', tone: 'safe', text: 'Stuck for more than ten minutes? Say: "Undo your last change and try a simpler way." Going backwards is a normal, smart move, not a failure.' },
+        { t: 'deeper', title: 'Why "saved in the browser" is not a database', blocks: [
+          { t: 'p', text: 'Your Spinner uses **localStorage**, a small storage box inside your browser. It is perfect for practice, but it only lives on that one browser on that one computer. Open the app on your phone and your list is gone.' },
+          { t: 'p', text: 'Anyone can also open the browser\'s developer tools and read or edit localStorage, so it must never hold passwords, payment details or anything private. Real apps keep that data in a server database like Neon, which you hook up in "Data and money".' },
+        ] },
+        { t: 'check', q: 'Your app shows "undefined" when you press Spin. What is the best message to send Claude?', options: [
+          '"It\'s broken, fix it."',
+          '"When the list is empty and I press Spin, it shows undefined. I expected a friendly message."',
+          '"Rewrite the whole app."',
+        ], answer: 1, explain: 'What you did, what you saw, what you expected. Clear bug reports get clean fixes.' },
+        { t: 'recap', items: [
+          'Practice on a throwaway app before your real one.',
+          'Ask for one change at a time and check each result.',
+          'Report bugs as: what I did, what I saw, what I expected.',
+        ] },
+      ],
+    },
+    {
       id: 'first-app',
       title: 'Your first app',
       minutes: 14,
       body: [
-        { t: 'why', text: 'This is the moment it gets real. By the end of this lesson, an app you asked for will be running on your computer, saved to GitHub, and ready to grow. Everything after this is adding pieces to something that already works.' },
+        { t: 'why', text: 'Practice lap done. This is the moment it gets real. By the end of this lesson, an app you asked for will be running on your computer, saved to GitHub, and ready to grow. Everything after this is adding pieces to something that already works.' },
         { t: 'h', text: 'What we are building with' },
         { t: 'p', text: 'We will use **Next.js**, the most popular way to build web apps with React (the code library behind Facebook, Netflix and many others). We pick it for three reasons: it handles both the page people see and the private server code in one project, it is made by the same company as Vercel so deploying is effortless, and AI tools have seen a huge amount of it, so they write it well.' },
         { t: 'p', text: 'We will also use **TypeScript**, which is regular JavaScript with labels on everything ("this is a number", "this is an email"). Those labels let the computer catch mistakes before your app even runs. That is extremely helpful when an AI is writing most of the code.' },
