@@ -216,22 +216,26 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
         </Section>
 
         {/* Meet the developer */}
-        <Section id="ray" tint eyebrow="Meet the developer" title="Hi, I'm Ray.">
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '0.8fr 1.2fr' }, gap: { xs: 4, md: 7 }, alignItems: 'center' }}>
+        <Section id="ray" tint eyebrow="Meet the developer" title="Ray Ally, artist turned AI builder.">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '0.55fr 1.45fr' }, gap: { xs: 4, md: 6 }, alignItems: 'start' }}>
             <Reveal>
               <Box component="img" src="/brand/ray.jpg" alt="Ray Ally, the creator of TinyAppCode, in a portrait lit with orange and purple light" loading="lazy"
-                sx={{ width: '100%', maxWidth: 380, aspectRatio: '4 / 5', objectFit: 'cover', borderRadius: '10px', display: 'block', mx: 'auto', boxShadow: '0 24px 60px rgba(20,30,90,0.25)' }} />
+                sx={{ width: '100%', maxWidth: { xs: 220, md: 280 }, aspectRatio: '4 / 5', objectFit: 'cover', borderRadius: '10px', display: 'block', mx: 'auto', boxShadow: '0 24px 60px rgba(20,30,90,0.25)' }} />
             </Reveal>
             <Reveal delay={0.1}>
-              <Typography sx={{ fontSize: { xs: '1.1rem', md: '1.2rem' }, lineHeight: 1.7 }}>
-                I'm an Air Force veteran, photographer, videographer, AI artist and entrepreneur with more than twenty years of building brands. I am not a classically trained programmer.
-              </Typography>
-              <Typography sx={{ fontSize: { xs: '1.1rem', md: '1.2rem' }, lineHeight: 1.7, mt: 2 }}>
-                I build real software anyway, including this site and a full restaurant back-office platform, by vibe coding with Claude Code. Along the way I learned what actually works, what quietly breaks, and how to keep customers' data safe.
-              </Typography>
-              <Typography sx={{ fontSize: { xs: '1.1rem', md: '1.2rem' }, lineHeight: 1.7, mt: 2 }}>
-                TinyAppCode is the course I wish I had when I started: plain words, real screenshots, and prompts you can copy. If I can do it, you can too.
-              </Typography>
+              {[
+                'Ray Ally is a graphic designer, photographer, videographer and AI artist with more than twenty years of creative and entrepreneurial experience. He studied at the Art Institute before leaving to pursue his passion for art full time.',
+                'Ray built his name in beauty and pageant photography, creating polished, editorial images for contestants, models and organizations connected to Miss United States, Miss America, Miss USA and Miss Earth. His work has appeared in publications, campaigns and portfolios.',
+                'Before his creative career, Ray served in the United States Air Force. Over his professional career he also became an expert in cybersecurity, and that security background led him into AI development and building software with AI.',
+                'Today Ray blends both worlds: a designer\'s eye for beautiful, easy-to-use apps and a security expert\'s habits for keeping customers\' data safe. He is co-owner of Backwater Hat Co. and creates cinematic content as The Ray Ally. TinyAppCode is his free course that teaches anyone to do what he does: build real apps with AI, the right way.',
+              ].map((p, i) => (
+                <Typography key={i} sx={{ fontSize: { xs: '1.05rem', md: '1.12rem' }, lineHeight: 1.7, mt: i ? 2 : 0 }}>{p}</Typography>
+              ))}
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2.5 }}>
+                {['Graphic design', 'Photography', 'Videography', 'AI art', 'Cybersecurity', 'AI development', 'U.S. Air Force veteran'].map((x) => (
+                  <Box key={x} sx={{ px: 1.25, py: 0.5, borderRadius: '99px', fontSize: 13.5, fontWeight: 600, background: t.accentSoft, color: t.accentText }}>{x}</Box>
+                ))}
+              </Box>
               <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: 3 }}>
                 <Button variant="contained" href="https://www.tiktok.com/@therayally" target="_blank" rel="noopener noreferrer">Follow @therayally on TikTok</Button>
                 <Button variant="outlined" href="https://therayally.com" target="_blank" rel="noopener noreferrer">therayally.com</Button>
@@ -244,7 +248,7 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
         <Section id="faq" eyebrow="Questions" title="The honest answers.">
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
             {[
-              ['Is it really free?', 'Yes. Every lesson is free, with no ads and no paywall. If it helps you, you can buy me a drink, but you never have to.'],
+              ['Is it really free?', 'Yes. Every lesson is free, with no ads and no paywall. If it helps you, you can buy Ray a drink, but you never have to.'],
               ['Do I need to know how to code?', 'No. The course starts from zero and explains every word. The AI writes the code; you learn to steer it, check it and keep it safe.'],
               ['Can I really learn in a few hours?', `The basics of vibe coding take about an hour. Track 1, which ends with your first app live online, is about ${firstAppHours} hours of short lessons. Go at your own pace.`],
               ['What do I need?', 'A Mac or Windows computer and a Claude plan that includes Claude Code (Pro is about $20 a month). GitHub, Vercel and the other tools have free plans to start.'],
@@ -277,7 +281,7 @@ export default function Landing({ onLogin, onSignup, colorMode, toggleColor }) {
         <Box sx={{ maxWidth: 1120, mx: 'auto', display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '2fr 1fr 1fr 1fr' }, gap: 3 }}>
           <Box sx={{ gridColumn: { xs: '1 / -1', md: 'auto' } }}>
             <Logo size={20} />
-            <Typography sx={{ color: 'text.secondary', mt: 1.5, fontSize: 14, maxWidth: 320 }}>A free course for building real apps with AI. Made by TheRayAlly.</Typography>
+            <Typography sx={{ color: 'text.secondary', mt: 1.5, fontSize: 14, maxWidth: 320 }}>A free course for building real apps with AI, created by Ray Ally.</Typography>
           </Box>
           {[
             ['Course', [['Start free', onSignup], ['Log in', onLogin], ['Buy me a drink', '/donate']]],
