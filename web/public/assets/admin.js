@@ -91,6 +91,7 @@ document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('clic
 
 $('forgot-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  setMsg($('login-msg'), 'Sending…');
   try {
     const r = await api('/api/auth/forgot', { method: 'POST', body: { email: $('f-email').value.trim() } });
     setMsg($('login-msg'), r.message, 'ok');
@@ -101,10 +102,21 @@ $('forgot-form').addEventListener('submit', async (e) => {
 $('reset-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    await api('/api/auth/reset', { method: 'POST', body: { email: $('f-email').value.trim(), code: $('r-code').value.trim(), password: $('r-password').value } });
-    $('email').value = $('f-email').value;
-    showForm('login-form');
-    setMsg($('login-msg'), 'Password changed. Sign in with your new password.', 'ok');
+    const email = $('f-email').value.trim();
+    const password = $('r-password').value;
+    await api('/api/auth/reset', { method: 'POST', body: { email, code: $('r-code').value.trim(), password } });
+    $('r-code').value = ''; $('r-password').value = '';
+    $('email').value = email;
+    // Go straight on to the admin sign-in with the new password: the panel always asks for one more emailed code.
+    try {
+      const r = await api('/api/admin/login', { method: 'POST', body: { email, password } });
+      showForm('code-form');
+      setMsg($('login-msg'), `Password changed. ${r.message || 'We emailed you a sign-in code.'}`, 'ok');
+      $('l-code').focus();
+    } catch (err) {
+      showForm('login-form');
+      setMsg($('login-msg'), `Password changed. ${err.message}`, 'err');
+    }
   } catch (err) { setMsg($('login-msg'), err.message, 'err'); }
 });
 

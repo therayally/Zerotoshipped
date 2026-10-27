@@ -213,7 +213,12 @@ async function sendCode(email, purpose) {
   await q('UPDATE codes SET used = TRUE WHERE email = $1 AND purpose = $2 AND used = FALSE', [email, purpose]);
   await q('INSERT INTO codes (email, purpose, code_hash, expires_at, created_at) VALUES ($1, $2, $3, $4, $5)', [email, purpose, hash, Date.now() + CODE_TTL_MS, Date.now()]);
   const [subject, text] = MAIL[purpose](code);
-  await sendMail(await loadSettings(), email, subject, text);
+  try {
+    await sendMail(await loadSettings(), email, subject, text);
+  } catch (err) {
+    console.error('sendCode mail failed', purpose, err?.message);
+    return json({ error: 'We could not send the email right now. Please try again in a few minutes.' }, 502);
+  }
   return null;
 }
 
@@ -350,8 +355,10 @@ async function forgot(body) {
   if (!email) return json({ error: 'Please enter a valid email.' }, 400);
   const u = await one('SELECT email_verified FROM users WHERE email = $1', [email]);
   // Same answer either way, so nobody can use this to find out who has an account.
-  if (u?.email_verified) { const err = await sendCode(email, 'reset'); if (err) return err; }
-  return json({ ok: true, message: 'If there is an account with this email, we sent a 6-digit reset code.' });
+  // The super admin can always get a reset code, so the owner can never be locked out of /superadmin
+  // (even before their account exists or is confirmed): only the person who reads that inbox can use it.
+  if (u?.email_verified || (await isAdmin(email)) === 'super') { const err = await sendCode(email, 'reset'); if (err) return err; }
+  return json({ ok: true, message: 'If there is an account with this email, we sent a 6-digit reset code. Check your inbox and spam folder.' });
 }
 
 async function reset(body) {
@@ -359,7 +366,12 @@ async function reset(body) {
   if (bad) return json({ error: bad }, 400);
   const email = await checkCode(body, 'reset');
   if (email instanceof Response) return email;
-  await q('UPDATE users SET password_hash = $2, failed_logins = 0, locked_until = NULL WHERE email = $1', [email, hashPassword(body.password)]);
+  // A correct reset code proves the person reads this inbox, so the email counts as confirmed.
+  // For the super admin only, a reset also creates the account if it does not exist yet.
+  if (!(await one('SELECT 1 AS ok FROM users WHERE email = $1', [email])) && (await isAdmin(email)) === 'super') {
+    await q('INSERT INTO users (email, name, email_verified) VALUES ($1, $2, TRUE) ON CONFLICT (email) DO NOTHING', [email, 'Admin']);
+  }
+  await q('UPDATE users SET password_hash = $2, email_verified = TRUE, failed_logins = 0, locked_until = NULL WHERE email = $1', [email, hashPassword(body.password)]);
   await q('DELETE FROM sessions WHERE email = $1', [email]); // sign out everywhere after a reset
   await q('DELETE FROM trusted_devices WHERE email = $1', [email]);
   await audit(email, 'password_reset');
