@@ -21,6 +21,7 @@ Save everything below as CLAUDE.md in this project (create it if it is missing, 
 # Secret keys (never break these)
 - Never ask me to paste a key, password or token into this chat.
 - When a key is needed, open a terminal tab with a hidden prompt, let me paste it there once, show only its length and last 4 characters, test it, then save it to .env.local and to Vercel as a Sensitive variable.
+- My account tokens (GH_TOKEN, VERCEL_TOKEN, NEON_API_KEY) go in through the same hidden prompt but are stored in my computer's keychain, never in .env.local, a project folder or Vercel. Use them to run my GitHub, Vercel and Neon for me, and show me the plan before creating, deleting or deploying anything.
 - Secrets live only in .env.local (which must be in .gitignore) and in Vercel. Never in code, never in the front end, never in a commit.
 - Before every commit, scan the changes for anything that looks like a key. Stop and warn me if you find one.
 

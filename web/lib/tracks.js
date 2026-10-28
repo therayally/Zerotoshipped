@@ -15,6 +15,7 @@ export default {
       "neon",
       "connectors",
       "secret-keys",
+      "access-tokens",
       "architecture",
       "practice-run",
       "first-app",

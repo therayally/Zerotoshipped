@@ -69,13 +69,13 @@ Tell me which ones I need for the very first version and which can wait.` },
           { do: 'Save your **recovery codes** somewhere safe, like a password manager.', why: 'If you lose your phone, these codes are the only way back in.' },
         ] },
         { t: 'h', text: 'Let Claude save to GitHub for you' },
-        { t: 'p', text: 'You do not need access tokens, keys or terminal commands for this. In the Claude app\'s **Code** tab, just paste this:' },
+        { t: 'p', text: 'You do not need access tokens, keys or terminal commands to start. In the Claude app\'s **Code** tab, just paste this:' },
         { t: 'prompt', label: 'Connect this computer to GitHub', text: `Set up this computer to save my projects to GitHub.
 Install anything that is missing and explain each step in one simple sentence before you do it.
 When it is time to sign in, open GitHub in my web browser so I can sign in and click Authorize there.
 Never ask me to paste a password, token or key into this chat.` },
         { t: 'p', text: 'Claude installs what is needed and opens GitHub in your browser. You sign in **on GitHub\'s own website** and click **Authorize**. Your computer gets permission, and nobody (including the AI) ever sees your password.' },
-        { t: 'tip', tone: 'warn', text: 'If any app, video or AI ever asks you to paste a GitHub "personal access token" into a chat, say no. Signing in through the browser is safer and you never have to handle a token.' },
+        { t: 'tip', tone: 'warn', text: 'If any app, video or AI ever asks you to paste a GitHub "personal access token" into a **chat**, say no. Tokens only ever go into the hidden terminal prompt. The access tokens lesson later in this module shows how, once you are ready to let Claude run your accounts fully.' },
         { t: 'deeper', title: 'Locking down your GitHub like a pro', blocks: [
           { t: 'steps', items: [
             '**Keep repos private** until you are ready to share. Bots scan public repos for leaked keys within minutes of a push.',
@@ -269,6 +269,65 @@ Tell me in simple words that each connection works.` },
           'Secret keys go in one place: the hidden terminal prompt.',
           'Check the character count and last 4 to confirm the paste.',
           'It saves to .env.local and Vercel (Sensitive) for you.',
+        ] },
+      ],
+    },
+    {
+      id: 'access-tokens',
+      title: 'Access tokens: let Claude run GitHub, Vercel and Neon',
+      minutes: 10,
+      body: [
+        { t: 'why', text: 'To build a **SaaS you can sell**, you have to own the three things it runs on: the code (GitHub), the hosting (Vercel) and the data (Neon). An **access token** for each one lets Claude do the work in those accounts for you: make repos, push code, deploy, create databases and branches. This is exactly what all-in-one builders like Base44 cannot give you, because there the app and data live in their account, not yours.' },
+        { t: 'analogy', text: 'An access token is a **valet key** for your car. It starts the car and drives it, but it cannot open the glovebox or the trunk, and you can cancel it the moment you get the car back. Your real password is the master key, and it never leaves your pocket.' },
+        { t: 'table', head: ['Token', 'What Claude can do with it', 'Where you make it'], rows: [
+          ['**GitHub** fine-grained token', 'Create repos, push code, open pull requests, publish desktop app releases', 'github.com → Settings → Developer settings → Personal access tokens → **Fine-grained tokens**'],
+          ['**Vercel** token', 'Create projects, set environment variables, deploy, add domains', 'vercel.com → Account Settings → **Tokens**'],
+          ['**Neon** API key', 'Create databases and branches, get connection details', 'console.neon.tech → Account settings → **API keys**'],
+        ] },
+        { t: 'h', text: 'Make each token the safe way' },
+        { t: 'steps', items: [
+          { do: 'Give it a clear name, like **claude-laptop**.', why: 'If your laptop is ever lost, you know exactly which token to delete.' },
+          { do: 'Set an **expiration**, like 90 days.', why: 'A token that expires cannot be abused forever if it leaks. Claude will remind you when it runs out.' },
+          { do: 'On GitHub, choose **Only select repositories** (or All, if you trust this computer) and give **Read and write** for Contents, Pull requests, Workflows and Administration. Leave everything else as No access.', why: 'Only the doors Claude needs. Administration lets it create new repos for you.' },
+          { do: 'On Vercel, set the **scope** to your own team only.' },
+          { do: 'Click **Copy**, then use the prompt below. Paste the token **only** into the hidden terminal prompt, never into the chat.' },
+        ] },
+        { t: 'prompt', label: 'Give Claude my GitHub, Vercel and Neon tokens', text: `Help me give you access to my GitHub, Vercel and Neon accounts with access tokens.
+For each one (GH_TOKEN for GitHub, VERCEL_TOKEN for Vercel, NEON_API_KEY for Neon), one at a time:
+1. Open a terminal tab with a hidden prompt (nothing shows while I paste) and wait for me to paste the token there once.
+2. Show only how many characters it got and the last 4, then test it with a read-only call (list my repos / projects / databases).
+3. Store it in my computer's secure keychain (macOS Keychain, Windows Credential Manager or Linux secret-tool). For GitHub, use gh auth login --with-token so gh keeps it.
+These are MY account tokens, not app secrets: never put them in .env.local, in any project folder, in code, or in Vercel environment variables.
+Never print a token and never ask me to paste one into this chat.
+Then tell me which token expires first and remind me a week before it does.` },
+        { t: 'term', title: 'Terminal', caption: 'What it looks like (the token never appears)', lines: [
+          ['out', 'Paste your GH_TOKEN (hidden), then press Return:'],
+          ['dim', 'Got 93 characters, ending in ...8KqZ'],
+          ['ok', '✓ GitHub accepted it: 12 repositories found'],
+          ['ok', '✓ Saved to your keychain'],
+        ] },
+        { t: 'h', text: 'Then just ask' },
+        { t: 'prompt', label: 'Set up a new SaaS on my own accounts', text: `Using my GitHub, Vercel and Neon tokens, set up a new product called [APP NAME]:
+1. Create a private GitHub repo and push this folder to it.
+2. Create a Vercel project linked to that repo.
+3. Create a Neon database for it and save the connection string in Vercel (Sensitive) and in .env.local.
+4. Deploy a preview and give me the link.
+Show me the plan first and wait for my OK before you create anything.` },
+        { t: 'tip', tone: 'warn', text: 'If a token is ever pasted into a chat, an email or a screenshot, delete it on that website right away and make a new one. Treat it as public.' },
+        { t: 'deeper', title: 'Tokens, sign-in and connectors: which one when?', blocks: [
+          { t: 'p', text: '**Browser sign-in** (the GitHub and Vercel lessons) is the easiest start: Claude never touches a token at all. **Connectors** let Claude read and act in those services from any chat. **Access tokens** are what pros use when Claude needs to do everything from the terminal on your computer, including scripts, desktop app releases and setting up whole new products in one go. All three are fine; use tokens once you are building things to sell.' },
+          { t: 'p', text: 'Desktop apps (the Tauri lesson) use the GitHub token too: Claude builds the Mac and Windows installers and publishes them as a **GitHub Release**, and the app\'s auto-updater downloads new versions from there.' },
+          { t: 'p', text: 'Fine-grained GitHub tokens are tied to specific repos and permissions and must expire. Avoid the old "classic" tokens: they give access to everything you own.' },
+        ] },
+        { t: 'check', q: 'Where does a Vercel or GitHub access token belong?', options: [
+          'In .env.local next to your app\'s keys',
+          'In your computer\'s secure keychain, pasted once through the hidden terminal prompt',
+          'In the chat, so Claude remembers it',
+        ], answer: 1, explain: 'These tokens control your whole account, not just one app, so they live in the keychain and never in a project, in Vercel or in a chat.' },
+        { t: 'recap', items: [
+          'Owning GitHub, Vercel and Neon is what lets you build and sell a real SaaS.',
+          'Access tokens let Claude run all three for you: expiring, narrow, one per computer.',
+          'Paste them only in the hidden terminal prompt; they live in your keychain.',
         ] },
       ],
     },
