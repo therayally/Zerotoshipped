@@ -23,6 +23,14 @@ export default {
           ['Stripe or Square', 'Take card payments', 'Customers pay on their page, so cards never touch your app. Stripe for online software, Square for real-world businesses', 'No monthly fee; a cut of each sale'],
         ] },
         { t: 'p', text: 'You will see this picture again in each tool\'s lesson, with that tool highlighted, so you always know where you are on the map.' },
+        { t: 'h', text: 'The best part: GitHub, Vercel and Neon plug into each other' },
+        { t: 'p', text: 'These three are built to connect. You link them **once**, in the next three lessons, and from then on they work as one machine:' },
+        { t: 'steps', items: [
+          { do: '**GitHub → Vercel:** you sign up for Vercel *with* your GitHub account.', why: 'Every time Claude saves your code to GitHub, Vercel puts the new version online by itself.' },
+          { do: '**Vercel → Neon:** you create your Neon database *from inside* Vercel.', why: 'Vercel hands the database\'s secret address to your app automatically. No copying passwords.' },
+          { do: '**All three → Claude:** you connect them to Claude.', why: 'Now you just say "save it and put it online" and Claude handles all three.' },
+        ] },
+        { t: 'analogy', text: 'It is like setting up a new phone with your car and your garage door. Pairing takes a few minutes, once. After that, you pull into the driveway and the door opens and your music keeps playing, without you touching anything.' },
         { t: 'deeper', title: 'What about the alternatives?', blocks: [
           { t: 'table', head: ['Job', 'We use', 'Also fine', 'Why we did not start there'], rows: [
             ['Code hosting', 'GitHub', 'GitLab, Bitbucket', 'Fewer one-click integrations with Vercel and Claude'],
@@ -114,6 +122,7 @@ Never ask me to paste a password, token or key into this chat.` },
           { do: 'Turn on two-factor login in Account Settings.', why: 'Your Vercel account will hold your app\'s secret keys. Protect it like your bank.' },
         ] },
         { t: 'snap', src: 'shots/vercel-signup.jpg', url: 'vercel.com/signup', caption: 'Sign up with GitHub (highlighted) so Vercel can see your code right away.', marks: [{ x: 35.5, y: 43.5, w: 29, h: 6.5 }] },
+        { t: 'tip', tone: 'safe', text: 'Signing up **with GitHub** is link number one of three. GitHub and Vercel are now connected. In the next lesson you add Neon from inside Vercel, and all three are linked.' },
         { t: 'h', text: 'The free plan rule you need to know' },
         { t: 'p', text: 'Vercel\'s free **Hobby** plan is for personal projects. Asking visitors for **donations is allowed**. But if your site **sells** something, takes payments, or runs ads, Vercel counts that as commercial use, and you need **Vercel Pro** (about $20 a month) when you launch. Building and testing on Hobby is fine.' },
         { t: 'deeper', title: 'What Vercel gives you behind the scenes', blocks: [
@@ -181,9 +190,20 @@ Never ask me to paste any token into this chat.` },
 2. Create one simple test table, insert one row, read it back, then delete the test table.
 3. Tell me in plain words what worked.
 Never print the database URL or password, and never ask me to paste it into this chat.` },
+        { t: 'h', text: 'All three, connected' },
+        { t: 'p', text: 'You now have the full chain: **GitHub** keeps your code, **Vercel** runs it and is linked to GitHub, and **Neon** is linked to Vercel. Save, and a minute later your live app is running the new code against your database. Every test branch even gets its own copy of the database automatically.' },
+        { t: 'prompt', label: 'Connect GitHub, Vercel and Neon together', text: `I have GitHub, Vercel and Neon accounts. Make sure all three are connected for this project, and fix anything missing:
+1. This folder is saved to a private GitHub repo.
+2. That repo is connected to a Vercel project, so every push to main goes live and every other branch gets a preview link.
+3. A Neon database is installed in that Vercel project through the Vercel Marketplace, with preview branches turned on, and DATABASE_URL is set for Production, Preview and Development.
+4. .env.local has the development values (pulled from Vercel) and is in .gitignore.
+5. Push a tiny change and show me the live link updating by itself.
+Tell me what you checked in a simple checklist. Before you create or change anything in my accounts, tell me what and wait for my OK. If I need to click something in a website, tell me exactly what to click.
+Never print the database URL or any password, and never ask me to paste one into this chat.` },
         { t: 'recap', items: [
           'A database is your app\'s memory, organized in tables.',
           'Neon runs Postgres and is created from inside Vercel.',
+          'GitHub → Vercel → Neon are linked once; then saving puts it online by itself.',
           'Connection details are secret: environment variables only.',
         ] },
       ],
