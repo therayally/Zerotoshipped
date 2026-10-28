@@ -10,7 +10,7 @@ async function api(path, { method = 'GET', body } = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 && path.startsWith('/api/admin/') && !path.startsWith('/api/admin/login')) { showLogin(); throw new Error('Please sign in.'); }
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  if (!res.ok) throw new Error((data.error === 'needs_verification' ? data.message : data.error) || `Request failed (${res.status})`);
   return data;
 }
 

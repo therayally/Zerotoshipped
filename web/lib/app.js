@@ -331,7 +331,7 @@ async function checkLogin(body, request) {
     const err = await sendCode(email, 'signup');
     return err || json({ error: 'needs_verification', message: 'Confirm your email first. We sent you a new code.' }, 403);
   }
-  await q('DELETE FROM rate_limits WHERE key = $1', [failKey]);
+  await q('DELETE FROM rate_limits WHERE key = $1 OR key = $2', [failKey, failKeyAll]);
   return email;
 }
 
@@ -372,6 +372,8 @@ async function reset(body) {
     await q('INSERT INTO users (email, name, email_verified) VALUES ($1, $2, TRUE) ON CONFLICT (email) DO NOTHING', [email, 'Admin']);
   }
   await q('UPDATE users SET password_hash = $2, email_verified = TRUE, failed_logins = 0, locked_until = NULL WHERE email = $1', [email, hashPassword(body.password)]);
+  // A reset also lifts any lockout from earlier wrong passwords or wrong codes, so the new password works right away.
+  await q("DELETE FROM rate_limits WHERE key = $1 OR key LIKE $2 OR key LIKE $3", [`loginfail:${email}`, `loginfail:${email}:%`, `codefail:%:${email}`]);
   await q('DELETE FROM sessions WHERE email = $1', [email]); // sign out everywhere after a reset
   await q('DELETE FROM trusted_devices WHERE email = $1', [email]);
   await audit(email, 'password_reset');
@@ -750,7 +752,8 @@ async function route(request, path) {
     if (path === '/api/admin/login') {
       const email = await checkLogin(body, request);
       if (email instanceof Response) return email;
-      if ((await isAdmin(email)) !== 'super') return json({ error: 'That email or password is not right.' }, 401);
+      // The password was right, so it is safe to say plainly that this account is not the admin one.
+      if ((await isAdmin(email)) !== 'super') return json({ error: 'That account does not have admin access. Sign in with the super admin email.' }, 403);
       const err = await sendCode(email, 'admin'); // the admin panel always asks for an emailed code
       return err || json({ needs_code: true, message: 'We emailed you a 6-digit sign-in code.' });
     }
