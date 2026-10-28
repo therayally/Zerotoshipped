@@ -19,7 +19,7 @@
 .nav button:hover { background: var(--surface2); }
 .nav button.active { background: var(--surface2); color: var(--text); box-shadow: inset 3px 0 0 var(--accent); }
 .nav button:focus-visible { outline: 2px solid var(--accent); }
-.me { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
+.me { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
 .me > div { min-width: 0; }
 .me-email { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
 

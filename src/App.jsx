@@ -142,7 +142,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState('');
   // Visitors who are not signed in see the landing page first; "Log in" or "Start free" opens the sign-in window.
-  const [entered, setEntered] = useState(null);
+  const [entered, setEntered] = useState(() => (new URLSearchParams(window.location.search).get('login') ? 'login' : null));
   const [splash, setSplash] = useState(() => !session.get('splashSeen') && !!getAccount());
   const [splashFade, setSplashFade] = useState(false);
 
