@@ -75,7 +75,7 @@ Install anything that is missing and explain each step in one simple sentence be
 When it is time to sign in, open GitHub in my web browser so I can sign in and click Authorize there.
 Never ask me to paste a password, token or key into this chat.` },
         { t: 'p', text: 'Claude installs what is needed and opens GitHub in your browser. You sign in **on GitHub\'s own website** and click **Authorize**. Your computer gets permission, and nobody (including the AI) ever sees your password.' },
-        { t: 'tip', tone: 'warn', text: 'If any app, video or AI ever asks you to paste a GitHub "personal access token" into a **chat**, say no. Tokens only ever go into the hidden terminal prompt. The access tokens lesson later in this module shows how, once you are ready to let Claude run your accounts fully.' },
+        { t: 'tip', tone: 'warn', text: 'If any app, video or AI ever asks you to paste a GitHub "personal access token" into a **chat**, say no. Tokens only ever go into the hidden terminal prompt. The access tokens lesson in Track 2 (GitHub like a pro) shows how, once you are ready to let Claude run your accounts fully.' },
         { t: 'deeper', title: 'Locking down your GitHub like a pro', blocks: [
           { t: 'steps', items: [
             '**Keep repos private** until you are ready to share. Bots scan public repos for leaked keys within minutes of a push.',

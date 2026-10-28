@@ -23,6 +23,7 @@ import { grow, run } from './modules/m19-grow-run';
 import { designPlus } from './modules/m20-design-plus';
 import smartFeatures from './modules/m21-smart-features';
 import { mobileApps, quality, authServices, aiBuilders, businessBasics } from './modules/m22-pro-gaps';
+import { engineering, desktopShip, customerCare, appLegal } from './modules/m23-real-engineering';
 
 const pick = (mod, ...ids) => ids.map((id) => {
   const lesson = mod.lessons.find((l) => l.id === id);
@@ -39,7 +40,7 @@ export const TRACKS = [
 const track1 = [
   m00,
   m01,
-  m02,
+  without(m02, 'access-tokens'),
   { ...m03, title: 'Plan your app', lessons: pick(m03, 'architecture') },
   m04,
   { ...m05, lessons: [...pick(m05, 'look-good', 'ui-rules', 'ui-references'), ...designPlus, ...pick(m05, 'ui-polish')] },
@@ -49,23 +50,26 @@ const track1 = [
   { ...m10, title: 'Launch day', lessons: pick(m10, 'launch') },
 ];
 
+// Track 2 climbs from habits (product, Claude, GitHub) to real engineering (architecture, environments, testing),
+// then features and platforms, then AI, then running the business. Bonus tools and the final project come last.
 const track2 = [
   { ...m16, lessons: [...m16.lessons, ...pick(m03, 'scrum')] },
   m17,
-  m15,
-  without(m06, 'mcp'),
+  { ...m15, lessons: [...m15.lessons, ...pick(m02, 'access-tokens')] },
+  without(m06, 'mcp', 'desktop-apps'),
+  engineering,
+  quality,
   { id: 'mcp', title: 'MCP: connect and build your own', lessons: [...pick(m06, 'mcp'), buildMcp] },
   smartFeatures,
-  { id: 'ai-coders', title: 'Other AI coders and app builders', lessons: [aiCoders, aiBuilders] },
-  { id: 'mobile', title: 'Get your app on phones', lessons: [mobileApps] },
-  quality,
-  { id: 'evals', title: 'Test your AI (evals)', lessons: evals },
-  { id: 'analytics', title: 'Analytics and experiments', lessons: analytics },
-  { id: 'grow', title: 'Launch and grow', lessons: [...grow, ...pick(m07, 'subscriptions')] },
-  { id: 'company', title: 'Run it like a company', lessons: [...run, authServices, businessBasics, ...pick(m10, 'soc2', 'run-like-a-pro'), ...pick(m09, 'security-tools', 'security-standards')] },
-  m11,
-  m12,
+  { id: 'mobile', title: 'Phones and desktop apps', lessons: [mobileApps, ...pick(m06, 'desktop-apps'), desktopShip] },
   m13,
+  { id: 'evals', title: 'Test your AI (evals)', lessons: evals },
+  m12,
+  { id: 'analytics', title: 'Analytics and experiments', lessons: analytics },
+  { id: 'grow', title: 'Launch and grow', lessons: [...grow, ...pick(m07, 'subscriptions'), customerCare] },
+  { id: 'company', title: 'Run it like a company', lessons: [...run, authServices, businessBasics, appLegal, ...pick(m10, 'soc2', 'run-like-a-pro'), ...pick(m09, 'security-tools', 'security-standards')] },
+  { id: 'ai-coders', title: 'Other AI coders and app builders', lessons: [aiCoders, aiBuilders] },
+  m11,
   { ...m14, title: 'Final project: Forward Deployed Engineering' },
 ];
 
